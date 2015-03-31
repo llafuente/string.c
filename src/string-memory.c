@@ -1,4 +1,4 @@
-#include "string-memory.h"
+#include "stringc.h"
 
 string* _string_new(size_t len, charset_t charset) {
   size_t size = len + 1; // null terminated!

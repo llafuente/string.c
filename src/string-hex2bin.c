@@ -1,4 +1,4 @@
-#include "string-type.h"
+#include "stringc.h"
 
 /*
 * @credits php-src

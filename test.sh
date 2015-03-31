@@ -5,6 +5,8 @@ reset
 rm string_test_mem
 rm string_test_c
 
+cp test/test.c test/test.cpp
+
 #echo
 #echo "--- LLVM IR --"
 #echo
@@ -12,7 +14,15 @@ rm string_test_c
 echo "--- COMPILE (CPP) ---"
 ## ?? -I./src -I./include
 ## -Wextra -pedantic
-clang -O0 -g -fsanitize=address -fno-omit-frame-pointer -std=c++11  -Wgcc-compat -Wall test/test.cpp -o string_test_mem &> /dev/null || exit 1
+clang -O0 \
+-g -fsanitize=address -fno-omit-frame-pointer \
+-std=c++11  -Wgcc-compat -Wall test/test.cpp \
+-I./include \
+-I./src \
+-L./.libs \
+-l:libstringc \
+-v \
+-o string_test_mem  &> /dev/null || exit 1
 sleep 1
 
 echo "--- TEST (with sanitize-address) --- "
@@ -25,7 +35,7 @@ echo "--- TEST (with sanitize-address) --- "
 
 echo "--- COMPILE (C) ---"
 # test pure c
-cp test/test.cpp test/test.c
+
 clang -O0 -std=c11 -Wgcc-compat -Wall test/test.c -o string_test_c &> /dev/null || exit 1
 sleep 1
 

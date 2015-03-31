@@ -1,4 +1,4 @@
-#include "string-sub.h"
+#include "stringc.h"
 
 string* string_sub(string* str, int start, int end) {
   assert(end > 0);

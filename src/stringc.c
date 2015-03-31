@@ -1,5 +1,6 @@
 #include "stringc.h"
 
+
 void string_zeronull(string* str) {
   str->value[str->length] = '\0';
 }

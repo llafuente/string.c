@@ -1,4 +1,4 @@
-#include "string-repeat.h"
+#include "stringc.h"
 
 string* string_repeat(string* input, size_t mult) {
   string *result; /* Resulting string */

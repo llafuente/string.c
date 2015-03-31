@@ -1,4 +1,4 @@
-#include "string-shuffle.h"
+#include "stringc.h"
 
 string* string_shuffle(string* src, size_t len) {
   int rnd_idx;

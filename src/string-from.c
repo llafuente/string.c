@@ -1,4 +1,4 @@
-#include "string-from.h"
+#include "stringc.h"
 
 /**
 * bindec, 2

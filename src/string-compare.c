@@ -1,4 +1,4 @@
-#include "string-compare.h"
+#include "stringc.h"
 
 int string_compare(string* a, string* b) {
   if (a->length > b->length) {

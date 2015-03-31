@@ -1,4 +1,4 @@
-#include "string-utils.h"
+#include "stringc.h"
 
 void charmask(unsigned char *input, size_t len, char *mask) {
   unsigned char *end;

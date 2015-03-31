@@ -1,4 +1,4 @@
-#include "string-append.h"
+#include "stringc.h"
 
 void string_append(string** out, string* src) {
   //printf("string_append %p - %p\n", *out, src);

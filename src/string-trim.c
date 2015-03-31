@@ -1,5 +1,6 @@
-#include "string-trim.h"
 #include "stringc.h"
+
+string* string_def_trim_mask = 0;
 
 string* string_trim(string *str, string *what_str, int mode) {
   const char *c = str->value;
