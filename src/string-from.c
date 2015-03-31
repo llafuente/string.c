@@ -5,18 +5,18 @@
 * octdec, 8
 * hexdec, 16
 */
-double string_from_base(string *str, int base) {
+double string_from_base(string *src, int base) {
   size_t num = 0;
   double fnum = 0;
   size_t i;
   int mode = 0;
-  char c, *s = str->value;
+  char c, *s = src->value;
   size_t cutoff;
   int cutlim;
 
   cutoff = INT64_MAX / base;
   cutlim = INT64_MAX % base;
-  for (i = str->length; i > 0; i--) {
+  for (i = src->length; i > 0; i--) {
     c = *s++;
     /* might not work for EBCDIC */
     if (c >= '0' && c <= '9') {

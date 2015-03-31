@@ -2,6 +2,7 @@
 
 string* string_def_trim_mask = 0;
 
+// TODO review, cache charmask for !what_str
 string* string_trim(string *str, string *what_str, int mode) {
   const char *c = str->value;
   size_t len = str->length;
@@ -74,5 +75,5 @@ string* string_trim(string *str, string *what_str, int mode) {
     return string_clone(str);
   }
 
-  return string_clonec(c, len);
+  return string_clone_subc(c, len, str->charset);
 }

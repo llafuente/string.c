@@ -35,12 +35,19 @@ int main(int argc, const char * argv[]) {
   //
   // UTF-8 tests
   //
-  assert(string_utf8_lenc(T_STR_01) == 12);
-  assert(string_utf8_lenc(T_STR_02) == 33);
-  assert(string_utf8_lenc(T_STR_03) == 6);
-  assert(string_utf8_lenc(T_STR_03_REP2) == 12);
-  assert(string_utf8_lenc(T_STR_03_REP3) == 18);
-  assert(string_utf8_lenc(T_STR_03_REP4) == 24);
+  size_t len;
+  assert(string_utf8_lenc(T_STR_01, &len) == 12);
+  assert(strlen(T_STR_01) + 1 == len);
+  assert(string_utf8_lenc(T_STR_02, &len) == 33);
+  assert(strlen(T_STR_02) + 1 == len);
+  assert(string_utf8_lenc(T_STR_03, &len) == 6);
+  assert(strlen(T_STR_03) + 1 == len);
+  assert(string_utf8_lenc(T_STR_03_REP2, &len) == 12);
+  assert(strlen(T_STR_03_REP2) + 1 == len);
+  assert(string_utf8_lenc(T_STR_03_REP3, &len) == 18);
+  assert(strlen(T_STR_03_REP3) + 1 == len);
+  assert(string_utf8_lenc(T_STR_03_REP4, &len) == 24);
+  assert(strlen(T_STR_03_REP4) + 1 == len);
 
   //assert(is_utf8(T_STR_02) == 0);
   //assert(is_utf8(T_STR_03_REP4) == 0);

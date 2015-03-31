@@ -1,8 +1,8 @@
 #include "stringc.h"
 
 string* string_sub(string* str, int start, int end) {
-  assert(end > 0);
   assert(end < str->length);
+  assert(end > -str->length);
 
   size_t len = 0;
   if (start < 0) {

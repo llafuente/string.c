@@ -3,7 +3,7 @@
 string* _string_new(size_t len, charset_t charset) {
   size_t size = len + 1; // null terminated!
 
-  string* s = (string*) __string_allocator(sizeof(string) + size * sizeof(char));
+  string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
 
   s->length = 0;
   s->capacity = size;
@@ -13,16 +13,15 @@ string* _string_new(size_t len, charset_t charset) {
   return s;
 }
 
+//TODO use utf8_len()
+string* _string_newc(const char* src, charset_t charset) {
+  size_t size = strlen(src) + 1; // null terminated!
 
-string* _string_newc(const char* chars, charset_t charset) {
-  size_t size = strlen(chars); // null terminated!
+  string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));
 
-  string* s = (string*) __string_allocator(sizeof(string) + (size + 1) * sizeof(char));
-
-  s->length = size;
-  s->capacity = size + 1;
-  memcpy(s->value, chars, size);
-  s->value[size] = '\0';
+  s->length = size - 1;
+  s->capacity = size;
+  memcpy(s->value, src, size);
   s->charset = charset;
 
   return s;
@@ -33,7 +32,7 @@ void string_resize(string** src, size_t len) {
 
   size_t size = len + 1; // null terminated!
 
-  *src = (string*) __string_reallocator(*src, sizeof(string) + size * sizeof(char));
+  *src = (string*) __STRING__REALLOCATOR(*src, sizeof(string) + size * sizeof(char));
 
   (*src)->capacity = size;
 
@@ -43,13 +42,23 @@ void string_resize(string** src, size_t len) {
 string* string_clone(string* src) {
   size_t size = sizeof(string) + src->capacity * sizeof(char);
 
-  string* out = (string*) __string_allocator(size);
+  string* out = (string*) __STRING_ALLOCATOR(size);
 
   memcpy(out, src, size);
 
   return out;
 }
 
+string* string_clone_subc(char* src, size_t len, charset_t charset) {
+  string* out = _string_new(len + 1, charset);
+  memcpy(out->value, src, len);
+  out->length = len;
+  out->value[len] = '\0';
+
+  return out;
+}
+
+/* deprecate, for reference only
 string* string_clonec(const char* src, size_t len) {
   string* out = string_new(len);
 
@@ -59,6 +68,7 @@ string* string_clonec(const char* src, size_t len) {
 
   return out;
 }
+*/
 
 void string_copy(string** out, string* src) {
   //printf("string_copy %p - %p\n", *out, src);
@@ -97,8 +107,8 @@ void _string_copyc(string** out, const char* src, charset_t charset) {
 }
 
 void string_delete(string** str) {
-  __string_deallocator((void*) *str);
-  *str = __MEM_FREE_ADDR; // when free set to a know address
+  __STRING_DEALLOCATOR((void*) *str);
+  *str = __STRING_MEM_FREE_ADDR; // when free set to a know address
 }
 
 void string_clear(string* str) {

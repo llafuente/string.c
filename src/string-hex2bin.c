@@ -1,8 +1,5 @@
 #include "stringc.h"
 
-/*
-* @credits php-src
-*/
 string *string_hex2bin(string *src) {
   size_t target_length = src->length >> 1;
   char* src_val = src->value;

@@ -13,18 +13,26 @@ static const char string_utf8_skip_data[256] = {
 const char * const string_utf8_skip = string_utf8_skip_data;
 
 /**
-* return length of given characters supossing is UTF-8
-* @credits based on glib_utf8_offset_to_pointer
+* Return length of given characters supossing is UTF-8
+* based on glib_utf8_offset_to_pointer
 */
-size_t string_utf8_lenc(const char* c) {
+size_t string_utf8_lenc(const char* c, size_t *out_capacity) {
   size_t len = 0;
-  const char* p = c;
+  const char *p = c;
+  char jump;
+  size_t capacity = 0;
+
   while (*p != '\0') {
     //printf("%c @%p %d\n", *p, p, utf8_next(p));
-    p += string_utf8_jump_next(p);
+    jump = string_utf8_jump_next(p);
+    p += jump;
+    capacity += jump;
     //printf("%c\n", *p);
     ++len;
   }
+  ++capacity;
+
+  *out_capacity = capacity;
 
   return len;
 }
