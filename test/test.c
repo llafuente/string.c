@@ -35,19 +35,19 @@ int main(int argc, const char * argv[]) {
   //
   // UTF-8 tests
   //
-  size_t len;
-  assert(string_utf8_lenc(T_STR_01, &len) == 12);
-  assert(strlen(T_STR_01) + 1 == len);
-  assert(string_utf8_lenc(T_STR_02, &len) == 33);
-  assert(strlen(T_STR_02) + 1 == len);
-  assert(string_utf8_lenc(T_STR_03, &len) == 6);
-  assert(strlen(T_STR_03) + 1 == len);
-  assert(string_utf8_lenc(T_STR_03_REP2, &len) == 12);
-  assert(strlen(T_STR_03_REP2) + 1 == len);
-  assert(string_utf8_lenc(T_STR_03_REP3, &len) == 18);
-  assert(strlen(T_STR_03_REP3) + 1 == len);
-  assert(string_utf8_lenc(T_STR_03_REP4, &len) == 24);
-  assert(strlen(T_STR_03_REP4) + 1 == len);
+  size_t cap;
+  assert(string_utf8_lenc(T_STR_01, &cap) == 12);
+  assert(strlen(T_STR_01) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_02, &cap) == 33);
+  assert(strlen(T_STR_02) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03, &cap) == 6);
+  assert(strlen(T_STR_03) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03_REP2, &cap) == 12);
+  assert(strlen(T_STR_03_REP2) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03_REP3, &cap) == 18);
+  assert(strlen(T_STR_03_REP3) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03_REP4, &cap) == 24);
+  assert(strlen(T_STR_03_REP4) + 1 == cap);
 
   //assert(is_utf8(T_STR_02) == 0);
   //assert(is_utf8(T_STR_03_REP4) == 0);
