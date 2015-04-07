@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #ifndef __STRINGC_TYPE__
 #define __STRINGC_TYPE__
@@ -40,8 +41,9 @@ typedef long int string_len_t;
 
 /// supported charsets
 typedef enum {
-  ascii, ///< ASCII
-  utf8 ///< UTF-8
+  string_enc_ascii, ///< ASCII
+  string_enc_utf8, ///< UTF-8
+  string_enc_ucs4be ///< UCS-4BE, UCS-4 big endian
 } charset_t;
 
 /// string type, use value[] at the end, so only one malloc is enough
@@ -56,8 +58,14 @@ typedef struct  {
   char value[];
 } string;
 
+typedef void (*string_citr)(string* character, string_len_t pos, string* src);
 
+//
+// shared globals
+//
 extern string* string_def_trim_mask;
+extern const char string_utf8_skip_data[256];
+extern const char * const string_utf8_skip;
 
 //
 // MACROS
@@ -76,6 +84,18 @@ extern string* string_def_trim_mask;
 #ifndef __STRING_DEALLOCATOR
   #define __STRING_DEALLOCATOR free
 #endif
+
+#define STRING_COPY_CHARS(src, dst, i) \
+{ \
+  const char* __end = src + i; \
+  while (src < __end) { \
+    *dst = *src; \
+    ++src; \
+    ++dst; \
+  } \
+}
+
+
 
 // add '\0' at the end of the string
 void string_zeronull(string* str);
@@ -117,6 +137,12 @@ string* string_bin2hex(const string* src);
 int string_compare(string* a, string* b);
 
 /**
+ * encode a string to given charset
+ * @return a new string
+ */
+string* string_encode(string* src, charset_t to_charset);
+
+/**
  * Convert a string replesentation of a number in a given base to number.
  *
  * @license https://github.com/php/php-src/blob/master/LICENSE
@@ -139,12 +165,14 @@ string* string_from_number(size_t value, int base);
  */
 string *string_hex2bin(string *src);
 
+void string_itr_chars(const string* str, string_citr itr_cb);
+
 /// default charset argument trick
-#define string_new(len,...) _string_new(len, (ascii, ##__VA_ARGS__) )
+#define string_new(len,...) _string_new(len, (string_enc_ascii, ##__VA_ARGS__) )
 /// default charset argument trick
-#define string_newc(chars,...) _string_newc(chars, (ascii, ##__VA_ARGS__) )
+#define string_newc(chars,...) _string_newc(chars, (string_enc_ascii, ##__VA_ARGS__) )
 /// default charset argument trick
-#define string_copyc(out, src, ...) _string_copyc(out, src, (ascii, ##__VA_ARGS__) )
+#define string_copyc(out, src, ...) _string_copyc(out, src, (string_enc_ascii, ##__VA_ARGS__) )
 
 /**
  * Allocate a new string
@@ -198,6 +226,10 @@ void _string_copyc(string** out, const char* src, charset_t charset);
  *
  */
 void string_delete(string** str);
+/**
+ *
+ */
+bool string_char(string** out, const string* str, string_len_t pos);
 
 /**
  * remove data, do no deallocate anything, just clean.
@@ -238,7 +270,7 @@ string* string_shuffle(string* src, size_t len);
  *   If is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes the position of this truncation or beyond.
  *   If length is 0 the substring starting from start until the end of the string will be returned.
  */
-string* string_sub(string* str, int start, int end);
+string* string_sub(const string* str, int start, int end);
 
 /**
  * Strip whitespace (or other characters) from the beginning and/or end of a string
@@ -284,12 +316,15 @@ size_t string_utf8_lenc(const char* src, size_t *out_capacity);
  * 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
  * 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
  *
+ * Based on is_utf8 by JulienPalard, heavily modified by llafuente
+ * to archieve great performance.
  * @license https://github.com/JulienPalard/is_utf8/blob/master/COPYRIGHT
  * @param str
  * @param len
- * @param first_invalid_pos
+ * @return
+ *   first invalid position found or 0 if success
  */
-int string_is_utf8(unsigned char *str, size_t len, size_t* first_invalid_pos);
+char* string_utf8_invalid(const unsigned char *str, size_t len);
 
 /**
  * Create a mask[256] for given ASCII input

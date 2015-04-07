@@ -16,38 +16,35 @@
 #define T_STR_CMP2 "a"
 #define T_STR_CMP3 "c"
 
+#define T_STR_UTF8_1 "Maïté"
+#define T_STR_UTF8_2 "Léa"
+#define T_STR_UTF8_3 "Pauline"
+#define T_STR_UTF8_4 "Élise"
+#define T_STR_UTF8_5 "\xc9\x6c\x69\x73\x65"
+#define T_STR_UTF8_6 "Elis\xc9"
+#define T_STR_UTF8_7 "Привет"
+
 #define CHK_LEN(src) assert(src->length == strlen(src->value));
 #define CHK_VAL(src, dst) assert(0 == strcmp(src->value, dst));
+
+
+extern void test_itr_chars();
+extern void test_utf8_invalid();
+extern void test_utf8_lenc();
+extern void test_trim();
 
 int main(int argc, const char * argv[]) {
 
   //
   // memory
   //
-  string* s = string_new(2, ascii);
+  string* s = string_new(2, string_enc_ascii);
   string* aux;
   string* aux2;
 
   assert(s->length == 0);
   assert(s->capacity == 3); // 3 because is null-terminated
   assert(s->value[0] == '\0');
-
-  //
-  // UTF-8 tests
-  //
-  size_t cap;
-  assert(string_utf8_lenc(T_STR_01, &cap) == 12);
-  assert(strlen(T_STR_01) + 1 == cap);
-  assert(string_utf8_lenc(T_STR_02, &cap) == 33);
-  assert(strlen(T_STR_02) + 1 == cap);
-  assert(string_utf8_lenc(T_STR_03, &cap) == 6);
-  assert(strlen(T_STR_03) + 1 == cap);
-  assert(string_utf8_lenc(T_STR_03_REP2, &cap) == 12);
-  assert(strlen(T_STR_03_REP2) + 1 == cap);
-  assert(string_utf8_lenc(T_STR_03_REP3, &cap) == 18);
-  assert(strlen(T_STR_03_REP3) + 1 == cap);
-  assert(string_utf8_lenc(T_STR_03_REP4, &cap) == 24);
-  assert(strlen(T_STR_03_REP4) + 1 == cap);
 
   //assert(is_utf8(T_STR_02) == 0);
   //assert(is_utf8(T_STR_03_REP4) == 0);
@@ -139,17 +136,42 @@ int main(int argc, const char * argv[]) {
   aux = string_sub(s, 0, 4);
   //string_debug(aux);
   string_delete(&aux);
-
-
   aux = string_sub(s, -10, 4);
   //string_debug(aux);
   string_delete(&aux);
 
   string_delete(&s);
 
-  s = string_new(10);
+
+
+
+  s = string_newc("123456789");
+  aux = string_shuffle(s, s->length);
+  string_delete(&s);
+  string_delete(&aux);
+
+  string_cleanup();
+
+
+
+  test_utf8_lenc();
+  test_utf8_invalid();
+  test_itr_chars();
+
+  printf("OK\n");
+
+  return 0;
+}
+
+char buffer[256];
+void itr_callback(string* chr, string_len_t pos, string* src) {
+  strcat(buffer, chr->value);
+}
+
+void test_trim() {
+  string* s = string_new(10);
   string_copyc(&s, "   123  ");
-  aux = string_trim(s, 0, 3);
+  string* aux = string_trim(s, 0, 3);
 
   CHK_VAL(aux, "123");
 
@@ -167,16 +189,42 @@ int main(int argc, const char * argv[]) {
   string_delete(&mask);
   string_delete(&s);
   string_delete(&aux);
+}
 
+void test_utf8_lenc() {
+  size_t cap;
+  assert(string_utf8_lenc(T_STR_01, &cap) == 12);
+  assert(strlen(T_STR_01) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_02, &cap) == 33);
+  assert(strlen(T_STR_02) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03, &cap) == 6);
+  assert(strlen(T_STR_03) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03_REP2, &cap) == 12);
+  assert(strlen(T_STR_03_REP2) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03_REP3, &cap) == 18);
+  assert(strlen(T_STR_03_REP3) + 1 == cap);
+  assert(string_utf8_lenc(T_STR_03_REP4, &cap) == 24);
+  assert(strlen(T_STR_03_REP4) + 1 == cap);
+}
 
-  s = string_newc("123456789");
-  aux = string_shuffle(s, s->length);
-  string_delete(&s);
-  string_delete(&aux);
+void test_utf8_invalid() {
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_1, strlen(T_STR_UTF8_1)) == 0);
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_2, strlen(T_STR_UTF8_2)) == 0);
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_3, strlen(T_STR_UTF8_3)) == 0);
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_4, strlen(T_STR_UTF8_4)) == 0);
 
-  string_cleanup();
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_5, strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1);
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_6, strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5);
 
-  printf("OK\n");
+  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_7, strlen(T_STR_UTF8_7)) == 0);
+}
 
-  return 0;
+void test_itr_chars() {
+
+  string* str = string_newc(T_STR_03_REP3);
+  string_itr_chars(str, itr_callback);
+  string_delete(&str);
+
+  assert(strcmp(buffer, T_STR_03_REP3) == 0);
+
 }

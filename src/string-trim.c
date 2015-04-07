@@ -38,7 +38,7 @@ string* string_trim(string *str, string *what_str, int mode) {
 
   if (!what_str) {
     if (!string_def_trim_mask) {
-      string_def_trim_mask = string_newc(" \t\n\r\0\x0B", ascii);
+      string_def_trim_mask = string_newc(" \t\n\r\0\x0B", string_enc_ascii);
     }
     what_str = string_def_trim_mask;
   }

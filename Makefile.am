@@ -18,6 +18,7 @@ libstringc_la_SOURCES = src/stringc.c \
                   src/string-compare.c \
                   src/string-from.c \
                   src/string-hex2bin.c \
+                  src/string-iterator.c \
                   src/string-memory.c \
                   src/string-repeat.c \
                   src/string-shuffle.c \

@@ -26,8 +26,17 @@
 /// @file
 
 #include "stringc.h"
+//TODO test performance using (also if are compatible)
+/*
+if ((code & 0xffffff80) == 0) return 1;
+else if ((code & 0xfffff800) == 0) return 2;
+else if ((code & 0xffff0000) == 0) return 3;
+else if ((code & 0xffe00000) == 0) return 4;
+else if ((code & 0xfc000000) == 0) return 5;
+else if ((code & 0x80000000) == 0) return 6;
+*/
 
-static const char string_utf8_skip_data[256] = {
+const char string_utf8_skip_data[256] = {
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -62,45 +71,45 @@ size_t string_utf8_lenc(const char* src, size_t *out_capacity) {
   return len;
 }
 
+int string_utf8_next_pos(unsigned char chr) {
+  if (chr <= 0x7F) {
+    return 0;
+  } else if (chr >= 0xC0 /*11000000*/ && chr <= 0xDF /*11011111*/) {
+    return 1;
+  } else if (chr >= 0xE0 /*11100000*/ && chr <= 0xEF /*11101111*/) {
+    return 2;
+  } else if (chr >= 0xF0 /*11110000*/ && chr <= 0xF4 /* Cause of RFC 3629 */) {
+    return 3;
+  }
+  // invalid!
+  return -1;
+}
 
-
-int string_is_utf8(unsigned char *str, size_t len, size_t* first_invalid_pos) {
+char* string_utf8_invalid(const unsigned char *str, size_t len) {
   size_t i = 0;
-  size_t j = 0;
-  size_t continuation_bytes = 0;
+  int continuation_bytes = 0;
   unsigned char cache;
+  const unsigned char *end = str + len;
 
-  while (i < len) {
-    j = i;
-    cache = str[i];
+  while (str < end) {
+    cache = *str;
 
-    if (cache <= 0x7F) {
-      continuation_bytes = 0;
-    } else if (cache >= 0xC0 /*11000000*/ && cache <= 0xDF /*11011111*/) {
-      continuation_bytes = 1;
-    } else if (cache >= 0xE0 /*11100000*/ && cache <= 0xEF /*11101111*/) {
-      continuation_bytes = 2;
-    } else if (cache >= 0xF0 /*11110000*/ && cache <= 0xF4 /* Cause of RFC 3629 */) {
-      continuation_bytes = 3;
-    } else {
-      if (first_invalid_pos) {
-        *first_invalid_pos = j;
-      }
-      return i + 1;
+    continuation_bytes = string_utf8_next_pos(cache);
+
+    if (continuation_bytes < 0) {
+      return (char*) str;
     }
 
-    i += 1;
+    ++str;
     while (i < len && continuation_bytes > 0
-      && cache >= 0x80
+      && (cache = *str) >= 0x80
       && cache <= 0xBF) {
-      i += 1;
+      ++str;
       continuation_bytes -= 1;
     }
+
     if (continuation_bytes != 0) {
-      if (first_invalid_pos) {
-        *first_invalid_pos = j;
-      }
-      return i + 1;
+      return (char*) str;
     }
   }
 

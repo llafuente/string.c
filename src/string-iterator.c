@@ -27,63 +27,58 @@
 
 #include "stringc.h"
 
-bool string_char(string** out, const string* str, string_len_t pos) {
-  assert(str->length > pos);
+void string_itr_chars(const string* str, string_citr itr_cb) {
+  // maximum char size is 7 bytes
+  // 6 utf-8 + null
+  charset_t enc = str->charset;
+  string* buffer = string_new(7, enc);
+  buffer->length = 1;
+  char* s = buffer->value;
+  char* dst;
 
-  const char* s = str->value + pos;
-  char* d = (*out)->value;
+  string_len_t pos = 0;
+  const char* itr = str->value;
+  const char* end = itr + str->capacity - 1;
 
-  while(pos--) {
-    s += string_utf8_jump_next(s);
+  switch(enc) {
+  case string_enc_ascii:
+    // \0 + end
+    while (*itr && itr < end) {
+      dst = s;
+
+      STRING_COPY_CHARS(itr, dst, 1);
+      *dst = '\0';
+
+      itr_cb(buffer, pos, str);
+      ++pos;
+    }
+    break;
+  case string_enc_utf8:
+    // \0 + end
+    while (*itr && itr < end) {
+      dst = s;
+      int jump = string_utf8_jump_next(itr);
+
+      STRING_COPY_CHARS(itr, dst, jump);
+      *dst = '\0';
+
+      itr_cb(buffer, pos, str);
+      ++pos;
+    }
+    break;
+  case string_enc_ucs4be:
+    // \0 + end
+    while (*itr && itr < end) {
+      dst = s;
+
+      STRING_COPY_CHARS(itr, dst, 4);
+      *dst = '\0';
+
+      itr_cb(buffer, pos, str);
+      ++pos;
+    }
   }
 
-  int i = string_utf8_jump_next(s);
-  STRING_COPY_CHARS(s, d, i);
 
-  *d = '\0';
-
-  return true;
-}
-
-string* string_sub(const string* str, int start, int end) {
-  assert(end < str->length);
-  assert(end > -str->length);
-
-  size_t len = 0;
-  if (start < 0) {
-
-    len -= start;
-    len += end;
-  } else {
-    len = end - start;
-  }
-
-  //printf("string %s start %d end %d\n", str->value, start, end);
-  //printf("len %zu\n", len);
-
-  string* out = string_new(len);
-
-  size_t pos,
-  idx = 0;
-  while (start < 0) {
-    pos = str->length + start;
-    //printf("pos %zu", pos);
-    out->value[idx++] = str->value[pos];
-
-    ++start;
-  }
-
-  //printf("start %d %c\n", start, str->value[start]);
-  //printf("idx %zu\n", idx);
-
-  while (start != end) {
-    out->value[idx++] = str->value[start++];
-  }
-  out->length = idx;
-
-  //printf("idx %zu\n", idx);
-
-  string_zeronull(out);
-
-  return out;
+  string_delete(&buffer);
 }
