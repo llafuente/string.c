@@ -35,7 +35,7 @@ void string_charmask(unsigned char *input, size_t len, char *mask) {
   }
 }
 
-string_len_t string_length(char* src, charset_t enc) {
+string_len_t string_length(char* src, st_enc_t enc) {
   if (enc == string_enc_ascii) {
     return strlen(src);
   } else if (enc == string_enc_utf8) {
@@ -46,7 +46,7 @@ string_len_t string_length(char* src, charset_t enc) {
   return -1;
 }
 
-size_t string_capacity(char* src, charset_t enc) {
+size_t string_capacity(char* src, st_enc_t enc) {
   if (enc == string_enc_ascii) {
     return strlen(src);
   } else if (enc == string_enc_utf8) {

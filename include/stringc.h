@@ -25,7 +25,13 @@
 
 // common headers
 #include <assert.h>
-#include <stdint.h>
+
+#if defined(_MSC_VER) && _MSC_VER < 1600
+# include "stdint-msvc2008.h"
+#else
+# include <stdint.h>
+#endif
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,12 +45,12 @@
 /// string length type.
 typedef long int string_len_t;
 
-/// supported charsets
+/// supported encodings
 typedef enum {
   string_enc_ascii, ///< ASCII
   string_enc_utf8, ///< UTF-8
   string_enc_ucs4be ///< UCS-4BE, UCS-4 big endian
-} charset_t;
+} st_enc_t;
 
 /// string type, use value[] at the end, so only one malloc is enough
 typedef struct  {
@@ -54,8 +60,8 @@ typedef struct  {
   string_len_t used;
   /// memory reserved
   size_t capacity;
-  /// charset used
-  charset_t charset;
+  /// encoding used
+  st_enc_t encoding;
   /// current string content, it's null-terminated
   char value[];
 } string;
@@ -122,8 +128,8 @@ if (enc == string_enc_ascii) { \
 src += amount; \
 
 
-string_len_t string_length(char* src, charset_t enc);
-size_t string_capacity(char* src, charset_t enc);
+string_len_t string_length(char* src, st_enc_t enc);
+size_t string_capacity(char* src, st_enc_t enc);
 
 // add '\0' at the end of the string
 void string_zeronull(string* str);
@@ -165,10 +171,10 @@ string* string_bin2hex(const string* src);
 int string_compare(string* a, string* b);
 
 /**
- * encode a string to given charset
+ * encode a string to given encoding
  * @return a new string
  */
-string* string_encode(string* src, charset_t to_charset);
+string* string_encode(string* src, st_enc_t to_enc);
 
 /**
  * Convert a string replesentation of a number in a given base to number.
@@ -200,13 +206,13 @@ void string_itr_chars(const string* str, string_citr itr_cb);
  * to edit allocator define: __STRING_ALLOCATOR
  *
  */
-extern string* string_new(size_t len, charset_t charset);
+extern string* string_new(size_t len, st_enc_t enc);
 
 /**
  * Allocate a new string and copy src into it.
  *
  */
-string* string_newc(const char* src, charset_t charset);
+string* string_newc(const char* src, st_enc_t enc);
 
 /**
 * Reallocate src with given len
@@ -224,7 +230,7 @@ string* string_clone(string* src);
 /**
  *
  */
-string* string_clone_subc(char* src, size_t len, charset_t charset);
+string* string_clone_subc(char* src, size_t len, st_enc_t enc);
 
 /**
  * Copy src into out
@@ -238,7 +244,7 @@ void string_copy(string** out, string* src);
  * out can be resized
  *
  */
-void string_copyc(string** out, const char* src, charset_t charset);
+void string_copyc(string** out, const char* src, st_enc_t enc);
 
 /**
  * delete string

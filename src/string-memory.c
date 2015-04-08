@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-string* string_new(size_t len, charset_t charset) {
+string* string_new(size_t len, st_enc_t enc) {
   size_t size = len + 1; // null terminated!
 
   string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
@@ -36,13 +36,13 @@ string* string_new(size_t len, charset_t charset) {
   s->used = 0;
   s->capacity = size;
   s->value[0] = '\0';
-  s->charset = charset;
+  s->encoding = enc;
 
   return s;
 }
 
 //TODO use utf8_len()
-string* string_newc(const char* src, charset_t enc) {
+string* string_newc(const char* src, st_enc_t enc) {
   STRING_GET_CHAR_DATA(src, enc, len, used);
   size_t size = used + 1; // null terminated!
 
@@ -55,7 +55,7 @@ string* string_newc(const char* src, charset_t enc) {
   s->used = used;
   s->capacity = size;
   memcpy(s->value, src, size);
-  s->charset = enc;
+  s->encoding = enc;
 
   return s;
 }
@@ -82,7 +82,7 @@ string* string_clone(string* src) {
   return out;
 }
 
-string* string_clone_subc(char* src, size_t len, charset_t enc) {
+string* string_clone_subc(char* src, size_t len, st_enc_t enc) {
   assert(enc == string_enc_ascii);
 
   string* out = string_new(len, enc);
@@ -125,7 +125,7 @@ void string_copy(string** out, string* src) {
   cache->value[src_len] = '\0';
 }
 
-void string_copyc(string** out, const char* src, charset_t enc) {
+void string_copyc(string** out, const char* src, st_enc_t enc) {
   //printf("string_copy %p - chars* %p\n", *out, src);
   STRING_GET_CHAR_DATA(src, enc, len, used);
 
@@ -139,7 +139,7 @@ void string_copyc(string** out, const char* src, charset_t enc) {
   //printf("string_copy %p @ %p\n", cache, cache->value);
   cache->length = len;
   cache->used = used;
-  cache->charset = enc;
+  cache->encoding = enc;
   strcpy(cache->value, src);
 }
 

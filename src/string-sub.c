@@ -46,7 +46,7 @@ bool string_char(string** out, const string* str, string_len_t pos) {
 }
 
 // unsafe!
-// same charset
+// same encoding
 string_len_t string_copy_usub(
   string* out, string_len_t initial_byte,
   const string* src, string_len_t start, size_t todo
@@ -55,8 +55,8 @@ string_len_t string_copy_usub(
   const char* itr = src->value;
 
 
-  assert(out->charset == src->charset);
-  charset_t enc = out->charset;
+  assert(out->encoding == src->encoding);
+  st_enc_t enc = out->encoding;
 
   string_len_t done = 0;
 
@@ -116,7 +116,7 @@ string* string_sub(const string* str, int start, int end) {
 
   if (start < 0) {
     assert(-start < str->length);
-    out = string_new(str->capacity * 2, str->charset);
+    out = string_new(str->capacity * 2, str->encoding);
 
     out_byte_ptr = string_copy_usub(out, 0, str, str->length + start, -start);
 
@@ -124,7 +124,7 @@ string* string_sub(const string* str, int start, int end) {
     out->used = out_byte_ptr;
     start = 0;
   } else {
-    out = string_new(str->capacity, str->charset);
+    out = string_new(str->capacity, str->encoding);
   }
 
   len = end - start;

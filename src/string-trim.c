@@ -102,5 +102,5 @@ string* string_trim(string *str, string *what_str, int mode) {
     return string_clone(str);
   }
 
-  return string_clone_subc(c, len, str->charset);
+  return string_clone_subc(c, len, str->encoding);
 }

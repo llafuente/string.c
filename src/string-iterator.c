@@ -30,7 +30,7 @@
 void string_itr_chars(const string* str, string_citr itr_cb) {
   // maximum char size is 7 bytes
   // 6 utf-8 + null
-  charset_t enc = str->charset;
+  st_enc_t enc = str->encoding;
   string* buffer = string_new(7, enc);
   buffer->length = 1;
   char* s = buffer->value;

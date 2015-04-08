@@ -42,7 +42,7 @@ assert(0 == strcmp(src->value, dst)); \
 assert(src->length == string_length(dst, enc)); \
 assert(src->used == string_capacity(dst, enc)); \
 assert(src->capacity >= src->used); \
-assert(src->charset == enc); \
+assert(src->encoding == enc); \
 
 
 #define RUN_TEST(test) \
