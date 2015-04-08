@@ -49,6 +49,9 @@ extern void test_itr_chars();
 extern void test_utf8_invalid();
 extern void test_utf8_lenc();
 extern void test_trim();
+extern void test_compare();
+extern void test_hexbinhex();
+extern void test_from();
 extern void test_capitalize();
 
 int main(int argc, const char * argv[]) {
@@ -56,61 +59,8 @@ int main(int argc, const char * argv[]) {
 
 
 /*
-  string* s;
-  string_copyc(&s, T_STR_CMP1);
-  aux = string_newc(T_STR_CMP2);
-
-  assert(string_compare(s, s) == 0);
-  assert(string_compare(aux, aux) == 0);
-  assert(string_compare(s, aux) > 0);
-  string_copyc(&aux, T_STR_CMP3);
-  assert(string_compare(s, aux) < 0);
-
-  string_delete(&aux);
-
-  // string_bin2hex
-  // WTF?!
-  string_copyc(&s, "1001");
-  aux = string_bin2hex(s);
-  CHK_LEN(aux);
-  CHK_VAL(aux, "31303031");
-  string_delete(&aux);
-
-  string_copyc(&s, "1111");
-  aux = string_bin2hex(s);
-  CHK_VAL(aux, "31313131");
-  aux2 = string_hex2bin(aux);
-  CHK_VAL(aux2, "1111");
-  string_delete(&aux);
-  string_delete(&aux2);
-
-  string_copyc(&s, "6e6f7420636f6d706c657465");
-  aux = string_hex2bin(s);
-  CHK_VAL(aux, "not complete");
-  string_delete(&aux);
-
-  string_copyc(&s, "31313131");
-  aux = string_hex2bin(s);
-  CHK_VAL(aux, "1111");
-  string_delete(&aux);
-
-  string_copyc(&s, "6578616d706c65206865782064617461");
-  aux = string_hex2bin(s);
-  CHK_VAL(aux, "example hex data");
-  string_delete(&aux);
 
 
-  // string_from_base
-
-  string_copyc(&s, T_STR_5BIN);
-  int d = string_from_base(s, 2);
-  assert(d == 5);
-
-  // string_from_number
-
-  string* binstr = string_from_number(5, 2);
-  CHK_VAL(binstr, T_STR_5BIN);
-  string_delete(&binstr);
 
   string_copyc(&s, T_STR_03);
 
@@ -144,6 +94,10 @@ int main(int argc, const char * argv[]) {
   test_utf8_lenc();
   test_utf8_invalid();
   test_itr_chars();
+  test_trim();
+  test_compare();
+  test_hexbinhex();
+  test_from();
   test_capitalize();
 
   string_cleanup();
@@ -193,7 +147,7 @@ void test_repeat() {
   string_delete(&srepeat);
 
   srepeat = string_repeat(s, 3);
-  CHK_VAL(srepeat, T_STR_03_REP3);
+  CHK_ALL(srepeat, T_STR_03_REP3, string_enc_utf8);
   string_delete(&srepeat);
   string_delete(&s);
 }
@@ -201,6 +155,77 @@ void test_repeat() {
 char buffer[256];
 void itr_callback(string* chr, string_len_t pos, string* src) {
   strcat(buffer, chr->value);
+}
+
+void test_compare() {
+  string* s = string_newc(T_STR_CMP1, string_enc_ascii);
+  CHK_ALL(s, T_STR_CMP1, string_enc_ascii);
+
+  string* aux = string_newc(T_STR_CMP2, string_enc_ascii);
+  CHK_ALL(aux, T_STR_CMP2, string_enc_ascii);
+
+  assert(string_compare(s, s) == 0);
+  assert(string_compare(aux, aux) == 0);
+  assert(string_compare(s, aux) > 0);
+
+  string_copyc(&aux, T_STR_CMP3, string_enc_ascii);
+  CHK_ALL(aux, T_STR_CMP3, string_enc_ascii);
+
+  assert(string_compare(s, aux) < 0);
+
+  string_delete(&aux);
+  string_delete(&s);
+}
+
+void test_hexbinhex() {
+  // string_bin2hex
+  string* s = string_newc("1001", string_enc_ascii);
+  string* aux = string_bin2hex(s);
+
+  CHK_ALL(aux, "31303031", string_enc_ascii);
+  string_delete(&aux);
+
+  // go
+  string_copyc(&s, "1111");
+  aux = string_bin2hex(s);
+  CHK_ALL(aux, "31313131", string_enc_ascii);
+  // back
+  string* aux2 = string_hex2bin(aux);
+  CHK_ALL(aux2, "1111", string_enc_ascii);
+  // cleanup
+  string_delete(&aux);
+  string_delete(&aux2);
+
+  // once again!
+  string_copyc(&s, "6e6f7420636f6d706c657465");
+  aux = string_hex2bin(s);
+  CHK_ALL(aux, "not complete", string_enc_ascii);
+  string_delete(&aux);
+
+  string_copyc(&s, "31313131");
+  aux = string_hex2bin(s);
+  CHK_ALL(aux, "1111", string_enc_ascii);
+  string_delete(&aux);
+
+  string_copyc(&s, "6578616d706c65206865782064617461");
+  aux = string_hex2bin(s);
+  CHK_ALL(aux, "example hex data", string_enc_ascii);
+  string_delete(&aux);
+  string_delete(&s);
+}
+
+void test_from() {
+  // string_from_base
+  string* s = string_newc(T_STR_5BIN, string_enc_ascii);
+  int d = string_from_base(s, 2);
+  assert(d == 5);
+  string_delete(&s);
+
+  // string_from_number
+
+  string* binstr = string_from_number(5, 2);
+  CHK_ALL(binstr, T_STR_5BIN, string_enc_ascii);
+  string_delete(&binstr);
 }
 
 void test_trim() {

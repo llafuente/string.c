@@ -30,7 +30,7 @@
 string *string_hex2bin(string *src) {
   size_t target_length = src->length >> 1;
   char* src_val = src->value;
-  string *out = string_new(target_length);
+  string *out = string_new(target_length, string_enc_ascii);
   unsigned char *out_val = (unsigned char *)out->value;
   size_t i, j;
   unsigned char c, d;
@@ -61,5 +61,6 @@ string *string_hex2bin(string *src) {
   }
   out_val[i] = '\0';
   out->length = i;
+  out->used = i;
   return out;
 }

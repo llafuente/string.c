@@ -106,8 +106,8 @@ string* string_from_number(size_t value, int base) {
   } while (ptr > buf && value);
   //?? *end = '\0';
   // size
-  result = string_new(end - ptr);
-  string_copyc(&result, ptr);
+  result = string_new(end - ptr, string_enc_ascii);
+  string_copyc(&result, ptr, string_enc_ascii);
   //result->length = end - ptr;
   return result;
 }
