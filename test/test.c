@@ -24,14 +24,31 @@
 #define T_STR_UTF8_6 "Elis\xc9"
 #define T_STR_UTF8_7 "Привет"
 
+
+#define T_STR_CAP_1 "word"
+#define T_STR_CAP_2 "word up"
+#define T_STR_CAP_3 "WORD UP"
+#define T_STR_CAP_T1 "Word"
+#define T_STR_CAP_T2 "Word up"
+#define T_STR_CAP_T3 "Word up"
+
 #define CHK_LEN(src) assert(src->length == strlen(src->value));
 #define CHK_VAL(src, dst) assert(0 == strcmp(src->value, dst));
+
+#define CHK_ALL(src, dst, enc) \
+printf("src = %s [%d][%d][%d]\n", src->value, src->length, src->used, src->capacity); \
+printf("dst = %s [%d][%d]\n", dst, string_length(dst, enc), string_capacity(dst, enc)); \
+assert(0 == strcmp(src->value, dst)); \
+assert(src->length == string_length(dst, enc)); \
+assert(src->used == string_capacity(dst, enc)); \
+assert(src->capacity >= src->used); \
 
 
 extern void test_itr_chars();
 extern void test_utf8_invalid();
 extern void test_utf8_lenc();
 extern void test_trim();
+extern void test_capitalize();
 
 int main(int argc, const char * argv[]) {
 
@@ -42,28 +59,29 @@ int main(int argc, const char * argv[]) {
   string* aux;
   string* aux2;
 
+  assert(s->used == 0);
   assert(s->length == 0);
   assert(s->capacity == 3); // 3 because is null-terminated
   assert(s->value[0] == '\0');
+
 
   //assert(is_utf8(T_STR_02) == 0);
   //assert(is_utf8(T_STR_03_REP4) == 0);
 
   //string_resize(&s, 50);
   string_copyc(&s, T_STR_01);
-  assert(s->length == 12);
   assert(s->capacity == 13);
-  CHK_VAL(s, T_STR_01);
+  CHK_ALL(s, T_STR_01, string_enc_ascii);
 
   string_copyc(&s, T_STR_02);
-  CHK_VAL(s, T_STR_02);
+  CHK_ALL(s, T_STR_02, string_enc_ascii);
 
-  string_copyc(&s, T_STR_03);
-  CHK_VAL(s, T_STR_03);
+  string_copyc(&s, T_STR_03, string_enc_utf8);
+  CHK_ALL(s, T_STR_03, string_enc_utf8);
 
   // str_repeat
   string* srepeat = string_repeat(s, 2);
-  CHK_VAL(srepeat, T_STR_03_REP2);
+  CHK_ALL(srepeat, T_STR_03_REP2, string_enc_utf8);
   string_delete(&srepeat);
 
   srepeat = string_repeat(s, 3);
@@ -157,6 +175,7 @@ int main(int argc, const char * argv[]) {
   test_utf8_lenc();
   test_utf8_invalid();
   test_itr_chars();
+  test_capitalize();
 
   printf("OK\n");
 
@@ -227,4 +246,25 @@ void test_itr_chars() {
 
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
 
+}
+
+void test_capitalize() {
+  return;
+  string* str = string_newc(T_STR_CAP_1);
+  string_capitalize(str);
+  string_debug(str);
+  CHK_VAL(str, T_STR_CAP_T1);
+  string_delete(&str);
+
+  str = string_newc(T_STR_CAP_2);
+  string_capitalize(str);
+  string_debug(str);
+  CHK_VAL(str, T_STR_CAP_T2);
+  string_delete(&str);
+
+  str = string_newc(T_STR_CAP_3);
+  string_capitalize(str);
+  string_debug(str);
+  CHK_VAL(str, T_STR_CAP_T3);
+  string_delete(&str);
 }

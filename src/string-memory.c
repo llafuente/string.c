@@ -33,6 +33,7 @@ string* _string_new(size_t len, charset_t charset) {
   string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
 
   s->length = 0;
+  s->used = 0;
   s->capacity = size;
   s->value[0] = '\0';
   s->charset = charset;
@@ -47,6 +48,7 @@ string* _string_newc(const char* src, charset_t charset) {
   string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));
 
   s->length = size - 1;
+  s->used = size;
   s->capacity = size;
   memcpy(s->value, src, size);
   s->charset = charset;
@@ -115,10 +117,9 @@ void string_copy(string** out, string* src) {
   cache->value[src_len] = '\0';
 }
 
-void _string_copyc(string** out, const char* src, charset_t charset) {
+void _string_copyc(string** out, const char* src, charset_t enc) {
   //printf("string_copy %p - chars* %p\n", *out, src);
-
-  size_t len = strlen(src);
+  STRING_GET_CHAR_DATA(src, enc, len, used);
 
   string* cache = *out;
 
@@ -129,7 +130,8 @@ void _string_copyc(string** out, const char* src, charset_t charset) {
   }
   //printf("string_copy %p @ %p\n", cache, cache->value);
   cache->length = len;
-  cache->charset = charset;
+  cache->used = used;
+  cache->charset = enc;
   strcpy(cache->value, src);
 }
 

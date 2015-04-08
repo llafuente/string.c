@@ -15,6 +15,7 @@ libstringc_la_LDFLAGS = -no-undefined -version-info 1:0:0
 libstringc_la_SOURCES = src/stringc.c \
                   src/string-append.c \
                   src/string-bin2hex.c \
+                  src/string-case.c \
                   src/string-compare.c \
                   src/string-from.c \
                   src/string-hex2bin.c \

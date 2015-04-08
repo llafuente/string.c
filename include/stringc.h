@@ -48,8 +48,10 @@ typedef enum {
 
 /// string type, use value[] at the end, so only one malloc is enough
 typedef struct  {
-  /// length (ASCII) atm
+  /// length
   string_len_t length;
+  /// used bytes
+  string_len_t used;
   /// memory reserved
   size_t capacity;
   /// charset used
@@ -95,7 +97,29 @@ extern const char * const string_utf8_skip;
   } \
 }
 
+#define STRING_LOOP(string_val, itr) \
+const char* itr = string_val->value ; \
+const char* __end = itr + string_val->used; \
+while (itr < __end)
 
+#define STRING_LOOP_START(string_val, itr, start) \
+const char* itr = string_val->value + start; \
+const char* __end = itr + string_val->used - start; \
+while (itr < __end)
+
+#define STRING_GET_CHAR_DATA(src, enc, len, used) \
+string_len_t len; \
+size_t used; \
+if (enc == string_enc_ascii) { \
+  len = used = strlen(src); \
+} else if (enc == string_enc_utf8) { \
+  len = string_utf8_lenc((const char*) src, &used); \
+} else { \
+  assert(false); \
+} \
+
+string_len_t string_length(char* src, charset_t enc);
+string_len_t string_capacity(char* src, charset_t enc);
 
 // add '\0' at the end of the string
 void string_zeronull(string* str);

@@ -34,3 +34,26 @@ void string_charmask(unsigned char *input, size_t len, char *mask) {
     mask[*input] = 1;
   }
 }
+
+string_len_t string_length(char* src, charset_t enc) {
+  if (enc == string_enc_ascii) {
+    return strlen(src);
+  } else if (enc == string_enc_utf8) {
+    size_t used;
+    return string_utf8_lenc((const char*) src, &used);
+  }
+
+  return -1;
+}
+
+string_len_t string_capacity(char* src, charset_t enc) {
+  if (enc == string_enc_ascii) {
+    return strlen(src);
+  } else if (enc == string_enc_utf8) {
+    size_t used;
+    string_utf8_lenc((const char*) src, &used);
+    return used;
+  }
+
+  return -1;
+}

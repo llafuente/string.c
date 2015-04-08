@@ -28,9 +28,7 @@
 #include "stringc.h"
 
 string* string_repeat(string* src, size_t x) {
-  string *result; /* Resulting string */
-  size_t result_len; /* Length of the resulting string */
-  string_len_t src_len = src->length; // @cache
+  string_len_t src_len = src->used; // @cache & use byte size not real length!
   /* Don't waste our time if it's empty */
   /* ... or if the multiplier is zero */
   if (src_len == 0 || x == 0) {
@@ -38,9 +36,9 @@ string* string_repeat(string* src, size_t x) {
   }
 
   /* Initialize the result string */
-  result_len = src_len * x;
-  result = string_new(result_len);
-  /* Heavy optimization for situations where src string is 1 byte long */
+  string_len_t result_len = src_len * x; // Length of the resulting string
+  string *result = string_new(result_len, src->charset);
+  // Heavy optimization for situations where src string is 1 byte long
   if (src_len == 1) {
     memset(result->value, *(src->value), x);
   } else {
@@ -58,5 +56,7 @@ string* string_repeat(string* src, size_t x) {
     }
   }
   result->value[result_len] = '\0';
+  result->length = src->length * x;
+  result->used = src_len * x;
   return result;
 }
