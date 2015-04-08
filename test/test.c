@@ -36,8 +36,8 @@
 #define CHK_VAL(src, dst) assert(0 == strcmp(src->value, dst));
 
 #define CHK_ALL(src, dst, enc) \
-printf("src = %s [%d][%zu][%d]\n", src->value, src->length, src->used, src->capacity); \
-printf("dst = %s [%zu][%zu]\n", dst, string_length(dst, enc), string_capacity(dst, enc)); \
+printf("src = %s [%ld][%ld][%lu]\n", src->value, src->length, src->used, src->capacity); \
+printf("dst = %s [%ld][%lu]\n", dst, string_length(dst, enc), string_capacity(dst, enc)); \
 assert(0 == strcmp(src->value, dst)); \
 assert(src->length == string_length(dst, enc)); \
 assert(src->used == string_capacity(dst, enc)); \
@@ -122,11 +122,11 @@ void test_memory_funcs() {
   //assert(is_utf8(T_STR_03_REP4) == 0);
 
   //string_resize(&s, 50);
-  string_copyc(&s, T_STR_01);
+  string_copyc(&s, T_STR_01, string_enc_ascii);
   assert(s->capacity == 13);
   CHK_ALL(s, T_STR_01, string_enc_ascii);
 
-  string_copyc(&s, T_STR_02);
+  string_copyc(&s, T_STR_02, string_enc_ascii);
   CHK_ALL(s, T_STR_02, string_enc_ascii);
 
   string_copyc(&s, T_STR_03, string_enc_utf8);
@@ -186,7 +186,7 @@ void test_hexbinhex() {
   string_delete(&aux);
 
   // go
-  string_copyc(&s, "1111");
+  string_copyc(&s, "1111", string_enc_ascii);
   aux = string_bin2hex(s);
   CHK_ALL(aux, "31313131", string_enc_ascii);
   // back
@@ -197,17 +197,17 @@ void test_hexbinhex() {
   string_delete(&aux2);
 
   // once again!
-  string_copyc(&s, "6e6f7420636f6d706c657465");
+  string_copyc(&s, "6e6f7420636f6d706c657465", string_enc_ascii);
   aux = string_hex2bin(s);
   CHK_ALL(aux, "not complete", string_enc_ascii);
   string_delete(&aux);
 
-  string_copyc(&s, "31313131");
+  string_copyc(&s, "31313131", string_enc_ascii);
   aux = string_hex2bin(s);
   CHK_ALL(aux, "1111", string_enc_ascii);
   string_delete(&aux);
 
-  string_copyc(&s, "6578616d706c65206865782064617461");
+  string_copyc(&s, "6578616d706c65206865782064617461", string_enc_ascii);
   aux = string_hex2bin(s);
   CHK_ALL(aux, "example hex data", string_enc_ascii);
   string_delete(&aux);
@@ -229,8 +229,8 @@ void test_from() {
 }
 
 void test_trim() {
-  string* s = string_new(10);
-  string_copyc(&s, "   123  ");
+  string* s = string_new(10, string_enc_ascii);
+  string_copyc(&s, "   123  ", string_enc_ascii);
   string* aux = string_trim(s, 0, 3);
 
   CHK_VAL(aux, "123");
@@ -239,9 +239,9 @@ void test_trim() {
   string_delete(&aux);
 
 
-  s = string_new(10);
+  s = string_new(10, string_enc_ascii);
   string* mask = string_newc("0", string_enc_ascii);
-  string_copyc(&s, "000123x0");
+  string_copyc(&s, "000123x0", string_enc_ascii);
   aux = string_trim(s, mask, 3);
 
   assert(strcmp(aux->value, "123x") == 0);

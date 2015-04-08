@@ -119,7 +119,7 @@ if (enc == string_enc_ascii) { \
 } \
 
 string_len_t string_length(char* src, charset_t enc);
-string_len_t string_capacity(char* src, charset_t enc);
+size_t string_capacity(char* src, charset_t enc);
 
 // add '\0' at the end of the string
 void string_zeronull(string* str);
@@ -191,17 +191,12 @@ string *string_hex2bin(string *src);
 
 void string_itr_chars(const string* str, string_citr itr_cb);
 
-/// default charset argument trick
-#define string_new(len,...) _string_new(len, (string_enc_ascii, ##__VA_ARGS__) )
-/// default charset argument trick
-#define string_copyc(out, src, ...) _string_copyc(out, src, (string_enc_ascii, ##__VA_ARGS__) )
-
 /**
  * Allocate a new string
  * to edit allocator define: __STRING_ALLOCATOR
  *
  */
-extern string* _string_new(size_t len, charset_t charset);
+extern string* string_new(size_t len, charset_t charset);
 
 /**
  * Allocate a new string and copy src into it.
@@ -239,7 +234,7 @@ void string_copy(string** out, string* src);
  * out can be resized
  *
  */
-void _string_copyc(string** out, const char* src, charset_t charset);
+void string_copyc(string** out, const char* src, charset_t charset);
 
 /**
  * delete string
@@ -352,5 +347,7 @@ char* string_utf8_invalid(const unsigned char *str, size_t len);
  * Create a mask[256] for given ASCII input
  */
 void string_charmask(unsigned char *input, size_t len, char *mask);
+
+void string_capitalize(string* str);
 
 #endif

@@ -46,7 +46,7 @@ string_len_t string_length(char* src, charset_t enc) {
   return -1;
 }
 
-string_len_t string_capacity(char* src, charset_t enc) {
+size_t string_capacity(char* src, charset_t enc) {
   if (enc == string_enc_ascii) {
     return strlen(src);
   } else if (enc == string_enc_utf8) {

@@ -61,7 +61,7 @@ string* string_sub(const string* str, int start, int end) {
   //printf("string %s start %d end %d\n", str->value, start, end);
   //printf("len %zu\n", len);
 
-  string* out = string_new(len);
+  string* out = string_new(len, string_enc_ascii);
 
   size_t pos,
   idx = 0;

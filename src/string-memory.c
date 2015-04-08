@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-string* _string_new(size_t len, charset_t charset) {
+string* string_new(size_t len, charset_t charset) {
   size_t size = len + 1; // null terminated!
 
   string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
@@ -83,7 +83,7 @@ string* string_clone(string* src) {
 }
 
 string* string_clone_subc(char* src, size_t len, charset_t charset) {
-  string* out = _string_new(len + 1, charset);
+  string* out = string_new(len + 1, charset);
   memcpy(out->value, src, len);
   out->length = len;
   out->value[len] = '\0';
@@ -122,7 +122,7 @@ void string_copy(string** out, string* src) {
   cache->value[src_len] = '\0';
 }
 
-void _string_copyc(string** out, const char* src, charset_t enc) {
+void string_copyc(string** out, const char* src, charset_t enc) {
   //printf("string_copy %p - chars* %p\n", *out, src);
   STRING_GET_CHAR_DATA(src, enc, len, used);
 
