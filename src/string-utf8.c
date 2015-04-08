@@ -48,7 +48,7 @@ const char string_utf8_skip_data[256] = {
 };
 const char * const string_utf8_skip = string_utf8_skip_data;
 
-size_t string_utf8_lenc(const char* src, size_t *out_capacity) {
+size_t string_utf8_lenc(const char* src, size_t *used_bytes) {
   size_t len = 0;
   const char *p = src;
   char jump;
@@ -62,10 +62,10 @@ size_t string_utf8_lenc(const char* src, size_t *out_capacity) {
     //printf("%c\n", *p);
     ++len;
   }
-  ++capacity;
+  //++capacity; do not include '\0'!
 
-  if (out_capacity) {
-    *out_capacity = capacity;
+  if (used_bytes) {
+    *used_bytes = capacity;
   }
 
   return len;

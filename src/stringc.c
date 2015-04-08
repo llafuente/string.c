@@ -32,7 +32,7 @@ void string_zeronull(string* str) {
 }
 
 void string_debug(string* str) {
-  printf("string_debug @%p, length[%zu] size[%zu]\n", str, str->length, str->capacity);
+  printf("string_debug @%p, length[%zu] used[%zu] size[%zu]\n", str, str->length, str->used, str->capacity);
 
   char *p = str->value;
   size_t size = str->capacity;
