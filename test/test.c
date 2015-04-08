@@ -36,14 +36,15 @@
 #define CHK_VAL(src, dst) assert(0 == strcmp(src->value, dst));
 
 #define CHK_ALL(src, dst, enc) \
-printf("src = %s [%d][%d][%d]\n", src->value, src->length, src->used, src->capacity); \
-printf("dst = %s [%d][%d]\n", dst, string_length(dst, enc), string_capacity(dst, enc)); \
+printf("src = %s [%d][%zu][%d]\n", src->value, src->length, src->used, src->capacity); \
+printf("dst = %s [%zu][%zu]\n", dst, string_length(dst, enc), string_capacity(dst, enc)); \
 assert(0 == strcmp(src->value, dst)); \
 assert(src->length == string_length(dst, enc)); \
 assert(src->used == string_capacity(dst, enc)); \
 assert(src->capacity >= src->used); \
 
-
+extern void test_memory_funcs();
+extern void test_repeat();
 extern void test_itr_chars();
 extern void test_utf8_invalid();
 extern void test_utf8_lenc();
@@ -52,42 +53,10 @@ extern void test_capitalize();
 
 int main(int argc, const char * argv[]) {
 
-  //
-  // memory
-  //
-  string* s = string_new(2, string_enc_ascii);
-  string* aux;
-  string* aux2;
-
-  assert(s->used == 0);
-  assert(s->length == 0);
-  assert(s->capacity == 3); // 3 because is null-terminated
-  assert(s->value[0] == '\0');
 
 
-  //assert(is_utf8(T_STR_02) == 0);
-  //assert(is_utf8(T_STR_03_REP4) == 0);
-
-  //string_resize(&s, 50);
-  string_copyc(&s, T_STR_01);
-  assert(s->capacity == 13);
-  CHK_ALL(s, T_STR_01, string_enc_ascii);
-
-  string_copyc(&s, T_STR_02);
-  CHK_ALL(s, T_STR_02, string_enc_ascii);
-
-  string_copyc(&s, T_STR_03, string_enc_utf8);
-  CHK_ALL(s, T_STR_03, string_enc_utf8);
-
-  // str_repeat
-  string* srepeat = string_repeat(s, 2);
-  CHK_ALL(srepeat, T_STR_03_REP2, string_enc_utf8);
-  string_delete(&srepeat);
-
-  srepeat = string_repeat(s, 3);
-  CHK_VAL(srepeat, T_STR_03_REP3);
-  string_delete(&srepeat);
-
+/*
+  string* s;
   string_copyc(&s, T_STR_CMP1);
   aux = string_newc(T_STR_CMP2);
 
@@ -167,19 +136,66 @@ int main(int argc, const char * argv[]) {
   aux = string_shuffle(s, s->length);
   string_delete(&s);
   string_delete(&aux);
-
-  string_cleanup();
-
+*/
 
 
+  test_memory_funcs();
+  test_repeat();
   test_utf8_lenc();
   test_utf8_invalid();
   test_itr_chars();
   test_capitalize();
 
+  string_cleanup();
   printf("OK\n");
 
   return 0;
+}
+
+void test_memory_funcs() {
+  //
+  // memory
+  //
+  string* s = string_new(2, string_enc_ascii);
+
+  assert(s->used == 0);
+  assert(s->length == 0);
+  assert(s->capacity == 3); // 3 because is null-terminated
+  assert(s->value[0] == '\0');
+
+
+  //assert(is_utf8(T_STR_02) == 0);
+  //assert(is_utf8(T_STR_03_REP4) == 0);
+
+  //string_resize(&s, 50);
+  string_copyc(&s, T_STR_01);
+  assert(s->capacity == 13);
+  CHK_ALL(s, T_STR_01, string_enc_ascii);
+
+  string_copyc(&s, T_STR_02);
+  CHK_ALL(s, T_STR_02, string_enc_ascii);
+
+  string_copyc(&s, T_STR_03, string_enc_utf8);
+  CHK_ALL(s, T_STR_03, string_enc_utf8);
+  string_delete(&s);
+
+
+  s = string_newc(T_STR_03, string_enc_utf8);
+  CHK_ALL(s, T_STR_03, string_enc_utf8);
+  string_delete(&s);
+}
+
+void test_repeat() {
+  string* s = string_newc(T_STR_03, string_enc_utf8);
+  // str_repeat
+  string* srepeat = string_repeat(s, 2);
+  CHK_ALL(srepeat, T_STR_03_REP2, string_enc_utf8);
+  string_delete(&srepeat);
+
+  srepeat = string_repeat(s, 3);
+  CHK_VAL(srepeat, T_STR_03_REP3);
+  string_delete(&srepeat);
+  string_delete(&s);
 }
 
 char buffer[256];
@@ -199,7 +215,7 @@ void test_trim() {
 
 
   s = string_new(10);
-  string* mask = string_newc("0");
+  string* mask = string_newc("0", string_enc_ascii);
   string_copyc(&s, "000123x0");
   aux = string_trim(s, mask, 3);
 
@@ -240,7 +256,7 @@ void test_utf8_invalid() {
 
 void test_itr_chars() {
 
-  string* str = string_newc(T_STR_03_REP3);
+  string* str = string_newc(T_STR_03_REP3, string_enc_utf8);
   string_itr_chars(str, itr_callback);
   string_delete(&str);
 
@@ -250,19 +266,19 @@ void test_itr_chars() {
 
 void test_capitalize() {
   return;
-  string* str = string_newc(T_STR_CAP_1);
+  string* str = string_newc(T_STR_CAP_1, string_enc_ascii);
   string_capitalize(str);
   string_debug(str);
   CHK_VAL(str, T_STR_CAP_T1);
   string_delete(&str);
 
-  str = string_newc(T_STR_CAP_2);
+  str = string_newc(T_STR_CAP_2, string_enc_ascii);
   string_capitalize(str);
   string_debug(str);
   CHK_VAL(str, T_STR_CAP_T2);
   string_delete(&str);
 
-  str = string_newc(T_STR_CAP_3);
+  str = string_newc(T_STR_CAP_3, string_enc_ascii);
   string_capitalize(str);
   string_debug(str);
   CHK_VAL(str, T_STR_CAP_T3);

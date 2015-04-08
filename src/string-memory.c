@@ -42,16 +42,20 @@ string* _string_new(size_t len, charset_t charset) {
 }
 
 //TODO use utf8_len()
-string* _string_newc(const char* src, charset_t charset) {
-  size_t size = strlen(src) + 1; // null terminated!
+string* string_newc(const char* src, charset_t enc) {
+  STRING_GET_CHAR_DATA(src, enc, len, used);
+  size_t size = used + 1; // null terminated!
+
+//printf("%s\n",  src);
+//printf("len[%zu] used[%zu] enc[%d]", len, used, enc);
 
   string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));
 
-  s->length = size - 1;
-  s->used = size;
+  s->length = len;
+  s->used = used;
   s->capacity = size;
   memcpy(s->value, src, size);
-  s->charset = charset;
+  s->charset = enc;
 
   return s;
 }
@@ -113,6 +117,7 @@ void string_copy(string** out, string* src) {
 
   memcpy(cache->value, src->value, src_len);
   cache->length = src_len;
+  cache->used = src->used;
 
   cache->value[src_len] = '\0';
 }

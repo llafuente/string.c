@@ -194,8 +194,6 @@ void string_itr_chars(const string* str, string_citr itr_cb);
 /// default charset argument trick
 #define string_new(len,...) _string_new(len, (string_enc_ascii, ##__VA_ARGS__) )
 /// default charset argument trick
-#define string_newc(chars,...) _string_newc(chars, (string_enc_ascii, ##__VA_ARGS__) )
-/// default charset argument trick
 #define string_copyc(out, src, ...) _string_copyc(out, src, (string_enc_ascii, ##__VA_ARGS__) )
 
 /**
@@ -209,7 +207,7 @@ extern string* _string_new(size_t len, charset_t charset);
  * Allocate a new string and copy src into it.
  *
  */
-string* _string_newc(const char* src, charset_t charset);
+string* string_newc(const char* src, charset_t charset);
 
 /**
 * Reallocate src with given len
