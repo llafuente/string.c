@@ -118,6 +118,10 @@ if (enc == string_enc_ascii) { \
   assert(false); \
 } \
 
+#define STRING_ADVANCE(src, amount) \
+src += amount; \
+
+
 string_len_t string_length(char* src, charset_t enc);
 size_t string_capacity(char* src, charset_t enc);
 

@@ -33,16 +33,15 @@ void string_append(string** out, string* src) {
 
   string* cache = *out;
 
-  string_len_t src_len = src->length;
-  string_len_t total = src_len + cache->length;
+  string_len_t bytes_to_cpy = src->used;
   size_t cap = cache->capacity;
 
-  if (cap < total) {
+  if (cap < cache->used + bytes_to_cpy) {
     // out will be reallocated if src is the same we should use it.
     bool same = cache == src;
 
-    assert(*out == src);
-    string_resize(out, total);
+    //assert(*out == src);
+    string_resize(out, cache->used + bytes_to_cpy);
     cache = *out;
     if (same) {
       src = cache;
@@ -50,9 +49,9 @@ void string_append(string** out, string* src) {
   }
 
 
-  memcpy(cache->value + cache->length, src->value, src_len);
-  cache->length += src_len;
-  cache->used += src->used;
+  memcpy(cache->value + cache->used, src->value, bytes_to_cpy);
+  cache->length += src->length;
+  cache->used += bytes_to_cpy;
 
-  cache->value[cache->length] = '\0';
+  cache->value[cache->used] = '\0';
 }

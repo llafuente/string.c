@@ -42,6 +42,13 @@ assert(0 == strcmp(src->value, dst)); \
 assert(src->length == string_length(dst, enc)); \
 assert(src->used == string_capacity(dst, enc)); \
 assert(src->capacity >= src->used); \
+assert(src->charset == enc); \
+
+
+#define RUN_TEST(test) \
+printf("%s\n", #test); \
+test_ ## test(); \
+
 
 extern void test_memory_funcs();
 extern void test_repeat();
@@ -53,6 +60,7 @@ extern void test_compare();
 extern void test_hexbinhex();
 extern void test_from();
 extern void test_append();
+extern void test_sub();
 extern void test_capitalize();
 
 int main(int argc, const char * argv[]) {
@@ -65,14 +73,7 @@ int main(int argc, const char * argv[]) {
 
 
 
-  aux = string_sub(s, 0, 4);
-  //string_debug(aux);
-  string_delete(&aux);
-  aux = string_sub(s, -10, 4);
-  //string_debug(aux);
-  string_delete(&aux);
 
-  string_delete(&s);
 
 
 
@@ -84,17 +85,18 @@ int main(int argc, const char * argv[]) {
 */
 
 
-  test_memory_funcs();
-  test_repeat();
-  test_utf8_lenc();
-  test_utf8_invalid();
-  test_itr_chars();
-  test_trim();
-  test_compare();
-  test_hexbinhex();
-  test_from();
-  test_append();
-  test_capitalize();
+  RUN_TEST(memory_funcs);
+  RUN_TEST(repeat);
+  RUN_TEST(utf8_lenc);
+  RUN_TEST(utf8_invalid);
+  RUN_TEST(itr_chars);
+  RUN_TEST(trim);
+  RUN_TEST(compare);
+  RUN_TEST(hexbinhex);
+  RUN_TEST(from);
+  RUN_TEST(append);
+  RUN_TEST(sub);
+  RUN_TEST(capitalize);
 
   string_cleanup();
   printf("OK\n");
@@ -225,14 +227,30 @@ void test_from() {
 }
 
 void test_append() {
-  string* s = string_newc(T_STR_03, string_enc_ascii);
+  string* s = string_newc(T_STR_03, string_enc_utf8);
 
   string_append(&s, s);
-  CHK_ALL(s, T_STR_03_REP2, string_enc_ascii);
+  CHK_ALL(s, T_STR_03_REP2, string_enc_utf8);
 
   string_append(&s, s);
-  CHK_ALL(s, T_STR_03_REP4, string_enc_ascii);
+  CHK_ALL(s, T_STR_03_REP4, string_enc_utf8);
 
+  string_delete(&s);
+}
+
+void test_sub() {
+  string* s = string_newc(T_STR_03_REP4, string_enc_utf8);
+  CHK_ALL(s, T_STR_03_REP4, string_enc_utf8);
+
+  string* aux = string_sub(s, 0, 6);
+  CHK_ALL(aux, T_STR_03, string_enc_utf8);
+
+  string_delete(&aux);
+
+  aux = string_sub(s, -12, 6);
+  CHK_ALL(aux, T_STR_03_REP3, string_enc_utf8);
+
+  string_delete(&aux);
   string_delete(&s);
 }
 

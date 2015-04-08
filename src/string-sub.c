@@ -45,45 +45,94 @@ bool string_char(string** out, const string* str, string_len_t pos) {
   return true;
 }
 
+// unsafe!
+// same charset
+string_len_t string_copy_usub(
+  string* out, string_len_t initial_byte,
+  const string* src, string_len_t start, size_t todo
+) {
+  char* dst = out->value + initial_byte;
+  const char* itr = src->value;
+
+
+  assert(out->charset == src->charset);
+  charset_t enc = out->charset;
+
+  string_len_t done = 0;
+
+  switch(enc) {
+    case string_enc_ascii: {
+      // \0 + end
+
+      itr += start;
+      const char* end = itr + todo;
+
+      while (*itr && itr < end) {
+        STRING_COPY_CHARS(itr, dst, 1);
+        ++done;
+      }
+      *dst = '\0';
+    }
+    break;
+    case string_enc_utf8: {
+      // \0 + end
+      while(start--) {
+        itr += string_utf8_jump_next(itr);
+      }
+
+      while (*itr && todo--) {
+        int jump = string_utf8_jump_next(itr);
+        done += jump;
+
+        STRING_COPY_CHARS(itr, dst, jump);
+      }
+      *dst = '\0';
+    }
+    break;
+    case string_enc_ucs4be: {
+      // \0 + end
+      itr += start * 4;
+      const char* end = itr + (todo * 4);
+
+      while (*itr && itr < end) {
+        STRING_COPY_CHARS(itr, dst, 4);
+        done += 4;
+      }
+      *dst = '\0';
+    }
+    break;
+  }
+
+  return done;
+}
+
 string* string_sub(const string* str, int start, int end) {
   assert(end < str->length);
   assert(end > -str->length);
 
   size_t len = 0;
+  string* out = 0;
+  size_t out_byte_ptr = 0;
+
   if (start < 0) {
+    assert(-start < str->length);
+    out = string_new(str->capacity * 2, str->charset);
 
-    len -= start;
-    len += end;
+    out_byte_ptr = string_copy_usub(out, 0, str, str->length + start, -start);
+
+    out->length = -start;
+    out->used = out_byte_ptr;
+    start = 0;
   } else {
-    len = end - start;
+    out = string_new(str->capacity, str->charset);
   }
 
-  //printf("string %s start %d end %d\n", str->value, start, end);
-  //printf("len %zu\n", len);
+  len = end - start;
 
-  string* out = string_new(len, string_enc_ascii);
 
-  size_t pos,
-  idx = 0;
-  while (start < 0) {
-    pos = str->length + start;
-    //printf("pos %zu", pos);
-    out->value[idx++] = str->value[pos];
-
-    ++start;
-  }
-
-  //printf("start %d %c\n", start, str->value[start]);
-  //printf("idx %zu\n", idx);
-
-  while (start != end) {
-    out->value[idx++] = str->value[start++];
-  }
-  out->length = idx;
-
-  //printf("idx %zu\n", idx);
-
-  string_zeronull(out);
+  out_byte_ptr = string_copy_usub(out, out_byte_ptr, str, start, len);
+  out->used += out_byte_ptr;
+  out->length += len;
 
   return out;
 }
