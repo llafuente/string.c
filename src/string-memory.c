@@ -82,10 +82,13 @@ string* string_clone(string* src) {
   return out;
 }
 
-string* string_clone_subc(char* src, size_t len, charset_t charset) {
-  string* out = string_new(len + 1, charset);
+string* string_clone_subc(char* src, size_t len, charset_t enc) {
+  assert(enc == string_enc_ascii);
+
+  string* out = string_new(len, enc);
   memcpy(out->value, src, len);
   out->length = len;
+  out->used = len;
   out->value[len] = '\0';
 
   return out;

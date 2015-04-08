@@ -62,28 +62,9 @@ extern void test_from();
 extern void test_append();
 extern void test_sub();
 extern void test_capitalize();
+extern void test_shuffle();
 
 int main(int argc, const char * argv[]) {
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-  s = string_newc("123456789");
-  aux = string_shuffle(s, s->length);
-  string_delete(&s);
-  string_delete(&aux);
-*/
-
 
   RUN_TEST(memory_funcs);
   RUN_TEST(repeat);
@@ -97,6 +78,7 @@ int main(int argc, const char * argv[]) {
   RUN_TEST(append);
   RUN_TEST(sub);
   RUN_TEST(capitalize);
+  RUN_TEST(shuffle);
 
   string_cleanup();
   printf("OK\n");
@@ -259,7 +241,7 @@ void test_trim() {
   string_copyc(&s, "   123  ", string_enc_ascii);
   string* aux = string_trim(s, 0, 3);
 
-  CHK_VAL(aux, "123");
+  CHK_ALL(aux, "123", string_enc_ascii);
 
   string_delete(&s);
   string_delete(&aux);
@@ -334,4 +316,12 @@ void test_capitalize() {
   string_debug(str);
   CHK_VAL(str, T_STR_CAP_T3);
   string_delete(&str);
+}
+
+// this not an actual test/assert just to be sure memory is ok
+void test_shuffle() {
+  string* s = string_newc("123456789", string_enc_ascii);
+  string* aux = string_shuffle(s, s->length);
+  string_delete(&s);
+  string_delete(&aux);
 }
