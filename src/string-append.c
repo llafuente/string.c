@@ -27,6 +27,7 @@
 
 #include "stringc.h"
 
+// TODO test & handle diff/enc
 void string_append(string** out, string* src) {
   //printf("string_append %p - %p\n", *out, src);
 
@@ -51,6 +52,7 @@ void string_append(string** out, string* src) {
 
   memcpy(cache->value + cache->length, src->value, src_len);
   cache->length += src_len;
+  cache->used += src->used;
 
   cache->value[cache->length] = '\0';
 }

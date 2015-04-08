@@ -52,6 +52,7 @@ extern void test_trim();
 extern void test_compare();
 extern void test_hexbinhex();
 extern void test_from();
+extern void test_append();
 extern void test_capitalize();
 
 int main(int argc, const char * argv[]) {
@@ -62,13 +63,7 @@ int main(int argc, const char * argv[]) {
 
 
 
-  string_copyc(&s, T_STR_03);
 
-  string_append(&s, s);
-  CHK_VAL(s, T_STR_03_REP2);
-
-  string_append(&s, s);
-  CHK_VAL(s, T_STR_03_REP4);
 
   aux = string_sub(s, 0, 4);
   //string_debug(aux);
@@ -98,6 +93,7 @@ int main(int argc, const char * argv[]) {
   test_compare();
   test_hexbinhex();
   test_from();
+  test_append();
   test_capitalize();
 
   string_cleanup();
@@ -226,6 +222,18 @@ void test_from() {
   string* binstr = string_from_number(5, 2);
   CHK_ALL(binstr, T_STR_5BIN, string_enc_ascii);
   string_delete(&binstr);
+}
+
+void test_append() {
+  string* s = string_newc(T_STR_03, string_enc_ascii);
+
+  string_append(&s, s);
+  CHK_ALL(s, T_STR_03_REP2, string_enc_ascii);
+
+  string_append(&s, s);
+  CHK_ALL(s, T_STR_03_REP4, string_enc_ascii);
+
+  string_delete(&s);
 }
 
 void test_trim() {
