@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-void string_itr_chars(const string* str, string_citr itr_cb) {
+void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   // maximum char size is 7 bytes
   // 6 utf-8 + null
   st_enc_t enc = str->encoding;
@@ -36,7 +36,7 @@ void string_itr_chars(const string* str, string_citr itr_cb) {
   char* s = buffer->value;
   char* dst;
 
-  string_len_t pos = 0;
+  st_len_t pos = 0;
   const char* itr = str->value;
   const char* end = itr + str->capacity - 1;
 

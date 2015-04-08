@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-bool string_char(string** out, const string* str, string_len_t pos) {
+bool string_char(string** out, const string* str, st_len_t pos) {
   assert(str->length > pos);
 
   const char* s = str->value + pos;
@@ -47,9 +47,9 @@ bool string_char(string** out, const string* str, string_len_t pos) {
 
 // unsafe!
 // same encoding
-string_len_t string_copy_usub(
-  string* out, string_len_t initial_byte,
-  const string* src, string_len_t start, size_t todo
+st_len_t string_copy_usub(
+  string* out, st_len_t initial_byte,
+  const string* src, st_len_t start, size_t todo
 ) {
   char* dst = out->value + initial_byte;
   const char* itr = src->value;
@@ -58,7 +58,7 @@ string_len_t string_copy_usub(
   assert(out->encoding == src->encoding);
   st_enc_t enc = out->encoding;
 
-  string_len_t done = 0;
+  st_len_t done = 0;
 
   switch(enc) {
     case string_enc_ascii: {

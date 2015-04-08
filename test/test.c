@@ -133,7 +133,7 @@ void test_repeat() {
 }
 
 char buffer[256];
-void itr_callback(string* chr, string_len_t pos, string* src) {
+void itr_callback(string* chr, st_len_t pos, string* src) {
   strcat(buffer, chr->value);
 }
 

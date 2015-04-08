@@ -33,7 +33,7 @@ void string_append(string** out, string* src) {
 
   string* cache = *out;
 
-  string_len_t bytes_to_cpy = src->used;
+  st_len_t bytes_to_cpy = src->used;
   size_t cap = cache->capacity;
 
   if (cap < cache->used + bytes_to_cpy) {

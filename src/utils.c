@@ -27,15 +27,17 @@
 
 #include "stringc.h"
 
-void string_charmask(unsigned char *input, size_t len, char *mask) {
-  unsigned char *end;
+void string_charmask(st_uc_t *input, size_t len, char *mask) {
+  st_uc_t* end;
+
   memset(mask, 0, 256);
+
   for (end = input+len; input < end; ++input) {
     mask[*input] = 1;
   }
 }
 
-string_len_t string_length(char* src, st_enc_t enc) {
+st_len_t string_length(char* src, st_enc_t enc) {
   if (enc == string_enc_ascii) {
     return strlen(src);
   } else if (enc == string_enc_utf8) {

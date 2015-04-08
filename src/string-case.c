@@ -10,7 +10,7 @@
 #define STRING_UP_ASCCI(c) c-=32;
 
 //ascii
-void string_char_up(string* str, string_len_t pos) {
+void string_char_up(string* str, st_len_t pos) {
   assert(str->length > pos);
 
   char* val = str->value;
@@ -21,7 +21,7 @@ void string_char_up(string* str, string_len_t pos) {
   }
 }
 
-void string_char_low(string* str, string_len_t pos) {
+void string_char_low(string* str, st_len_t pos) {
   assert(str->length > pos);
 
   char* val = str->value;

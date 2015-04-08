@@ -26,7 +26,7 @@ libstringc_la_SOURCES = src/stringc.c \
                   src/string-sub.c \
                   src/string-trim.c \
                   src/string-utf8.c \
-                  src/string-utils.c
+                  src/utils.c
 
 
 TESTS = test/run-tests

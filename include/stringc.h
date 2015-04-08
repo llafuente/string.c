@@ -43,7 +43,8 @@
 #define __STRINGC_TYPE__
 
 /// string length type.
-typedef long int string_len_t;
+typedef long int st_len_t;
+typedef unsigned char st_uc_t;
 
 /// supported encodings
 typedef enum {
@@ -53,11 +54,11 @@ typedef enum {
 } st_enc_t;
 
 /// string type, use value[] at the end, so only one malloc is enough
-typedef struct  {
+typedef struct string_s {
   /// length
-  string_len_t length;
+  st_len_t length;
   /// used bytes
-  string_len_t used;
+  st_len_t used;
   /// memory reserved
   size_t capacity;
   /// encoding used
@@ -66,7 +67,7 @@ typedef struct  {
   char value[];
 } string;
 
-typedef void (*string_citr)(string* character, string_len_t pos, string* src);
+typedef void (*st_char_itr_cb)(string* character, st_len_t pos, string* src);
 
 //
 // shared globals
@@ -114,7 +115,7 @@ const char* __end = itr + string_val->used - start; \
 while (itr < __end)
 
 #define STRING_GET_CHAR_DATA(src, enc, len, used) \
-string_len_t len; \
+st_len_t len; \
 size_t used; \
 if (enc == string_enc_ascii) { \
   len = used = strlen(src); \
@@ -128,7 +129,9 @@ if (enc == string_enc_ascii) { \
 src += amount; \
 
 
-string_len_t string_length(char* src, st_enc_t enc);
+// utils.c
+void string_charmask(st_uc_t* input, size_t len, char* mask);
+st_len_t string_length(char* src, st_enc_t enc);
 size_t string_capacity(char* src, st_enc_t enc);
 
 // add '\0' at the end of the string
@@ -199,7 +202,7 @@ string* string_from_number(size_t value, int base);
  */
 string *string_hex2bin(string *src);
 
-void string_itr_chars(const string* str, string_citr itr_cb);
+void st_char_iterator(const string* str, st_char_itr_cb itr_cb);
 
 /**
  * Allocate a new string
@@ -256,7 +259,7 @@ void string_delete(string** str);
 /**
  *
  */
-bool string_char(string** out, const string* str, string_len_t pos);
+bool string_char(string** out, const string* str, st_len_t pos);
 
 /**
  * remove data, do no deallocate anything, just clean.
