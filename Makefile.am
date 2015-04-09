@@ -13,18 +13,18 @@ lib_LTLIBRARIES = libstringc.la
 libstringc_la_CFLAGS = @CFLAGS@
 libstringc_la_LDFLAGS = -no-undefined -version-info 1:0:0
 libstringc_la_SOURCES = src/append.c \
-                  src/string-bin2hex.c \
-                  src/string-case.c \
-                  src/string-compare.c \
-                  src/string-from.c \
-                  src/string-hex2bin.c \
-                  src/string-iterator.c \
-                  src/string-memory.c \
-                  src/string-repeat.c \
-                  src/string-shuffle.c \
-                  src/string-sub.c \
-                  src/string-trim.c \
-                  src/string-utf8.c \
+                  src/alloc.c \
+                  src/bin2hex.c \
+                  src/case.c \
+                  src/compare.c \
+                  src/to.c \
+                  src/hex2bin.c \
+                  src/iterators.c \
+                  src/repeat.c \
+                  src/shuffle.c \
+                  src/substring.c \
+                  src/trim.c \
+                  src/utf8.c \
                   src/utils.c
 
 

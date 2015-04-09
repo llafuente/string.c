@@ -27,28 +27,40 @@
 
 #include "stringc.h"
 
-string* string_shuffle(string* src, size_t len) {
-  int rnd_idx;
-  char temp;
-  /* The implementation is stolen from array_data_shuffle */
-  /* Thus the characteristics of the randomization are the same */
-  string* out = string_clone(src);
-
-  if (len <= 1) {
-    return out;
-  }
-
-  char* str = out->value;
-
-  while (--len) {
-    rnd_idx = (int) (len * (rand() / (RAND_MAX + 1.0)));
-
-    if (rnd_idx != len) {
-      temp = str[len];
-      str[len] = str[rnd_idx];
-      str[rnd_idx] = temp;
+string *st_hex2bin(string *src) {
+  size_t target_length = src->length >> 1;
+  char* src_val = src->value;
+  string *out = st_new(target_length, string_enc_ascii);
+  unsigned char *out_val = (unsigned char *)out->value;
+  size_t i, j;
+  unsigned char c, d;
+  for (i = j = 0; i < target_length; i++) {
+    c = src_val[j++];
+    if (c >= '0' && c <= '9') {
+      d = (c - '0') << 4;
+    } else if (c >= 'a' && c <= 'f') {
+      d = (c - 'a' + 10) << 4;
+    } else if (c >= 'A' && c <= 'F') {
+      d = (c - 'A' + 10) << 4;
+    } else {
+      st_delete(&out);
+      return 0;
     }
+    c = src_val[j++];
+    if (c >= '0' && c <= '9') {
+      d |= c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+      d |= c - 'a' + 10;
+    } else if (c >= 'A' && c <= 'F') {
+      d |= c - 'A' + 10;
+    } else {
+      st_delete(&out);
+      return 0;
+    }
+    out_val[i] = d;
   }
-
+  out_val[i] = '\0';
+  out->length = i;
+  out->used = i;
   return out;
 }

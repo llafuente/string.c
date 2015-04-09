@@ -1,4 +1,4 @@
 void bench_memory() {
-  string* src = string_newc("fjksdfsofsijdflsdfisdflsdl");
-  string_delete(&src);
+  string* src = st_newc("fjksdfsofsijdflsdfisdflsdl");
+  st_delete(&src);
 }

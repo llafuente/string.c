@@ -30,7 +30,7 @@
 string* string_def_trim_mask = 0;
 
 // TODO review, cache charmask for !what_str
-string* string_trim(string *str, string *what_str, int mode) {
+string* st_trim(const string *str, string *what_str, int mode) {
   const char *c = str->value;
   size_t len = str->length;
   size_t i;
@@ -38,7 +38,7 @@ string* string_trim(string *str, string *what_str, int mode) {
 
   if (!what_str) {
     if (!string_def_trim_mask) {
-      string_def_trim_mask = string_newc(" \t\n\r\0\x0B", string_enc_ascii);
+      string_def_trim_mask = st_newc(" \t\n\r\0\x0B", string_enc_ascii);
     }
     what_str = string_def_trim_mask;
   }
@@ -99,8 +99,8 @@ string* string_trim(string *str, string *what_str, int mode) {
   }
 
   if (str->length == len) {
-    return string_clone(str);
+    return st_clone(str);
   }
 
-  return string_clone_subc(c, len, str->encoding);
+  return st_clone_subc(c, len, str->encoding);
 }

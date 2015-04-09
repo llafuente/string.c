@@ -41,7 +41,7 @@ void st_append(string** out, string* src) {
     bool same = cache == src;
 
     //assert(*out == src);
-    string_resize(out, cache->used + bytes_to_cpy);
+    st_resize(out, cache->used + bytes_to_cpy);
     cache = *out;
     if (same) {
       src = cache;
@@ -62,7 +62,7 @@ string* st_concat(string* first, string* second) {
 
   size_t f_used = first->used;
   size_t s_used = second->used;
-  string* out = string_new(f_used + s_used, first->encoding);
+  string* out = st_new(f_used + s_used, first->encoding);
   char* dst = out->value;
   memcpy(dst, first->value, f_used);
   memcpy(dst + f_used, second->value, s_used);

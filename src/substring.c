@@ -38,7 +38,7 @@ bool string_char(string** out, const string* str, st_len_t pos) {
   }
 
   int i = string_utf8_jump_next(s);
-  STRING_COPY_CHARS(s, d, i);
+  st_copy_CHARS(s, d, i);
 
   *d = '\0';
 
@@ -47,7 +47,7 @@ bool string_char(string** out, const string* str, st_len_t pos) {
 
 // unsafe!
 // same encoding
-st_len_t string_copy_usub(
+st_len_t st_copy_usub(
   string* out, st_len_t initial_byte,
   const string* src, st_len_t start, size_t todo
 ) {
@@ -68,7 +68,7 @@ st_len_t string_copy_usub(
       const char* end = itr + todo;
 
       while (*itr && itr < end) {
-        STRING_COPY_CHARS(itr, dst, 1);
+        st_copy_CHARS(itr, dst, 1);
         ++done;
       }
       *dst = '\0';
@@ -84,7 +84,7 @@ st_len_t string_copy_usub(
         int jump = string_utf8_jump_next(itr);
         done += jump;
 
-        STRING_COPY_CHARS(itr, dst, jump);
+        st_copy_CHARS(itr, dst, jump);
       }
       *dst = '\0';
     }
@@ -95,7 +95,7 @@ st_len_t string_copy_usub(
       const char* end = itr + (todo * 4);
 
       while (*itr && itr < end) {
-        STRING_COPY_CHARS(itr, dst, 4);
+        st_copy_CHARS(itr, dst, 4);
         done += 4;
       }
       *dst = '\0';
@@ -106,7 +106,7 @@ st_len_t string_copy_usub(
   return done;
 }
 
-string* string_sub(const string* str, int start, int end) {
+string* st_sub(const string* str, int start, int end) {
   assert(end < str->length);
   assert(end > -str->length);
 
@@ -116,21 +116,21 @@ string* string_sub(const string* str, int start, int end) {
 
   if (start < 0) {
     assert(-start < str->length);
-    out = string_new(str->capacity * 2, str->encoding);
+    out = st_new(str->capacity * 2, str->encoding);
 
-    out_byte_ptr = string_copy_usub(out, 0, str, str->length + start, -start);
+    out_byte_ptr = st_copy_usub(out, 0, str, str->length + start, -start);
 
     out->length = -start;
     out->used = out_byte_ptr;
     start = 0;
   } else {
-    out = string_new(str->capacity, str->encoding);
+    out = st_new(str->capacity, str->encoding);
   }
 
   len = end - start;
 
 
-  out_byte_ptr = string_copy_usub(out, out_byte_ptr, str, start, len);
+  out_byte_ptr = st_copy_usub(out, out_byte_ptr, str, start, len);
   out->used += out_byte_ptr;
   out->length += len;
 

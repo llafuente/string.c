@@ -27,58 +27,28 @@
 
 #include "stringc.h"
 
-void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
-  // maximum char size is 7 bytes
-  // 6 utf-8 + null
-  st_enc_t enc = str->encoding;
-  string* buffer = string_new(7, enc);
-  buffer->length = 1;
-  char* s = buffer->value;
-  char* dst;
+string* st_shuffle(string* src, size_t len) {
+  int rnd_idx;
+  char temp;
+  /* The implementation is stolen from array_data_shuffle */
+  /* Thus the characteristics of the randomization are the same */
+  string* out = st_clone(src);
 
-  st_len_t pos = 0;
-  const char* itr = str->value;
-  const char* end = itr + str->capacity - 1;
+  if (len <= 1) {
+    return out;
+  }
 
-  switch(enc) {
-  case string_enc_ascii:
-    // \0 + end
-    while (*itr && itr < end) {
-      dst = s;
+  char* str = out->value;
 
-      STRING_COPY_CHARS(itr, dst, 1);
-      *dst = '\0';
+  while (--len) {
+    rnd_idx = (int) (len * (rand() / (RAND_MAX + 1.0)));
 
-      itr_cb(buffer, pos, str);
-      ++pos;
-    }
-    break;
-  case string_enc_utf8:
-    // \0 + end
-    while (*itr && itr < end) {
-      dst = s;
-      int jump = string_utf8_jump_next(itr);
-
-      STRING_COPY_CHARS(itr, dst, jump);
-      *dst = '\0';
-
-      itr_cb(buffer, pos, str);
-      ++pos;
-    }
-    break;
-  case string_enc_ucs4be:
-    // \0 + end
-    while (*itr && itr < end) {
-      dst = s;
-
-      STRING_COPY_CHARS(itr, dst, 4);
-      *dst = '\0';
-
-      itr_cb(buffer, pos, str);
-      ++pos;
+    if (rnd_idx != len) {
+      temp = str[len];
+      str[len] = str[rnd_idx];
+      str[rnd_idx] = temp;
     }
   }
 
-
-  string_delete(&buffer);
+  return out;
 }

@@ -29,8 +29,8 @@
 
 static char string_hexconvtab[] = "0123456789abcdef";
 
-string* string_bin2hex(const string* src) {
-  string *result = string_new(src->length * 2, string_enc_ascii);
+string* st_bin2hex(const string* src) {
+  string *result = st_new(src->length * 2, string_enc_ascii);
   size_t i, j;
   char* str = result->value;
   for (i = j = 0; i < src->length; i++) {

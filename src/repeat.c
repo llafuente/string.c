@@ -27,40 +27,36 @@
 
 #include "stringc.h"
 
-string *string_hex2bin(string *src) {
-  size_t target_length = src->length >> 1;
-  char* src_val = src->value;
-  string *out = string_new(target_length, string_enc_ascii);
-  unsigned char *out_val = (unsigned char *)out->value;
-  size_t i, j;
-  unsigned char c, d;
-  for (i = j = 0; i < target_length; i++) {
-    c = src_val[j++];
-    if (c >= '0' && c <= '9') {
-      d = (c - '0') << 4;
-    } else if (c >= 'a' && c <= 'f') {
-      d = (c - 'a' + 10) << 4;
-    } else if (c >= 'A' && c <= 'F') {
-      d = (c - 'A' + 10) << 4;
-    } else {
-      string_delete(&out);
-      return 0;
-    }
-    c = src_val[j++];
-    if (c >= '0' && c <= '9') {
-      d |= c - '0';
-    } else if (c >= 'a' && c <= 'f') {
-      d |= c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
-      d |= c - 'A' + 10;
-    } else {
-      string_delete(&out);
-      return 0;
-    }
-    out_val[i] = d;
+string* st_repeat(const string* src, size_t x) {
+  st_len_t src_len = src->used; // @cache & use byte size not real length!
+  /* Don't waste our time if it's empty */
+  /* ... or if the multiplier is zero */
+  if (src_len == 0 || x == 0) {
+    return st_new((size_t) 0, string_enc_ascii);
   }
-  out_val[i] = '\0';
-  out->length = i;
-  out->used = i;
-  return out;
+
+  /* Initialize the result string */
+  st_len_t result_len = src_len * x; // Length of the resulting string
+  string *result = st_new(result_len, src->encoding);
+  // Heavy optimization for situations where src string is 1 byte long
+  if (src_len == 1) {
+    memset(result->value, *(src->value), x);
+  } else {
+    char *s, *e, *ee;
+    //TODO review: ptrdiff_t l=0;
+    size_t l=0;
+    memcpy(result->value, src->value, src_len);
+    s = result->value;
+    e = result->value + src_len;
+    ee = result->value + result_len;
+    while (e<ee) {
+      l = (e-s) < (ee-e) ? (e-s) : (ee-e);
+      memmove(e, s, l);
+      e += l;
+    }
+  }
+  result->value[result_len] = '\0';
+  result->length = src->length * x;
+  result->used = src_len * x;
+  return result;
 }

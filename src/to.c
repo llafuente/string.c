@@ -27,22 +27,19 @@
 
 #include "stringc.h"
 
-/**
-* bindec, 2
-* octdec, 8
-* hexdec, 16
-*/
-double string_from_base(string *src, int base) {
+double st_base2number(string *src, int base) {
+  assert(src->encoding == string_enc_ascii);
+
   size_t num = 0;
   double fnum = 0;
   size_t i;
   int mode = 0;
-  char c, *s = src->value;
-  size_t cutoff;
-  int cutlim;
+  char c;
+  char* s = src->value;
 
-  cutoff = INT64_MAX / base;
-  cutlim = INT64_MAX % base;
+  size_t cutoff = INT64_MAX / base;
+  int cutlim = INT64_MAX % base;
+
   for (i = src->length; i > 0; i--) {
     c = *s++;
     /* might not work for EBCDIC */
@@ -83,14 +80,7 @@ double string_from_base(string *src, int base) {
 }
 
 
-/*
-* Convert a long to a string containing a base(2-36) representation of
-* the number.
-* decbin, 2
-* decoct, 8
-* dechex, 16
-*/
-string* string_from_number(size_t value, int base) {
+string* st_number2base(size_t value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
   string* result;
   char *ptr;
@@ -106,8 +96,8 @@ string* string_from_number(size_t value, int base) {
   } while (ptr > buf && value);
   //?? *end = '\0';
   // size
-  result = string_new(end - ptr, string_enc_ascii);
-  string_copyc(&result, ptr, string_enc_ascii);
+  result = st_new(end - ptr, string_enc_ascii);
+  st_copyc(&result, ptr, string_enc_ascii);
   //result->length = end - ptr;
   return result;
 }

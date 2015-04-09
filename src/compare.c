@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-int string_compare(string* a, string* b) {
+int st_compare(const string* a, const string* b) {
   if (a->length > b->length) {
     return 1;
   }
@@ -39,7 +39,7 @@ int string_compare(string* a, string* b) {
   const char *pa = a->value,
     *pb = b->value;
 
-  while(*pa && (*pa==*pb)) {
+  while(*pa && (*pa == *pb)) {
     ++pa;
     ++pb;
   }

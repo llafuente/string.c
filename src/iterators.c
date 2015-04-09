@@ -27,36 +27,58 @@
 
 #include "stringc.h"
 
-string* string_repeat(string* src, size_t x) {
-  st_len_t src_len = src->used; // @cache & use byte size not real length!
-  /* Don't waste our time if it's empty */
-  /* ... or if the multiplier is zero */
-  if (src_len == 0 || x == 0) {
-    return string_new((size_t) 0, string_enc_ascii);
-  }
+void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
+  // maximum char size is 7 bytes
+  // 6 utf-8 + null
+  st_enc_t enc = str->encoding;
+  string* buffer = st_new(7, enc);
+  buffer->length = 1;
+  char* s = buffer->value;
+  char* dst;
 
-  /* Initialize the result string */
-  st_len_t result_len = src_len * x; // Length of the resulting string
-  string *result = string_new(result_len, src->encoding);
-  // Heavy optimization for situations where src string is 1 byte long
-  if (src_len == 1) {
-    memset(result->value, *(src->value), x);
-  } else {
-    char *s, *e, *ee;
-    //TODO review: ptrdiff_t l=0;
-    size_t l=0;
-    memcpy(result->value, src->value, src_len);
-    s = result->value;
-    e = result->value + src_len;
-    ee = result->value + result_len;
-    while (e<ee) {
-      l = (e-s) < (ee-e) ? (e-s) : (ee-e);
-      memmove(e, s, l);
-      e += l;
+  st_len_t pos = 0;
+  const char* itr = str->value;
+  const char* end = itr + str->capacity - 1;
+
+  switch(enc) {
+  case string_enc_ascii:
+    // \0 + end
+    while (*itr && itr < end) {
+      dst = s;
+
+      st_copy_CHARS(itr, dst, 1);
+      *dst = '\0';
+
+      itr_cb(buffer, pos, str);
+      ++pos;
+    }
+    break;
+  case string_enc_utf8:
+    // \0 + end
+    while (*itr && itr < end) {
+      dst = s;
+      int jump = string_utf8_jump_next(itr);
+
+      st_copy_CHARS(itr, dst, jump);
+      *dst = '\0';
+
+      itr_cb(buffer, pos, str);
+      ++pos;
+    }
+    break;
+  case string_enc_ucs4be:
+    // \0 + end
+    while (*itr && itr < end) {
+      dst = s;
+
+      st_copy_CHARS(itr, dst, 4);
+      *dst = '\0';
+
+      itr_cb(buffer, pos, str);
+      ++pos;
     }
   }
-  result->value[result_len] = '\0';
-  result->length = src->length * x;
-  result->used = src_len * x;
-  return result;
+
+
+  st_delete(&buffer);
 }
