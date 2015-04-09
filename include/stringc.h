@@ -130,28 +130,64 @@ src += amount; \
 
 
 // utils.c
-void string_charmask(st_uc_t* input, size_t len, char* mask);
-st_len_t string_length(char* src, st_enc_t enc);
-size_t string_capacity(char* src, st_enc_t enc);
+/**
+ * Create an ascii map
+ *
+ * @param input chars to map
+ * @param len length of the input
+ * @param mask char[256]
+ */
+void st_charmask(st_uc_t* input, size_t len, char* mask);
+/**
+ * get plain string (null terminated) length in given encoding
+ *
+ * @param src
+ * @param enc
+ * @return string length
+ */
+st_len_t st_length(const char* src, st_enc_t enc);
+/**
+ * get plain string (null terminated) capacity in given encoding
+ * it's just strlen alias atm.
+ *
+ * @param src
+ * @param enc
+ * @return string length
+ */
+size_t st_capacity(const char* src, st_enc_t enc);
 
-// add '\0' at the end of the string
-void string_zeronull(string* str);
+/**
+ * add '\0' at the end of the string
+ */
+void st_zeronull(string* str);
 
 /**
  * print to stdout useful information to debug
  */
-void string_debug(string* str);
+void st_debug(string* str);
+
+//
+// append.c
+//
 
 /**
  * Append src to out
  *
- * @see string_concat
+ * @see st_concat
  * @param out
  *  out could be resized
  * @param src
  *  string to append
  */
-void string_append(string** out, string* src);
+void st_append(string** out, string* src);
+/**
+* Concatenate two string and return a new one.
+*
+* @see st_append
+* @param first
+* @param second
+*/
+string* st_concat(string* first, string* second);
 
 /**
  * Treat the string as binary data and convert it into hexadecimal representation

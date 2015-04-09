@@ -28,7 +28,7 @@
 #include "stringc.h"
 
 // TODO test & handle diff/enc
-void string_append(string** out, string* src) {
+void st_append(string** out, string* src) {
   //printf("string_append %p - %p\n", *out, src);
 
   string* cache = *out;
@@ -54,4 +54,23 @@ void string_append(string** out, string* src) {
   cache->used += bytes_to_cpy;
 
   cache->value[cache->used] = '\0';
+}
+
+
+string* st_concat(string* first, string* second) {
+  assert(first->encoding == second->encoding);
+
+  size_t f_used = first->used;
+  size_t s_used = second->used;
+  string* out = string_new(f_used + s_used, first->encoding);
+  char* dst = out->value;
+  memcpy(dst, first->value, f_used);
+  memcpy(dst + f_used, second->value, s_used);
+
+  out->used = f_used + s_used;
+  out->length = first->length + second->length;
+
+  dst[out->used] = '\0';
+
+  return out;
 }

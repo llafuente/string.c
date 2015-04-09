@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-void string_charmask(st_uc_t *input, size_t len, char *mask) {
+void st_charmask(st_uc_t *input, size_t len, char *mask) {
   st_uc_t* end;
 
   memset(mask, 0, 256);
@@ -37,7 +37,7 @@ void string_charmask(st_uc_t *input, size_t len, char *mask) {
   }
 }
 
-st_len_t string_length(char* src, st_enc_t enc) {
+st_len_t st_length(const char* src, st_enc_t enc) {
   if (enc == string_enc_ascii) {
     return strlen(src);
   } else if (enc == string_enc_utf8) {
@@ -48,14 +48,32 @@ st_len_t string_length(char* src, st_enc_t enc) {
   return -1;
 }
 
-size_t string_capacity(char* src, st_enc_t enc) {
-  if (enc == string_enc_ascii) {
-    return strlen(src);
-  } else if (enc == string_enc_utf8) {
-    size_t used;
-    string_utf8_lenc((const char*) src, &used);
-    return used;
-  }
+size_t st_capacity(const char* src, st_enc_t enc) {
+  return strlen(src);
+}
 
-  return -1;
+
+void st_zeronull(string* str) {
+  str->value[str->used] = '\0';
+}
+
+void st_debug(string* str) {
+  printf("st_debug @%p, length[%zu] used[%zu] size[%zu]\n", str, str->length, str->used, str->capacity);
+
+  char *p = str->value;
+  size_t size = str->capacity;
+  printf("\nhexadecimal\n");
+  int n;
+  for (n = 0; n < size; ++n) {
+    printf("| %2.2x ", (*p) & 0xff);
+    ++p;
+  }
+  printf("\nchar by char\n");
+  p = str->value;
+
+  for (n = 0; n < size; ++n) {
+    printf("| %c  ", *p ? *p : ' ');
+    ++p;
+  }
+  printf("\nprintf %s\n", str->value);
 }

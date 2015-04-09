@@ -37,10 +37,10 @@
 
 #define CHK_ALL(src, dst, enc) \
 printf("src = %s [%ld][%ld][%lu]\n", src->value, src->length, src->used, src->capacity); \
-printf("dst = %s [%ld][%lu]\n", dst, string_length(dst, enc), string_capacity(dst, enc)); \
+printf("dst = %s [%ld][%lu]\n", dst, st_length(dst, enc), st_capacity(dst, enc)); \
 assert(0 == strcmp(src->value, dst)); \
-assert(src->length == string_length(dst, enc)); \
-assert(src->used == string_capacity(dst, enc)); \
+assert(src->length == st_length(dst, enc)); \
+assert(src->used == st_capacity(dst, enc)); \
 assert(src->capacity >= src->used); \
 assert(src->encoding == enc); \
 
@@ -211,12 +211,19 @@ void test_from() {
 void test_append() {
   string* s = string_newc(T_STR_03, string_enc_utf8);
 
-  string_append(&s, s);
+  st_append(&s, s);
   CHK_ALL(s, T_STR_03_REP2, string_enc_utf8);
 
-  string_append(&s, s);
+  st_append(&s, s);
   CHK_ALL(s, T_STR_03_REP4, string_enc_utf8);
 
+  string_delete(&s);
+
+  s = string_newc(T_STR_03, string_enc_utf8);
+  string* aux = st_concat(s, s);
+  CHK_ALL(aux, T_STR_03_REP2, string_enc_utf8);
+
+  string_delete(&aux);
   string_delete(&s);
 }
 
@@ -290,7 +297,7 @@ void test_utf8_invalid() {
 void test_itr_chars() {
 
   string* str = string_newc(T_STR_03_REP3, string_enc_utf8);
-  string_itr_chars(str, itr_callback);
+  st_char_iterator(str, itr_callback);
   string_delete(&str);
 
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
@@ -301,19 +308,19 @@ void test_capitalize() {
   return;
   string* str = string_newc(T_STR_CAP_1, string_enc_ascii);
   string_capitalize(str);
-  string_debug(str);
+  st_debug(str);
   CHK_VAL(str, T_STR_CAP_T1);
   string_delete(&str);
 
   str = string_newc(T_STR_CAP_2, string_enc_ascii);
   string_capitalize(str);
-  string_debug(str);
+  st_debug(str);
   CHK_VAL(str, T_STR_CAP_T2);
   string_delete(&str);
 
   str = string_newc(T_STR_CAP_3, string_enc_ascii);
   string_capitalize(str);
-  string_debug(str);
+  st_debug(str);
   CHK_VAL(str, T_STR_CAP_T3);
   string_delete(&str);
 }
