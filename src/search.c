@@ -102,6 +102,19 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
   }
 }
 
+bool st_start_with(string* haystack, string* needle) {
+  return st_pos(haystack, needle, 0) == 0;
+}
+
+bool st_end_with(string* haystack, string* needle) {
+  st_len_t offset = haystack->length - needle->length;
+  if (offset < 0) {
+    return false;
+  }
+
+  return st_pos(haystack, needle, offset) == offset;
+}
+
 //TODO do it!
 #define st_lower
 /**

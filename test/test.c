@@ -440,9 +440,17 @@ void test_search() {
   i = st_pos(hay, ned, 18);
   assert(i == 23);
 
-  st_delete(&hay);
+  // st_start_with / st_end_with
+  assert(st_start_with(hay, ned) == false);
+  assert(st_end_with(hay, ned) == true);
   st_delete(&ned);
 
+  ned = st_newc(T_STR_03, st_enc_utf8);
+  assert(st_start_with(hay, ned) == true);
+  assert(st_end_with(hay, ned) == true);
+
+  st_delete(&ned);
+  st_delete(&hay);
 
 
 }

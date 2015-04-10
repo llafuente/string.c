@@ -611,13 +611,17 @@ ST_EXTERN void string_capitalize(string* str);
 // search.c
 //
 
-st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
+ST_EXTERN st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
 
 /// alias of st_pos
 /// @see st_pos
 #define st_index_of st_pos
 
-st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
+ST_EXTERN bool st_start_with(string* haystack, string* needle);
+
+ST_EXTERN bool st_end_with(string* haystack, string* needle);
+
+ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
 //
 // internal.c
 //
