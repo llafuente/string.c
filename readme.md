@@ -14,3 +14,26 @@ include a single header
 ```
 
 include .libs/ and link against libstringc.la
+
+
+## Compilation
+
+autoconf is required.
+
+RHEL
+```bash
+sudo yum install autoconf
+sudo yum install libtool
+```
+
+```bash
+sh autogen.sh
+./configure
+make
+```
+
+## Tests
+
+```bash
+make check
+```

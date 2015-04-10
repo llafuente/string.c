@@ -160,7 +160,10 @@ extern const uint8_t st_bom[];
 
 /// advance pointer to amount positions UTF8
 #define ST_ADVANCE_UTF8(s, amount) \
-  while(amount--) { ST_UTF8_FOWARD(s); }
+  { \
+    st_len_t tmp = amount; \
+    while(tmp--) { ST_UTF8_FOWARD(s); } \
+  } \
 
 /// advance pointer to amount positions UCS4BE
 #define ST_ADVANCE_UCS4BE(s, amount) \
@@ -609,6 +612,11 @@ ST_EXTERN void string_capitalize(string* str);
 //
 
 st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
+
+/// alias of st_pos
+/// @see st_pos
+#define st_index_of st_pos
+
 st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
 //
 // internal.c

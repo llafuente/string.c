@@ -33,6 +33,7 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
   // Offset not contained in string
   assert(offset >= 0);
   assert(offset < haystack->length);
+  assert(haystack->encoding == needle->encoding);
 
   if (haystack->length == 0) {
     return -1;
@@ -40,7 +41,7 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
 
   char* p = haystack->value;
   char* pp;
-  size_t end = haystack->used - needle->used /*+ 1*/;
+  size_t end = haystack->used - needle->used;
   char* endp = p + end /*+ 1*/;
   char* needle_val = needle->value;
   st_len_t needle_len = needle->length;
@@ -50,44 +51,55 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
     ST_ADVANCE(p, offset, haystack->encoding);
   }
 
-  // printf("needle %s\n", needle->value);
-  // printf("needle-first-char %c\n", *needle->value);
-  // printf("%s\n", haystack->value);
-  // printf("%c\n", *haystack->value);
-  //return -1;
-
   // first char cmp
   st_uc_t first = *needle->value;
   st_uc_t last = *(needle->value + needle->used - 1);
 
-  while (p <= endp) {
-    // printf("%s\n", p);
-    pp = st__memchr(p, first, end);
-    // printf("found first char? [%p] [%c]\n", pp, pp ? *pp : 0);
-    if (!pp) {
-      return -1;
-    }
+  st_enc_t enc = haystack->encoding;
 
+  switch(enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+  case st_enc_ucs4be:
 
-    end -= pp - p;
-    // printf("enough space? [%zu] < [%zu] \n", end, needle_len);
-    if (end < needle_len) {
-      return -1;
-    }
-
-    // printf("check last? [%c] == [%c] \n", last, pp[needle_len_m1]);
-
-    // check last
-    if (last == pp[needle_len_m1]) {
-      // compare until last
-      if (!memcmp(needle_val, pp, needle_len_m1)) {
-        return pp - haystack->value;
+    while (p <= endp) {
+      pp = st__memchr(p, first, end);
+      if (!pp) {
+        return -1;
       }
-    }
-    p = pp + 1;
-  }
 
-  return -1;
+
+      end -= pp - p;
+      if (end < needle_len) {
+        return -1;
+      }
+
+      // check last
+      if (last == pp[needle_len_m1]) {
+        // compare until last
+        if (!memcmp(needle_val, pp, needle_len_m1)) {
+          return enc == st_enc_ucs4be ? (pp - haystack->value) / 4
+            : pp - haystack->value;
+        }
+      }
+      p = pp + 1;
+    }
+
+    return -1;
+
+  case st_enc_utf8:
+
+    while (p <= endp) {
+      if (!memcmp(needle_val, p, needle_len)) {
+        return offset;
+      }
+
+      ST_UTF8_FOWARD(p);
+      ++offset;
+    }
+
+    return -1;
+  }
 }
 
 //TODO do it!

@@ -301,7 +301,7 @@ void test_utf8_invalid() {
 void test_itr_chars() {
 
   string* str = st_newc(T_STR_03_REP3, st_enc_utf8);
-  st_char_iterator(str, itr_callback);
+  st_char_iterator(str, (st_char_itr_cb) itr_callback);
   st_delete(&str);
 
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
@@ -423,5 +423,26 @@ void test_search() {
 
   st_delete(&hay);
   st_delete(&ned);
+
+  // UTF-8
+  hay = st_newc(T_STR_03_REP4, st_enc_utf8);
+  ned = st_newc("☃", st_enc_utf8);
+
+  i = st_pos(hay, ned, 0);
+  assert(i == 5);
+
+  i = st_pos(hay, ned, 6);
+  assert(i == 11);
+
+  i = st_pos(hay, ned, 12);
+  assert(i == 17);
+
+  i = st_pos(hay, ned, 18);
+  assert(i == 23);
+
+  st_delete(&hay);
+  st_delete(&ned);
+
+
 
 }

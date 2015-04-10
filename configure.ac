@@ -19,6 +19,10 @@ AM_PROG_CC_C_O
 
 AC_PROG_LIBTOOL
 
+# fix last automake error ~1.13.4
+m4_pattern_allow([AM_PROG_AR])
+AM_PROG_AR
+
 LT_INIT
 
 AC_CONFIG_FILES([Makefile])
