@@ -61,6 +61,7 @@ st_len_t st_copy_usub(
   st_len_t done = 0;
 
   switch(enc) {
+    case st_enc_binary:
     case st_enc_ascii: {
       // \0 + end
 

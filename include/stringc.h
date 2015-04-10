@@ -71,7 +71,7 @@ typedef struct string_s {
   char value[];
 } string;
 
-typedef void (*st_char_itr_cb)(string* character, st_len_t pos, string* src);
+typedef void (*st_char_itr_cb)(string* character, st_len_t pos, const string* src);
 
 //
 // shared globals
@@ -131,6 +131,51 @@ if (enc == st_enc_ascii) { \
 
 #define STRING_ADVANCE(src, amount) \
 src += amount; \
+
+
+//
+// MACROS (good ones)
+//
+
+#define ST_UTF8_COUNT_BYTES(byte) \
+  (1 + (((byte)>=0xc0)+((byte)>=0xe0)+((byte)>=0xf0)))
+
+#define ST_UTF8_IS_TRAIL(c) (((c)&0xc0)==0x80)
+
+#define ST_UTF8_IS_LEAD(c) ((uint8_t)((c)-0xc0)<0x3e)
+#define ST_UTF8_BACK(s) \
+  while(ST_UTF8_IS_TRAIL(*s)) {--s}
+
+#define ST_UTF8_FOWARD(s) \
+  s+= ST_UTF8_COUNT_BYTES((st_uc_t) *s)
+
+extern const uint8_t st_bom[];
+
+#define ST_UTF8_HAS_BOM(s) \
+  *s == st_bom[0] && *(s+1) == st_bom[1] && *(s+2) == st_bom[2]
+
+/// advance pointer to amount positions ASCII
+#define ST_ADVANCE_ASCII(s, amount) \
+  s += amount
+
+/// advance pointer to amount positions UTF8
+#define ST_ADVANCE_UTF8(s, amount) \
+  while(amount--) { ST_UTF8_FOWARD(s); }
+
+/// advance pointer to amount positions UCS4BE
+#define ST_ADVANCE_UCS4BE(s, amount) \
+  s += amount * 4
+
+/// advance pointer to amount positions
+#define ST_ADVANCE(s, amount, enc) \
+  switch (enc) { \
+    case st_enc_binary: \
+    case st_enc_ascii: ST_ADVANCE_ASCII(s, amount); break; \
+    case st_enc_utf8: ST_ADVANCE_UTF8(s, amount); break; \
+    case st_enc_ucs4be: ST_ADVANCE_UCS4BE(s, amount); break; \
+  } \
+
+
 
 //
 // utils.c
@@ -296,6 +341,16 @@ ST_EXTERN string* st_number2base(size_t value, int base);
  */
 ST_EXTERN string* st_chr(uint32_t value, st_enc_t enc);
 
+
+/**
+* Return the code point at specified offset
+*
+* @param str
+* @param offset
+* @return code point
+*/
+size_t st_ord(const string* str, st_len_t offset);
+
 //
 // hex2bin.c
 //
@@ -363,11 +418,11 @@ ST_EXTERN void st_resize(string** src, size_t cap);
  * @param src source
  * @return new string
  */
-ST_EXTERN string* st_clone(string* src);
+ST_EXTERN string* st_clone(const string* src);
 /**
  *
  */
-ST_EXTERN string* st_clone_subc(char* src, size_t len, st_enc_t enc);
+ST_EXTERN string* st_clone_subc(const char* src, size_t len, st_enc_t enc);
 
 /**
  * Copy src into out
@@ -548,5 +603,23 @@ ST_EXTERN char* string_utf8_invalid(const unsigned char *str, size_t len);
 //
 
 ST_EXTERN void string_capitalize(string* str);
+
+//
+// search.c
+//
+
+st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
+st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
+//
+// internal.c
+//
+
+/**
+ * binary search to find the start position of needle inside haystack.
+ *
+ *
+ */
+ST_EXTERN char* st__memchr(const char *s, st_uc_t c, size_t n);
+
 
 #endif

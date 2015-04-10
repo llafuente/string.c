@@ -19,8 +19,10 @@ libstringc_la_SOURCES = src/append.c \
                   src/compare.c \
                   src/to.c \
                   src/hex2bin.c \
+                  src/internal.c \
                   src/iterators.c \
                   src/repeat.c \
+                  src/search.c \
                   src/shuffle.c \
                   src/substring.c \
                   src/trim.c \

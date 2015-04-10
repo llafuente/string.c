@@ -27,59 +27,18 @@
 
 #include "stringc.h"
 
-void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
-  // maximum char size is 7 bytes
-  // 6 utf-8 + null
-  st_enc_t enc = str->encoding;
-  string* buffer = st_new(7, enc);
-  buffer->length = 1;
-  char* s = buffer->value;
-  char* dst;
+const uint8_t st_bom[] = {0xef, 0xbb, 0xbf};
 
-  st_len_t pos = 0;
-  const char* itr = str->value;
-  const char* end = itr + str->capacity - 1;
+char* st__memchr(const char *s, st_uc_t c, size_t n) {
+  if (n != 0) {
+    const st_uc_t* p = (st_uc_t*) s;
 
-  switch(enc) {
-  case st_enc_binary:
-  case st_enc_ascii:
-    // \0 + end
-    while (*itr && itr < end) {
-      dst = s;
-
-      st_copy_CHARS(itr, dst, 1);
-      *dst = '\0';
-
-      itr_cb(buffer, pos, str);
-      ++pos;
-    }
-    break;
-  case st_enc_utf8:
-    // \0 + end
-    while (*itr && itr < end) {
-      dst = s;
-      int jump = string_utf8_jump_next(itr);
-
-      st_copy_CHARS(itr, dst, jump);
-      *dst = '\0';
-
-      itr_cb(buffer, pos, str);
-      ++pos;
-    }
-    break;
-  case st_enc_ucs4be:
-    // \0 + end
-    while (*itr && itr < end) {
-      dst = s;
-
-      st_copy_CHARS(itr, dst, 4);
-      *dst = '\0';
-
-      itr_cb(buffer, pos, str);
-      ++pos;
-    }
+    do {
+      if (*p++ == c) {
+        return ((char *)(p - 1));
+      }
+    } while (--n != 0);
   }
 
-
-  st_delete(&buffer);
+  return 0;
 }

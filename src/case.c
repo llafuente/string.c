@@ -49,21 +49,21 @@ void string_capitalize(string* str) {
 }
 
 string* string_ucfirst(string* src) {
-
+  return 0;
 }
 
 string* string_upper(string* src) {
-
+  return 0;
 }
 
 string* string_lcfirst(string* src) {
-
+  return 0;
 }
 
 string* string_lower(string* src) {
-
+  return 0;
 }
 
 string* string_swapcase(string* src) {
-
+  return 0;
 }

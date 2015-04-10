@@ -72,7 +72,7 @@ void st_resize(string** src, size_t cap) {
   //printf("after st_resize %p\n", *src);
 }
 
-string* st_clone(string* src) {
+string* st_clone(const string* src) {
   size_t size = sizeof(string) + src->capacity * sizeof(char);
 
   string* out = (string*) __STRING_ALLOCATOR(size);
@@ -82,7 +82,7 @@ string* st_clone(string* src) {
   return out;
 }
 
-string* st_clone_subc(char* src, size_t len, st_enc_t enc) {
+string* st_clone_subc(const char* src, size_t len, st_enc_t enc) {
   assert(enc == st_enc_ascii);
 
   string* out = st_new(len, enc);

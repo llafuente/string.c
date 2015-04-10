@@ -102,17 +102,6 @@ string* st_number2base(size_t value, int base) {
   return result;
 }
 
-static int
-u8_wc_toutf8(
-char *dest,
- ch
-)
-{
-
-
-  return 0;
-}
-
 string* st_chr(uint32_t value, st_enc_t enc) {
   if (enc == st_enc_ascii) {
     assert(value < 256);
@@ -123,13 +112,14 @@ string* st_chr(uint32_t value, st_enc_t enc) {
 
 
   switch(enc) {
+    case st_enc_binary:
     case st_enc_ascii:
       out = st_new(1, enc);
       dst = out->value;
 
       dst[0] = value;
       dst[1] = '\0';
-      
+
       out->length = 1;
       out->used = 1;
     break;
@@ -203,12 +193,13 @@ string* st_chr(uint32_t value, st_enc_t enc) {
 }
 
 
-size_t st_ord(const string* val, st_len_t offset) {
-  assert(val->length > offset);
+size_t st_ord(const string* str, st_len_t offset) {
+  assert(str->length > offset);
 
-  st_enc_t enc = val->encoding;
-  const char* itr = val->value;
+  st_enc_t enc = str->encoding;
+  const char* itr = str->value;
   switch(enc) {
+    case st_enc_binary:
     case st_enc_ascii:
       itr +=offset;
       return (size_t) *itr;

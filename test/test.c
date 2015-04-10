@@ -64,6 +64,7 @@ extern void test_sub();
 extern void test_capitalize();
 extern void test_shuffle();
 extern void test_chr();
+extern void test_search();
 
 int main(int argc, const char * argv[]) {
 
@@ -81,6 +82,7 @@ int main(int argc, const char * argv[]) {
   RUN_TEST(capitalize);
   RUN_TEST(shuffle);
   RUN_TEST(chr);
+  RUN_TEST(search);
 
   st_cleanup();
   printf("OK\n");
@@ -373,4 +375,53 @@ void test_chr() {
   s = st_chr(241, st_enc_utf8);
   CHK_ALL(s, "ñ", st_enc_utf8);
   st_delete(&s);
+}
+
+
+void test_search() {
+  string* hay = st_newc("0123456789", st_enc_ascii);
+  string* ned = st_newc("5", st_enc_ascii);
+
+  st_len_t i = st_pos(hay, ned, 0);
+
+  assert(i == 5);
+
+  st_delete(&hay);
+  st_delete(&ned);
+
+  hay = st_newc("0X123456XX789", st_enc_ascii);
+  ned = st_newc("XX", st_enc_ascii);
+
+  i = st_pos(hay, ned, 0);
+  assert(i == 8);
+
+  st_delete(&hay);
+  st_delete(&ned);
+
+  hay = st_newc("ababababdababdababddx", st_enc_ascii);
+  ned = st_newc("d", st_enc_ascii);
+
+  i = st_pos(hay, ned, 0);
+  assert(i == 8);
+
+  i = st_pos(hay, ned, 9);
+  assert(i == 13);
+
+  i = st_pos(hay, ned, 14);
+  assert(i == 18);
+
+  i = st_pos(hay, ned, 19);
+  assert(i == 19);
+
+  i = st_pos(hay, ned, 20);
+  assert(i == -1);
+
+  st_delete(&ned);
+  ned = st_newc("fdusgeui", st_enc_ascii);
+  i = st_pos(hay, ned, 20);
+  assert(i == -1);
+
+  st_delete(&hay);
+  st_delete(&ned);
+
 }
