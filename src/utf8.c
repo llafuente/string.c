@@ -115,3 +115,29 @@ char* string_utf8_invalid(const unsigned char *str, size_t len) {
 
   return 0;
 }
+
+
+// TODO i'm almost sure that this could be improved with a sum == X
+// same technique used in ST_UTF8_COUNT_BYTES
+bool st_char_eq_utf8(char* a, char* b) {
+  st_uc_t ac = (st_uc_t) *a;
+  st_uc_t bc = (st_uc_t) *b;
+
+  if (ac != bc) {
+    return false;
+  }
+
+  if (ac >= 0xc0 && *(a+1) != *(b+1)) {
+    return false;
+  }
+
+  if (ac >= 0xe0 && *(a+2) != *(b+2)) {
+    return false;
+  }
+
+  if (ac >= 0xf0 && *(a+3) != *(b+3)) {
+    return false;
+  }
+
+  return true;
+}

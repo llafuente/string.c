@@ -140,6 +140,9 @@ src += amount; \
 #define ST_UTF8_COUNT_BYTES(byte) \
   (1 + (((byte)>=0xc0)+((byte)>=0xe0)+((byte)>=0xf0)))
 
+#define ST_UTF8_COUNT_TRAIL(byte) \
+  (((byte)>=0xc0)+((byte)>=0xe0)+((byte)>=0xf0))
+
 #define ST_UTF8_IS_TRAIL(c) (((c)&0xc0)==0x80)
 
 #define ST_UTF8_IS_LEAD(c) ((uint8_t)((c)-0xc0)<0x3e)
@@ -177,7 +180,6 @@ extern const uint8_t st_bom[];
     case st_enc_utf8: ST_ADVANCE_UTF8(s, amount); break; \
     case st_enc_ucs4be: ST_ADVANCE_UCS4BE(s, amount); break; \
   } \
-
 
 
 //
@@ -600,6 +602,9 @@ ST_EXTERN size_t string_utf8_lenc(const char* src, size_t *out_capacity);
  *   first invalid position found or 0 if success
  */
 ST_EXTERN char* string_utf8_invalid(const unsigned char *str, size_t len);
+
+
+ST_EXTERN bool st_char_eq_utf8(char* a, char* b);
 
 //
 // case.c

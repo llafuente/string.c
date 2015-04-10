@@ -65,6 +65,7 @@ extern void test_capitalize();
 extern void test_shuffle();
 extern void test_chr();
 extern void test_search();
+extern void test_utf8();
 
 int main(int argc, const char * argv[]) {
 
@@ -83,6 +84,7 @@ int main(int argc, const char * argv[]) {
   RUN_TEST(shuffle);
   RUN_TEST(chr);
   RUN_TEST(search);
+  RUN_TEST(utf8);
 
   st_cleanup();
   printf("OK\n");
@@ -453,4 +455,13 @@ void test_search() {
   st_delete(&hay);
 
 
+}
+
+
+void test_utf8() {
+  assert(st_char_eq_utf8("☃", "☃") == true);
+  assert(st_char_eq_utf8("ñ", "ñ") == true);
+  assert(st_char_eq_utf8("☃", "a") == false);
+  assert(st_char_eq_utf8("A", "a") == false);
+  assert(st_char_eq_utf8("ñ", "☃") == false);
 }
