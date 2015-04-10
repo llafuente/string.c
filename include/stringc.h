@@ -51,10 +51,10 @@ typedef unsigned char st_uc_t;
 
 /// supported encodings
 typedef enum {
-  string_enc_binary, ///< Binary encoding for abuse in user land
-  string_enc_ascii, ///< ASCII
-  string_enc_utf8, ///< UTF-8
-  string_enc_ucs4be ///< UCS-4BE, UCS-4 big endian
+  st_enc_binary, ///< Binary encoding for abuse in user land
+  st_enc_ascii, ///< ASCII
+  st_enc_utf8, ///< UTF-8
+  st_enc_ucs4be ///< UCS-4BE, UCS-4 big endian
 } st_enc_t;
 
 /// string type, use value[] at the end, so only one malloc is enough
@@ -121,9 +121,9 @@ while (itr < __end)
 #define STRING_GET_CHAR_DATA(src, enc, len, used) \
 st_len_t len; \
 size_t used; \
-if (enc == string_enc_ascii) { \
+if (enc == st_enc_ascii) { \
   len = used = strlen(src); \
-} else if (enc == string_enc_utf8) { \
+} else if (enc == st_enc_utf8) { \
   len = string_utf8_lenc((const char*) src, &used); \
 } else { \
   assert(false); \
@@ -204,11 +204,11 @@ ST_EXTERN string* st_concat(string* first, string* second);
  * Returns a new string result of converting binary data
  * into hexadecimal representation
  *
- * @license https://github.com/php/php-src/blob/master/LICENSE
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  * @see st_hex2bin
  * @return Returns an ASCII string containing the hexadecimal representation of str
  */
-string* st_bin2hex(const string* src);
+ST_EXTERN string* st_bin2hex(const string* src);
 
 //
 // compare.c
@@ -222,7 +222,7 @@ string* st_bin2hex(const string* src);
  *   =0 Both strings has same content & length.
  *   >0 a > b (length or content)
  */
-int st_compare(const string* a, const string* b);
+ST_EXTERN int st_compare(const string* a, const string* b);
 
 /// alias
 /// @see st_compare
@@ -239,7 +239,7 @@ int st_compare(const string* a, const string* b);
  * @param to_enc
  * @return new string
  */
-string* string_encode(string* src, st_enc_t to_enc);
+ST_EXTERN string* string_encode(string* src, st_enc_t to_enc);
 
 
 //
@@ -249,12 +249,13 @@ string* string_encode(string* src, st_enc_t to_enc);
 /**
  * Convert a string replesentation of a number in a given base to number.
  *
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
+ *
  * @param src
  * @param base
  * @return number
- * @license https://github.com/php/php-src/blob/master/LICENSE
  */
-double st_base2number(string *src, int base);
+ST_EXTERN double st_base2number(string *src, int base);
 
 /// binary to decimal
 #define st_bin2dec(value) st_number2base(value, 2)
@@ -266,17 +267,18 @@ double st_base2number(string *src, int base);
 #define st_hex2dec(value) st_number2base(value, 16)
 
 /**
- * Returns a new string containing the representation of the given number argument in given base.
- * @return a new string
+ * Returns a new string containing the representation of the given number
+ * argument in given base.
+ *
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  *
  * @param value
  * @param base
  * @return new string
- * @license https://github.com/php/php-src/blob/master/LICENSE
  */
-string* st_number2base(size_t value, int base);
+ST_EXTERN string* st_number2base(size_t value, int base);
 
-// decimal to binary
+/// decimal to binary
 #define st_dec2bin(value) st_number2base(value, 2)
 
 /// decimal to octal
@@ -284,6 +286,15 @@ string* st_number2base(size_t value, int base);
 
 /// decimal to hexadecimal
 #define st_dec2hex(value) st_number2base(value, 16)
+
+/**
+ * Returns a new one-character string containing the character specified
+ *
+ * @param value
+ * @param enc
+ * @return new string
+ */
+ST_EXTERN string* st_chr(uint32_t value, st_enc_t enc);
 
 //
 // hex2bin.c
@@ -293,17 +304,18 @@ string* st_number2base(size_t value, int base);
  * Returns a new string result of decoding a hexadecimally encoded
  * binary string
  *
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
+ *
  * @param src
  * @return new string
- * @license https://github.com/php/php-src/blob/master/LICENSE
  */
-string *st_hex2bin(string *src);
+ST_EXTERN string *st_hex2bin(string *src);
 
 //
 // iterators.c
 //
 
-void st_char_iterator(const string* str, st_char_itr_cb itr_cb);
+ST_EXTERN void st_char_iterator(const string* str, st_char_itr_cb itr_cb);
 
 // TODO
 void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
@@ -340,7 +352,7 @@ ST_EXTERN string* st_newc(const char* src, st_enc_t enc);
  * @note to edit allocator define: __STRING_REALLOCATOR
  *
  * @param src source
- * @param len new capacity
+ * @param cap new capacity
  * @return new string
  */
 ST_EXTERN void st_resize(string** src, size_t cap);
@@ -351,11 +363,11 @@ ST_EXTERN void st_resize(string** src, size_t cap);
  * @param src source
  * @return new string
  */
-string* st_clone(string* src);
+ST_EXTERN string* st_clone(string* src);
 /**
  *
  */
-string* st_clone_subc(char* src, size_t len, st_enc_t enc);
+ST_EXTERN string* st_clone_subc(char* src, size_t len, st_enc_t enc);
 
 /**
  * Copy src into out
@@ -365,7 +377,7 @@ string* st_clone_subc(char* src, size_t len, st_enc_t enc);
  * @param out
  * @param src
  */
-void st_copy(string** out, string* src);
+ST_EXTERN void st_copy(string** out, string* src);
 
 /// alias of st_copyc
 #define st_cp st_copy
@@ -378,7 +390,7 @@ void st_copy(string** out, string* src);
  * @param src
  * @param enc
  */
-void st_copyc(string** out, const char* src, st_enc_t enc);
+ST_EXTERN void st_copyc(string** out, const char* src, st_enc_t enc);
 
 /// alias of st_copyc
 #define st_cpc st_copyc
@@ -390,16 +402,16 @@ void st_copyc(string** out, const char* src, st_enc_t enc);
  * @note To edit deallocator define: __STRING_DEALLOCATOR
  * @param out
  */
-void st_delete(string** out);
+ST_EXTERN void st_delete(string** out);
 
 // TODO
-bool st_char_at(string** out, const string* str, st_len_t pos);
+ST_EXTERN bool st_char_at(string** out, const string* str, st_len_t pos);
 
 /**
  * Remove data, do no deallocate anything, just clean.
  * @param out
  */
-void st_clear(string* out);
+ST_EXTERN void st_clear(string* out);
 
 /**
  * Clean up operation, call this before exit.
@@ -408,7 +420,7 @@ void st_clear(string* out);
  *
  * @note can be called more than once to free memory
  */
-void st_cleanup();
+ST_EXTERN void st_cleanup();
 
 //
 // repeat.c
@@ -417,12 +429,13 @@ void st_cleanup();
 /**
  * Returns a new string result of repeating src x times.
  *
- * @license https://github.com/php/php-src/blob/master/LICENSE
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
+ *
  * @param src
  * @param x
  * @return new string
  */
-string* st_repeat(const string* src, size_t x);
+ST_EXTERN string* st_repeat(const string* src, size_t x);
 
 //
 // shuffle.c
@@ -435,7 +448,7 @@ string* st_repeat(const string* src, size_t x);
  * @param len How many iteration do
  * @return new string
  */
-string* st_shuffle(string* src, size_t len);
+ST_EXTERN string* st_shuffle(string* src, size_t len);
 
 //
 // substring.c
@@ -444,6 +457,7 @@ string* st_shuffle(string* src, size_t len);
 /**
  * Return a new string part of given str
  *
+ * @param str
  * @param start
  *   If non-negative, the returned string will start at the start'th position in string, counting from zero
  *   If negative, the returned string will start at the start'th character from the end of string.
@@ -453,7 +467,7 @@ string* st_shuffle(string* src, size_t len);
  *   If length is 0 the substring starting from start until the end of the string will be returned.
  * @return new string
  */
-string* st_sub(const string* str, int start, int end);
+ST_EXTERN string* st_sub(const string* str, int start, int end);
 
 //
 // trim.c
@@ -464,8 +478,8 @@ string* st_sub(const string* str, int start, int end);
  *
  * @param str
  *   String that will be trimmed.
- * @param what_str
- *   if 0 what_str = " \t\n\r\0\x0B"
+ * @param character_mask
+ *   if 0 character_mask = " \t\n\r\0\x0B"
  *   String containing the list all characters that you want to be stripped.
  * @param mode
  *    1 trim left
@@ -473,7 +487,16 @@ string* st_sub(const string* str, int start, int end);
  *    3 trim both
  * @return new string
  */
-string* st_trim(const string *str, string *character_mask, int mode);
+ST_EXTERN string* st_trim(const string *str, string *character_mask, int mode);
+
+/// alias st_trim (right only)
+#define st_chop(str, character_mask) st_trim (str, character_mask, 2)
+
+/// alias st_trim (right only)
+#define st_rtrim(str, character_mask) st_trim (str, character_mask, 2)
+
+/// alias st_trim (left only)
+#define st_ltrim(str, character_mask) st_trim (str, character_mask, 1)
 
 //
 // utf8.c
@@ -492,7 +515,7 @@ string* st_trim(const string *str, string *character_mask, int mode);
  *   Optional, 0 means you don't want the value
  * @return string length utf-8 encoded
  */
-size_t string_utf8_lenc(const char* src, size_t *out_capacity);
+ST_EXTERN size_t string_utf8_lenc(const char* src, size_t *out_capacity);
 
 /**
  * Check if the given unsigned char * is a valid utf-8 sequence.
@@ -510,18 +533,20 @@ size_t string_utf8_lenc(const char* src, size_t *out_capacity);
  *
  * Based on is_utf8 by JulienPalard, heavily modified by llafuente
  * to archieve great performance.
- * @license https://github.com/JulienPalard/is_utf8/blob/master/COPYRIGHT
+ *
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
+ *
  * @param str
  * @param len
  * @return
  *   first invalid position found or 0 if success
  */
-char* string_utf8_invalid(const unsigned char *str, size_t len);
+ST_EXTERN char* string_utf8_invalid(const unsigned char *str, size_t len);
 
 //
 // case.c
 //
 
-void string_capitalize(string* str);
+ST_EXTERN void string_capitalize(string* str);
 
 #endif

@@ -83,7 +83,7 @@ string* st_clone(string* src) {
 }
 
 string* st_clone_subc(char* src, size_t len, st_enc_t enc) {
-  assert(enc == string_enc_ascii);
+  assert(enc == st_enc_ascii);
 
   string* out = st_new(len, enc);
   memcpy(out->value, src, len);

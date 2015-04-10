@@ -38,9 +38,9 @@ void st_charmask(st_uc_t *input, size_t len, char *mask) {
 }
 
 st_len_t st_length(const char* src, st_enc_t enc) {
-  if (enc == string_enc_ascii) {
+  if (enc == st_enc_ascii) {
     return strlen(src);
-  } else if (enc == string_enc_utf8) {
+  } else if (enc == st_enc_utf8) {
     size_t used;
     return string_utf8_lenc((const char*) src, &used);
   }

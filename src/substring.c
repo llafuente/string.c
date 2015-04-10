@@ -61,7 +61,7 @@ st_len_t st_copy_usub(
   st_len_t done = 0;
 
   switch(enc) {
-    case string_enc_ascii: {
+    case st_enc_ascii: {
       // \0 + end
 
       itr += start;
@@ -74,7 +74,7 @@ st_len_t st_copy_usub(
       *dst = '\0';
     }
     break;
-    case string_enc_utf8: {
+    case st_enc_utf8: {
       // \0 + end
       while(start--) {
         itr += string_utf8_jump_next(itr);
@@ -89,7 +89,7 @@ st_len_t st_copy_usub(
       *dst = '\0';
     }
     break;
-    case string_enc_ucs4be: {
+    case st_enc_ucs4be: {
       // \0 + end
       itr += start * 4;
       const char* end = itr + (todo * 4);

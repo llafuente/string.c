@@ -34,7 +34,7 @@ void string_char_low(string* str, st_len_t pos) {
 
 // http://pastebin.com/fuw4Uizk
 void string_capitalize(string* str) {
-  assert(str->encoding == string_enc_ascii);
+  assert(str->encoding == st_enc_ascii);
 
   if (STRING_IS_UP_ASCII(str->value[0])) {
     STRING_LOW_ASCCI(str->value[0]);

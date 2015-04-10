@@ -1,13 +1,16 @@
 # string.c
 
 Single allocation string implementation, more convinient and performance
-that null terminated chars and compatible with them :)
+that null terminated chars and 100% compatible with them :)
 
-It's a wip... back in a few days...
+For performance reason, atm, is not a shared library.
 
+## Usage
 
-It's not meant to be used as shared lib, single include
+include a single header
 
 ```c
-#include "string.c/src/string.h"
+#include "stringc.h"
 ```
+
+include .libs/ and link against libstringc.la

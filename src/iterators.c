@@ -41,7 +41,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   const char* end = itr + str->capacity - 1;
 
   switch(enc) {
-  case string_enc_ascii:
+  case st_enc_ascii:
     // \0 + end
     while (*itr && itr < end) {
       dst = s;
@@ -53,7 +53,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
       ++pos;
     }
     break;
-  case string_enc_utf8:
+  case st_enc_utf8:
     // \0 + end
     while (*itr && itr < end) {
       dst = s;
@@ -66,7 +66,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
       ++pos;
     }
     break;
-  case string_enc_ucs4be:
+  case st_enc_ucs4be:
     // \0 + end
     while (*itr && itr < end) {
       dst = s;

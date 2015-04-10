@@ -32,7 +32,7 @@ string* st_repeat(const string* src, size_t x) {
   /* Don't waste our time if it's empty */
   /* ... or if the multiplier is zero */
   if (src_len == 0 || x == 0) {
-    return st_new((size_t) 0, string_enc_ascii);
+    return st_new((size_t) 0, st_enc_ascii);
   }
 
   /* Initialize the result string */
