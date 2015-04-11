@@ -139,3 +139,56 @@ st_len_t st_ipos(string* haystack, string* needle, st_len_t offset) {
 
   return out;
 }
+
+string* st_char_at(const string* src, st_len_t pos) {
+  st_enc_t enc = src->encoding;
+
+  assert(pos < src->length);
+
+  string* out;
+  char* dst;
+  const char* p = src->value;
+
+
+
+  switch(enc) {
+    case st_enc_binary:
+    case st_enc_ascii:
+      ST_ADVANCE_ASCII(p, pos);
+
+      out = st_new(1, enc);
+      dst = out->value;
+
+      ST_CHAR_CP_ASCII(dst, p, true);
+
+      out->length = 1;
+      out->used = 1;
+    break;
+    case st_enc_utf8:
+      ST_ADVANCE_UTF8(p, pos);
+
+      out = st_new(4, enc);
+      dst = out->value;
+
+
+      ST_CHAR_CP_UTF8(dst, p, true);
+      printf("%s\n", dst);
+      printf("%s\n", p);
+
+      out->length = 1;
+      out->used = strlen(dst);
+    break;
+    case st_enc_ucs4be:
+      ST_ADVANCE_UCS4BE(p, pos);
+
+      out = st_new(4, enc);
+      dst = out->value;
+
+      ST_CHAR_CP_UCS4BE(dst, p, true);
+      out->length = 1;
+      out->used = 4;
+    break;
+  }
+
+  return out;
+}

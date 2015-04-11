@@ -459,7 +459,37 @@ void test_search() {
   st_delete(&ned);
   st_delete(&hay);
 
+  // char_at
+  string* s = st_newc(T_STR_03, st_enc_utf8);
 
+  st_debug(s);
+  st_debug(chr);
+
+  string* chr = st_char_at(s, 0);
+  CHK_ALL(chr, "n", st_enc_utf8);
+  st_delete(&chr);
+
+  string* chr = st_char_at(s, 1);
+  CHK_ALL(chr, "i", st_enc_utf8);
+  st_delete(&chr);
+
+  string* chr = st_char_at(s, 2);
+  CHK_ALL(chr, "ñ", st_enc_utf8);
+  st_delete(&chr);
+
+  string* chr = st_char_at(s, 3);
+  CHK_ALL(chr, "o", st_enc_utf8);
+  st_delete(&chr);
+
+  string* chr = st_char_at(s, 4);
+  CHK_ALL(chr, " ", st_enc_utf8);
+  st_delete(&chr);
+
+  string* chr = st_char_at(s, 5);
+  CHK_ALL(chr, "☃", st_enc_utf8);
+  st_delete(&chr);
+
+  st_delete(&s);
 }
 
 

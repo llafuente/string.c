@@ -182,6 +182,44 @@ extern const uint8_t st_bom[];
     case st_enc_ucs4be: ST_ADVANCE_UCS4BE(s, amount); break; \
   } \
 
+#define ST_CHAR_CP_ASCII(dst, src, null_end) \
+  dst[0] = src[0];                           \
+  if (null_end) {                            \
+    dst[1] = '\0';                           \
+  }                                          \
+
+#define ST_CHAR_CP_UCS4BE(dst, src, null_end) \
+  dst[0] = src[0];                            \
+  dst[1] = src[1];                            \
+  dst[2] = src[2];                            \
+  dst[3] = src[3];                            \
+  if (null_end) {                             \
+    dst[4] = '\0';                            \
+  }                                           \
+
+#define ST_CHAR_CP_UTF8(dst, src, null_end) \
+  {                                         \
+    st_uc_t c = (st_uc_t) *src;             \
+                                            \
+    dst[0] = src[0];                        \
+    if (c >= 0xc0) {                        \
+      dst[1] = src[1];                      \
+      if (c >= 0xe0) {                      \
+        dst[2] = src[2];                    \
+        if (c >= 0xf0) {                    \
+          dst[3] = src[3];                  \
+          dst[4] = '\0';                    \
+        } else {                            \
+          dst[3] = '\0';                    \
+        }                                   \
+      } else {                              \
+        dst[2] = '\0';                      \
+      }                                     \
+    } else {                                \
+      dst[1] = '\0';                        \
+    }                                       \
+  }                                         \
+
 
 //
 // utils.c
@@ -465,9 +503,6 @@ ST_EXTERN void st_copyc(string** out, const char* src, st_enc_t enc);
  */
 ST_EXTERN void st_delete(string** out);
 
-// TODO
-ST_EXTERN bool st_char_at(string** out, const string* str, st_len_t pos);
-
 /**
  * Remove data, do no deallocate anything, just clean.
  * @param out
@@ -628,6 +663,9 @@ ST_EXTERN bool st_start_with(string* haystack, string* needle);
 ST_EXTERN bool st_end_with(string* haystack, string* needle);
 
 ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
+
+// TODO
+ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
 //
 // encode.c
