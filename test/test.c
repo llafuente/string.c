@@ -5,6 +5,9 @@
 
 #include "stringc.h"
 
+#include <wchar.h>
+#include <fcntl.h>
+
 #define T_STR_01 "hello world!"
 #define T_STR_02 "hello my friend i'm even larger!!"
 #define T_STR_03 "niño ☃"
@@ -66,6 +69,7 @@ extern void test_shuffle();
 extern void test_chr();
 extern void test_search();
 extern void test_utf8();
+extern void test_encoding();
 
 int main(int argc, const char * argv[]) {
 
@@ -85,6 +89,7 @@ int main(int argc, const char * argv[]) {
   RUN_TEST(chr);
   RUN_TEST(search);
   RUN_TEST(utf8);
+  RUN_TEST(encoding);
 
   st_cleanup();
   printf("OK\n");
@@ -464,4 +469,22 @@ void test_utf8() {
   assert(st_char_eq_utf8("☃", "a") == false);
   assert(st_char_eq_utf8("A", "a") == false);
   assert(st_char_eq_utf8("ñ", "☃") == false);
+}
+
+void test_encoding() {
+  int* utf32p = L"ο Δικαιοπολις εν αγρω εστιν";
+  string* src = st_newc("ο Δικαιοπολις εν αγρω εστιν", st_enc_utf8);
+
+  string* go = st_to_utf32(src);
+
+  assert(strcmp(go->value, (const char *) utf32p) == 0);
+
+  string* back = st_to_utf8(go);
+
+  assert(strcmp(back->value, src->value) == 0);
+
+  st_delete(&src);
+  st_delete(&go);
+  st_delete(&back);
+
 }

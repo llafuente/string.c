@@ -34,6 +34,12 @@
 /missing
 /test/run-tests
 
+/ar-lib
+/test-driver
+/test-suite.log
+/test/run-tests.log
+/test/run-tests.trs
+
 # make
 *.o
 *.lo

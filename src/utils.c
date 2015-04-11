@@ -58,7 +58,7 @@ void st_zeronull(string* str) {
 }
 
 void st_debug(string* str) {
-  printf("st_debug @%p, length[%zu] used[%zu] size[%zu]\n", str, str->length, str->used, str->capacity);
+  printf("st_debug @%p, length[%zu] used[%zu] size[%zu] enc[%d]\n", str, str->length, str->used, str->capacity, str->encoding);
 
   char *p = str->value;
   size_t size = str->capacity;

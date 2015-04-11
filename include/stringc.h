@@ -47,7 +47,8 @@
 
 /// string length type.
 typedef long int st_len_t;
-typedef unsigned char st_uc_t;
+typedef uint8_t st_uc_t;
+typedef uint32_t st_uc4_t;
 
 /// supported encodings
 typedef enum {
@@ -627,6 +628,14 @@ ST_EXTERN bool st_start_with(string* haystack, string* needle);
 ST_EXTERN bool st_end_with(string* haystack, string* needle);
 
 ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
+
+//
+// encode.c
+//
+
+ST_EXTERN string* st_to_utf32(const string* src);
+ST_EXTERN string* st_to_utf8(const string* src);
+
 //
 // internal.c
 //

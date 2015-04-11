@@ -17,6 +17,7 @@ libstringc_la_SOURCES = src/append.c \
                   src/bin2hex.c \
                   src/case.c \
                   src/compare.c \
+                  src/encode.c \
                   src/to.c \
                   src/hex2bin.c \
                   src/internal.c \
