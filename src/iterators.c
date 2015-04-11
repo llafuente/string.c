@@ -80,6 +80,100 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
     }
   }
 
+  st_delete(&buffer);
+}
+
+string* st_char_map(const string* str, st_char_map_cb map_cb) {
+  string* out;
+
+  // maximum char size is 7 bytes
+  // 6 utf-8 + null
+  st_enc_t enc = str->encoding;
+  string* buffer = st_new(7, enc);
+  buffer->length = 1;
+  char* bufp = buffer->value;
+
+  st_len_t pos = 0;
+  const char* itr = str->value;
+  char* dst;
+  const char* end = itr + str->capacity - 1;
+
+  switch(enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+    out = st_new(str->length, enc);
+    out->length = str->length;
+    out->used = str->used;
+    dst = out->value;
+
+    // \0 + end
+    while (*itr && itr < end) {
+
+      ST_CHAR_CP_ASCII(bufp, itr, true);
+
+      map_cb(buffer, pos, str);
+
+      ST_CHAR_CP_ASCII(dst, bufp, false);
+      ++itr;
+      ++dst;
+      ++pos;
+    }
+    *dst = '\0';
+    break;
+  case st_enc_utf8:
+    // as always be conservative and allocate maximum possible
+    out = st_new(str->length * 4, enc);
+    out->length = str->length;
+    dst = out->value;
+
+    size_t used = 0;
+    int jump;
+
+    while (*itr && itr < end) {
+      jump = string_utf8_jump_next(itr);
+      printf("jump [%ld][%d]\n", pos, jump);
+
+      ST_CHAR_CP(bufp, itr, jump, true);
+      itr+=jump; //advance now, to reuse jump later
+
+      map_cb(buffer, pos, str);
+
+      jump = string_utf8_jump_next(bufp);
+
+      used += jump;
+
+      ST_CHAR_CP(dst, bufp, jump, false);
+      dst += jump;
+
+      ++pos;
+    }
+    *dst = '\0';
+    out->used = used;
+    break;
+  case st_enc_ucs4be:
+    out = st_new(str->length * 4, enc);
+    out->length = str->length;
+    out->used = str->used;
+    dst = out->value;
+
+    // \0 + end
+    while (*itr && itr < end) {
+
+      ST_CHAR_CP_UCS4BE(bufp, itr, true);
+
+      map_cb(buffer, pos, str);
+
+      ST_CHAR_CP_UCS4BE(dst, bufp, false);
+      itr += 4;
+      dst += 4;
+      ++pos;
+    }
+    *dst = '\0';
+    break;
+  }
+
 
   st_delete(&buffer);
+
+  return out;
 }

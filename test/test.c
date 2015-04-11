@@ -11,6 +11,7 @@
 #define T_STR_01 "hello world!"
 #define T_STR_02 "hello my friend i'm even larger!!"
 #define T_STR_03 "niño ☃"
+#define T_STR_03_PLUS_ONE "niño ☃"
 #define T_STR_03_REP2 "niño ☃niño ☃"
 #define T_STR_03_REP3 "niño ☃niño ☃niño ☃"
 #define T_STR_03_REP4 "niño ☃niño ☃niño ☃niño ☃"
@@ -102,6 +103,7 @@ void test_memory_funcs() {
   // memory
   //
   string* s = st_new(2, st_enc_ascii);
+  string* s2;
 
   assert(s->used == 0);
   assert(s->length == 0);
@@ -127,6 +129,17 @@ void test_memory_funcs() {
 
   s = st_newc(T_STR_03, st_enc_utf8);
   CHK_ALL(s, T_STR_03, st_enc_utf8);
+
+  s2 = st_clone(s);
+  CHK_ALL(s2, T_STR_03, st_enc_utf8);
+  assert(s->capacity == s2->capacity);
+  st_delete(&s2);
+
+  s2 = st_rclone(s, 128);
+  CHK_ALL(s2, T_STR_03, st_enc_utf8);
+  assert(s2->capacity == 129);
+  st_delete(&s2);
+
   st_delete(&s);
 }
 
@@ -141,11 +154,6 @@ void test_repeat() {
   CHK_ALL(srepeat, T_STR_03_REP3, st_enc_utf8);
   st_delete(&srepeat);
   st_delete(&s);
-}
-
-char buffer[256];
-void itr_callback(string* chr, st_len_t pos, string* src) {
-  strcat(buffer, chr->value);
 }
 
 void test_compare() {
@@ -305,14 +313,58 @@ void test_utf8_invalid() {
   assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_7, strlen(T_STR_UTF8_7)) == 0);
 }
 
-void test_itr_chars() {
+char buffer[256];
+void char_itr_cb(const string* chr, st_len_t pos, string* src) {
+  strcat(buffer, chr->value);
+}
 
-  string* str = st_newc(T_STR_03_REP3, st_enc_utf8);
-  st_char_iterator(str, (st_char_itr_cb) itr_callback);
+void char_map_cb(string* chr, st_len_t pos, string* src) {
+  chr->value[0] += 1;
+}
+
+void test_itr_chars() {
+  buffer[0] = '\0';
+  string* str;
+  string* nstr;
+
+  str = st_newc(T_STR_03_REP3, st_enc_utf8);
+  st_char_iterator(str, (st_char_itr_cb) char_itr_cb);
   st_delete(&str);
 
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
+  buffer[0] = '\0';
 
+  str = st_newc("abc", st_enc_ascii);
+
+  nstr = st_char_map(str, (st_char_map_cb) char_map_cb);
+
+  CHK_ALL(nstr, "bcd", st_enc_ascii);
+  st_delete(&str);
+  st_delete(&nstr);
+
+
+  str = st_newc("abc", st_enc_utf8);
+
+  st_debug(str);
+  nstr = st_char_map(str, (st_char_map_cb) char_map_cb);
+  printf("***********\n");
+  st_debug(nstr);
+
+  CHK_ALL(nstr, "bcd", st_enc_utf8);
+  st_delete(&str);
+  st_delete(&nstr);
+
+
+  str = st_newc(T_STR_03, st_enc_utf8);
+
+  st_debug(str);
+  nstr = st_char_map(str, (st_char_map_cb) char_map_cb);
+  printf("***********\n");
+  st_debug(nstr);
+
+  CHK_ALL(nstr, "ojıp!㘃", st_enc_utf8);
+  st_delete(&str);
+  st_delete(&nstr);
 }
 
 void test_capitalize() {
@@ -462,30 +514,28 @@ void test_search() {
   // char_at
   string* s = st_newc(T_STR_03, st_enc_utf8);
 
-  st_debug(s);
-  st_debug(chr);
-
-  string* chr = st_char_at(s, 0);
+  string* chr;
+  chr = st_char_at(s, 0);
   CHK_ALL(chr, "n", st_enc_utf8);
   st_delete(&chr);
 
-  string* chr = st_char_at(s, 1);
+  chr = st_char_at(s, 1);
   CHK_ALL(chr, "i", st_enc_utf8);
   st_delete(&chr);
 
-  string* chr = st_char_at(s, 2);
+  chr = st_char_at(s, 2);
   CHK_ALL(chr, "ñ", st_enc_utf8);
   st_delete(&chr);
 
-  string* chr = st_char_at(s, 3);
+  chr = st_char_at(s, 3);
   CHK_ALL(chr, "o", st_enc_utf8);
   st_delete(&chr);
 
-  string* chr = st_char_at(s, 4);
+  chr = st_char_at(s, 4);
   CHK_ALL(chr, " ", st_enc_utf8);
   st_delete(&chr);
 
-  string* chr = st_char_at(s, 5);
+  chr = st_char_at(s, 5);
   CHK_ALL(chr, "☃", st_enc_utf8);
   st_delete(&chr);
 

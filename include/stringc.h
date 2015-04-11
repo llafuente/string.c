@@ -72,7 +72,9 @@ typedef struct string_s {
   char value[];
 } string;
 
-typedef void (*st_char_itr_cb)(string* character, st_len_t pos, const string* src);
+typedef void (*st_char_itr_cb)(const string* character, st_len_t pos, const string* src);
+
+typedef void (*st_char_map_cb)(string* character, st_len_t pos, const string* src);
 
 //
 // shared globals
@@ -220,6 +222,21 @@ extern const uint8_t st_bom[];
     }                                       \
   }                                         \
 
+
+#define ST_CHAR_CP(dst, src, amount, null_end)       \
+  {                                                  \
+    st_len_t tmp = amount;                           \
+                                                     \
+    if (null_end) {                                  \
+      dst[tmp + 1] = src[tmp + 1];                   \
+    }                                                \
+                                                     \
+    while(tmp--) {                                   \
+      dst[tmp] = src[tmp];                           \
+    }                                                \
+  }                                                  \
+
+//    dst[0] = src[0];                                 \
 
 //
 // utils.c
@@ -385,7 +402,6 @@ ST_EXTERN string* st_number2base(size_t value, int base);
  */
 ST_EXTERN string* st_chr(uint32_t value, st_enc_t enc);
 
-
 /**
 * Return the code point at specified offset
 *
@@ -394,6 +410,8 @@ ST_EXTERN string* st_chr(uint32_t value, st_enc_t enc);
 * @return code point
 */
 size_t st_ord(const string* str, st_len_t offset);
+
+#define st_char_code_at st_ord
 
 //
 // hex2bin.c
@@ -415,6 +433,8 @@ ST_EXTERN string *st_hex2bin(string *src);
 //
 
 ST_EXTERN void st_char_iterator(const string* str, st_char_itr_cb itr_cb);
+
+ST_EXTERN string* st_char_map(const string* str, st_char_map_cb map_cb);
 
 // TODO
 void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
@@ -463,6 +483,15 @@ ST_EXTERN void st_resize(string** src, size_t cap);
  * @return new string
  */
 ST_EXTERN string* st_clone(const string* src);
+
+/**
+ * Return a new string clone of src with given capacity
+ *
+ * @param src source
+ * @return new string
+ */
+ST_EXTERN string* st_rclone(const string* src, size_t cap);
+
 /**
  *
  */

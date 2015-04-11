@@ -82,6 +82,22 @@ string* st_clone(const string* src) {
   return out;
 }
 
+string* st_rclone(const string* src, size_t cap) {
+  assert(cap >= src->capacity);
+
+  ++cap; // null
+
+  size_t size = sizeof(string) + cap * sizeof(char);
+  size_t src_size = sizeof(string) + src->capacity * sizeof(char);
+
+  string* out = (string*) __STRING_ALLOCATOR(size);
+
+  memcpy(out, src, src_size); // copy null
+  out->capacity = cap;
+
+  return out;
+}
+
 string* st_clone_subc(const char* src, size_t len, st_enc_t enc) {
   assert(enc == st_enc_ascii);
 
