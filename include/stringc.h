@@ -148,7 +148,7 @@ src += amount; \
 
 #define ST_UTF8_IS_TRAIL(c) (((c)&0xc0)==0x80)
 
-#define ST_UTF8_IS_LEAD(c) ((uint8_t)((c)-0xc0)<0x3e)
+#define ST_UTF8_IS_LEAD(c) ((st_uc_t)((c)-0xc0)<0x3e)
 
 #define ST_UTF8_BACK(s) \
   while(ST_UTF8_IS_TRAIL(*s)) { --s; }
@@ -156,7 +156,7 @@ src += amount; \
 #define ST_UTF8_FOWARD(s) \
   s+= ST_UTF8_COUNT_BYTES((st_uc_t) *s)
 
-extern const uint8_t st_bom[];
+extern const st_uc_t st_bom[];
 
 #define ST_UTF8_HAS_BOM(s) \
   *s == st_bom[0] && *(s+1) == st_bom[1] && *(s+2) == st_bom[2]
@@ -401,7 +401,7 @@ ST_EXTERN string* st_number2base(size_t value, int base);
  * @param enc
  * @return new string
  */
-ST_EXTERN string* st_chr(uint32_t value, st_enc_t enc);
+ST_EXTERN string* st_chr(st_uc4_t value, st_enc_t enc);
 
 /**
 * Return the code point at specified offset
@@ -454,6 +454,17 @@ void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
  * @return new string
  */
 ST_EXTERN string* st_new(size_t cap, st_enc_t enc);
+
+/**
+* Allocate a new empty with the maximum capacity needed to store given len
+*
+* @note To edit allocator define: __STRING_ALLOCATOR
+*
+* @param len
+* @param enc
+* @return new string
+*/
+ST_EXTERN string* st_new_max(st_len_t len, st_enc_t enc);
 
 /**
  * Allocate a new string and copy src into it.
@@ -684,6 +695,9 @@ ST_EXTERN bool st_char_eq_utf8(char* a, char* b);
 
 ST_EXTERN void string_capitalize(string* str);
 
+ST_EXTERN string* st_upper(string* src);
+ST_EXTERN string* st_lower(string* src);
+
 //
 // search.c
 //
@@ -761,6 +775,13 @@ ST_EXTERN string* st_to_utf32(const string* src);
 ST_EXTERN string* st_to_utf8(const string* src);
 
 //
+// picobase.c
+//
+
+ST_EXTERN st_uc4_t st_utf32_uppercase (st_uc4_t utf32);
+ST_EXTERN st_uc4_t st_utf32_lowercase(st_uc4_t utf32);
+
+//
 // internal.c
 //
 
@@ -807,5 +828,9 @@ ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
  *    len < 0, length of the string from the end
  */
 ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t len, char** start, char** end);
+
+ST_EXTERN st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8);
+
+ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 
 #endif

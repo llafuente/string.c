@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-const uint8_t st_bom[] = {0xef, 0xbb, 0xbf};
+const st_uc_t st_bom[] = {0xef, 0xbb, 0xbf};
 
 char* st__memchr(const char *s, st_uc_t c, size_t n) {
   if (n != 0) {
@@ -42,7 +42,6 @@ char* st__memchr(const char *s, st_uc_t c, size_t n) {
 
   return 0;
 }
-
 
 char* st__get_char_offset(string* str, st_len_t offset) {
   if (!offset) {
@@ -124,4 +123,67 @@ void st__get_char_range(string* str, st_len_t offset, st_len_t len, char** start
 
   *start = s;
   *end = e;
+}
+
+// utf8 chars to utf32 code point
+st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8) {
+  st_uc_t c = *utf8;
+
+  if ((c < (st_uc_t)'\200')) {
+    return c;
+  }
+
+  if ((c >= (st_uc_t)'\370')) {
+    return 0;
+  }
+
+  if ((c >= (st_uc_t)'\360')) {
+    return ((((262144 * (c % 8)) + (4096 * (utf8[1] % 64))) + (64 * (utf8[2] % 64))) + (utf8[3] % 64));
+  }
+
+  if ((c >= (st_uc_t)'\340')) {
+    return (((4096 * (c % 16)) + (64 * (utf8[1] % 64))) + (utf8[2] % 64));
+  }
+
+  if ((c >= (st_uc_t)'\300')) {
+    return ((64 * (c % 32)) + (utf8[1] % 64));
+  }
+
+  return 0;
+}
+
+// utf32 code point to utf8 chars
+st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8) {
+  if (utf32 < 128) {
+    utf8[0] = utf32;
+    return 1;
+  }
+
+  if (utf32 < 2048) {
+    utf8[1] = (128 + (utf32 % 64));
+    utf32 = (utf32 / 64);
+    utf8[0] = (192 + (utf32 % 32));
+    return 2;
+  }
+
+  if (utf32 < 65536) {
+    utf8[2] = (128 + (utf32 % 64));
+    utf32 = (utf32 / 64);
+    utf8[1] = (128 + (utf32 % 64));
+    utf32 = (utf32 / 64);
+    utf8[0] = (224 + utf32);
+    return 3;
+  }
+
+  if (utf32 < 1048576) {
+    utf8[3] = (128 + (utf32 % 64));
+    utf32 = (utf32 / 64);
+    utf8[2] = (128 + (utf32 % 64));
+    utf32 = (utf32 / 64);
+    utf8[1] = (128 + (utf32 % 64));
+    utf32 = (utf32 / 64);
+    utf8[0] = (240 + utf32);
+    return 4;
+  }
+  return 0; //err
 }

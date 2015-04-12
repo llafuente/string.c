@@ -102,7 +102,7 @@ string* st_number2base(size_t value, int base) {
   return result;
 }
 
-string* st_chr(uint32_t value, st_enc_t enc) {
+string* st_chr(st_uc4_t value, st_enc_t enc) {
   if (enc == st_enc_ascii) {
     assert(value < 256);
   }
