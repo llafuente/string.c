@@ -1,9 +1,12 @@
 # string.c
 
-Single allocation string implementation, more convinient and performance
-that null terminated chars and 100% compatible with them :)
+Single allocation string implementation (with struct) c99 at least,
+more convinient and performance that common null terminated char*,
+100% compatible with them :) and accept multiple encodings: ascii, utf8 &
+ucs4be.
 
-For performance reason, atm, is not a shared library.
+It's not yet ready to be a shared library, use static instead. It's not stable
+enough.
 
 ## Usage
 

@@ -26,7 +26,7 @@
 /// @file
 
 #include "stringc.h"
-
+// TODO add st_len_t len (to search always inside a substring)
 // Finds position of first occurrence of a string within another */
 st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
   // TODO return -1 ??
@@ -51,8 +51,9 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
     ST_ADVANCE(p, offset, haystack->encoding);
   }
 
-  // first char cmp
+  // first char to comare
   st_uc_t first = *needle->value;
+  // last char to comare
   st_uc_t last = *(needle->value + needle->used - 1);
 
   st_enc_t enc = haystack->encoding;
@@ -78,7 +79,8 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
       if (last == pp[needle_len_m1]) {
         // compare until last
         if (!memcmp(needle_val, pp, needle_len_m1)) {
-          return enc == st_enc_ucs4be ? (pp - haystack->value) / 4
+          return (enc == st_enc_ucs4be)
+            ? (pp - haystack->value) * 0.25 // /4
             : pp - haystack->value;
         }
       }
@@ -176,8 +178,6 @@ string* st_char_at(const string* src, st_len_t pos) {
 
 
       ST_CHAR_CP_UTF8(dst, p, true);
-      printf("%s\n", dst);
-      printf("%s\n", p);
 
       out->length = 1;
       out->used = strlen(dst);
@@ -195,4 +195,54 @@ string* st_char_at(const string* src, st_len_t pos) {
   }
 
   return out;
+}
+
+
+
+st_len_t st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len) {
+
+  st_len_t start_pos = offset;
+  st_len_t end_pos = len;
+  st__calc_range(haystack->length, &start_pos, &end_pos);
+
+  char* start;
+  char* end;
+  st__get_char_range(haystack, start_pos, end_pos, &start, &end);
+
+  printf("start [%p] end [%p] \n", start, end);
+  printf("diff [%ld] \n", end - start);
+
+  size_t bytes = needle->used;
+  st_len_t nlen = needle->length;
+  char* nval = needle->value;
+
+  // go back at least bytes
+  end -= bytes;
+  // update end_pos
+  end_pos -= nlen;
+
+  // end position must be a lead byte
+  if (!ST_UTF8_IS_LEAD(*end)) {
+    do {
+      --end;
+      if (!ST_UTF8_IS_LEAD(*end)) {
+        --nlen;
+      }
+    } while(nlen);
+  }
+
+  printf("start [%p] end2 [%p] \n", start, end);
+  printf("diff [%ld] \n", end - start);
+
+
+  // loop backwards
+  while (start <= end) {
+    if (!memcmp(nval, end, bytes)) {
+      return end_pos;
+    }
+
+    ST_UTF8_BACK(end);
+    --end_pos;
+  }
+
 }

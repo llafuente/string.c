@@ -71,9 +71,31 @@ void st_debug(string* str) {
   printf("\nchar by char\n");
   p = str->value;
 
-  for (n = 0; n < size; ++n) {
-    printf("| %c  ", *p ? *p : ' ');
-    ++p;
+  switch(str->encoding) {
+  case st_enc_ascii:
+    for (n = 0; n < size; ++n) {
+      printf("| %c  ", *p ? *p : ' ');
+      ++p;
+    }
+    break;
+  case st_enc_utf8:
+    for (n = 0; n < str->length; ++n) {
+      if (n < 10) {
+        printf("| %d ", n);
+      } else if (n < 100) {
+        printf("| %d", n);
+      } else {
+        printf("|%d", n);
+      }
+    }
+    printf("\n");
+
+    for (n = 0; n < str->length; ++n) {
+      string* x = st_char_at(str, n);
+      printf("| %s ", x->value);
+      st_delete(&x);
+    }
+    break;
   }
   printf("\nprintf %s\n", str->value);
 }

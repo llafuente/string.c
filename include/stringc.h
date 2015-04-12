@@ -149,8 +149,9 @@ src += amount; \
 #define ST_UTF8_IS_TRAIL(c) (((c)&0xc0)==0x80)
 
 #define ST_UTF8_IS_LEAD(c) ((uint8_t)((c)-0xc0)<0x3e)
+
 #define ST_UTF8_BACK(s) \
-  while(ST_UTF8_IS_TRAIL(*s)) {--s}
+  while(ST_UTF8_IS_TRAIL(*s)) { --s; }
 
 #define ST_UTF8_FOWARD(s) \
   s+= ST_UTF8_COUNT_BYTES((st_uc_t) *s)
@@ -580,7 +581,7 @@ ST_EXTERN string* st_shuffle(string* src, size_t len);
 //
 
 /**
- * Return a new string part of given str
+ * Extracts the characters from a string, between two specified indices, and returns the new sub string.
  *
  * @param str
  * @param start
@@ -599,12 +600,12 @@ ST_EXTERN string* st_sub(const string* str, int start, int end);
 //
 
 /**
- * Strip whitespace (or other characters) from the beginning and/or end of a string
+ * Strip whitespace (or given mask) from the beginning and/or end of a string
  *
  * @param str
  *   String that will be trimmed.
  * @param character_mask
- *   if 0 character_mask = " \t\n\r\0\x0B"
+ *   if character_mask = 0 " \t\n\r\0\x0B" will be used
  *   String containing the list all characters that you want to be stripped.
  * @param mode
  *    1 trim left
@@ -668,7 +669,13 @@ ST_EXTERN size_t string_utf8_lenc(const char* src, size_t *out_capacity);
  */
 ST_EXTERN char* string_utf8_invalid(const unsigned char *str, size_t len);
 
-
+/**
+ * Returns if two utf8 are the same. Comparison is multibyte.
+ *
+ * @param a
+ * @param b
+ * @return true if are the same
+ */
 ST_EXTERN bool st_char_eq_utf8(char* a, char* b);
 
 //
@@ -681,6 +688,17 @@ ST_EXTERN void string_capitalize(string* str);
 // search.c
 //
 
+/**
+ * Returns the position of the first occurrence of needle
+ * in haystack.
+ * Returns -1 if the value to search never occurs.
+ *
+ * @param haystack
+ * @param needle
+ * @return
+ *  > 0 position of the first occurrence if found
+ *  -1 if not found
+ */
 ST_EXTERN st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
 
 /// alias of st_pos
@@ -693,19 +711,53 @@ ST_EXTERN bool st_contains(string* haystack, string* needle);
 /// @see st_contains
 #define st_include st_contains
 
+/**
+ * Returns if haystack starts with needle
+ *
+ * @param haystack
+ * @param needle
+ * @return
+ */
 ST_EXTERN bool st_start_with(string* haystack, string* needle);
 
+/**
+ * Returns if haystack ends with needle
+ *
+ * @param haystack
+ * @param needle
+ * @return
+ */
 ST_EXTERN bool st_end_with(string* haystack, string* needle);
 
 ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
 
+/**
+ * Return a string with the char at given position
+ *
+ * @param src
+ * @param pos
+ * @return new string
+ */
 ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
 //
 // encode.c
 //
 
+/**
+ * enconde a string into utf32
+ *
+ * @param src
+ * @return new string
+ */
 ST_EXTERN string* st_to_utf32(const string* src);
+
+/**
+ * enconde a string into utf8
+ *
+ * @param src
+ * @return new string
+ */
 ST_EXTERN string* st_to_utf8(const string* src);
 
 //
@@ -715,12 +767,45 @@ ST_EXTERN string* st_to_utf8(const string* src);
 /**
  * binary search to find the start position of needle inside haystack.
  *
- *
+ * @param s
+ * @param c
+ * @param n
  */
 ST_EXTERN char* st__memchr(const char *s, st_uc_t c, size_t n);
 
+/**
+ * Return a pointer to given string offset
+ *
+ * @example
+ * string[10] - offset[0] --> 0
+ * string[10] - offset[5] --> 5
+ * string[10] - offset[-5] --> 5
+ * string[10] - offset[-2] --> 8
+ * string[10] - offset[2] --> 2
+ *
+ * @param str
+ * @param offset
+ * @return offset position
+ */
 ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
 
+/**
+ * Find the range
+ *
+ * @example
+ * string[10] - offset[0] - len[5] --> (0, 5)
+ * string[10] - offset[-5] - len[5] --> (5, 10)
+ * string[10] - offset[-5] - len[-2] --> (5, 8)
+ * string[10] - offset[2] - len[-2] --> (2, 8)
+ *
+ * @param str
+ * @param offset
+ *    offset > 0, position from the begining
+ *    offset < 0, position from the end
+ * @param len
+ *    len > 0, length of the string from the offset
+ *    len < 0, length of the string from the end
+ */
 ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t len, char** start, char** end);
 
 #endif

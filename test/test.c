@@ -542,6 +542,21 @@ void test_search() {
   st_delete(&chr);
 
   st_delete(&s);
+
+
+  // st_rpos
+  printf("*********************\n");
+  hay = st_newc(T_STR_03_REP4, st_enc_utf8);
+  ned = st_newc("☃", st_enc_utf8);
+  i = st_rpos(hay, ned, 0, hay->length);
+  assert(i == 23);
+  i = st_rpos(hay, ned, 0, -1);
+  assert(i == 17);
+
+  st_debug(hay);
+
+  st_delete(&ned);
+  st_delete(&hay);
 }
 
 
@@ -591,9 +606,15 @@ void test_internal() {
   assert(start == s->value);
   assert(end == s->value + 5);
 
+
   st__get_char_range(s, -2, 2, &start, &end);
   assert(start == s->value + 8);
   assert(end == s->value + 10);
+
+
+  st__get_char_range(s, -2, -1, &start, &end);
+  assert(start == s->value + 8);
+  assert(end == s->value + 9);
 
 
   st_delete(&s);
