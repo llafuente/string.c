@@ -115,6 +115,10 @@ bool st_end_with(string* haystack, string* needle) {
   return st_pos(haystack, needle, offset) == offset;
 }
 
+bool st_contains(string* haystack, string* needle) {
+  return st_pos(haystack, needle, 0) >= 0;
+}
+
 //TODO do it!
 #define st_lower
 /**

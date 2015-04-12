@@ -687,13 +687,18 @@ ST_EXTERN st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
 /// @see st_pos
 #define st_index_of st_pos
 
+ST_EXTERN bool st_contains(string* haystack, string* needle);
+
+/// alias of st_contains
+/// @see st_contains
+#define st_include st_contains
+
 ST_EXTERN bool st_start_with(string* haystack, string* needle);
 
 ST_EXTERN bool st_end_with(string* haystack, string* needle);
 
 ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
 
-// TODO
 ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
 //
