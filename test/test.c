@@ -71,6 +71,7 @@ extern void test_chr();
 extern void test_search();
 extern void test_utf8();
 extern void test_encoding();
+extern void test_internal();
 
 int main(int argc, const char * argv[]) {
 
@@ -91,6 +92,7 @@ int main(int argc, const char * argv[]) {
   RUN_TEST(search);
   RUN_TEST(utf8);
   RUN_TEST(encoding);
+  RUN_TEST(internal);
 
   st_cleanup();
   printf("OK\n");
@@ -567,4 +569,32 @@ void test_encoding() {
   st_delete(&go);
   st_delete(&back);
 
+}
+
+
+void test_internal() {
+  string* s;
+  char* start;
+  char* end;
+
+  s = st_newc("0123456789", st_enc_ascii);
+
+  assert(st__get_char_offset(s, 5) - 5 == s->value);
+  assert(st__get_char_offset(s, 3) - 3 == s->value);
+  assert(st__get_char_offset(s, 9) - 9 == s->value);
+
+  assert(st__get_char_offset(s, -5) - 5 == s->value);
+  assert(st__get_char_offset(s, -9) - 1 == s->value);
+  assert(st__get_char_offset(s, -1) - 9 == s->value);
+
+  st__get_char_range(s, 0, 5, &start, &end);
+  assert(start == s->value);
+  assert(end == s->value + 5);
+
+  st__get_char_range(s, -2, 2, &start, &end);
+  assert(start == s->value + 8);
+  assert(end == s->value + 10);
+
+
+  st_delete(&s);
 }

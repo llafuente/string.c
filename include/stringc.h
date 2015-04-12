@@ -719,5 +719,8 @@ ST_EXTERN string* st_to_utf8(const string* src);
  */
 ST_EXTERN char* st__memchr(const char *s, st_uc_t c, size_t n);
 
+ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
+
+ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t len, char** start, char** end);
 
 #endif

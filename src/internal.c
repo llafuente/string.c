@@ -42,3 +42,45 @@ char* st__memchr(const char *s, st_uc_t c, size_t n) {
 
   return 0;
 }
+
+
+char* st__get_char_offset(string* str, st_len_t offset) {
+  if (!offset) {
+    return str->value;
+  }
+
+  if (offset < 0) {
+    assert(-offset < str->length);
+    offset = str->length + offset;
+  }
+
+  char* p = str->value;
+
+  ST_ADVANCE(p, offset, str->encoding);
+
+  return p;
+}
+
+void st__get_char_range(string* str, st_len_t offset, st_len_t len, char** start, char** end) {
+  char* s =  str->value;
+  char* e;
+  st_enc_t enc = str->encoding;
+
+  if (offset < 0) {
+    assert(-offset < str->length);
+    offset = str->length + offset;
+
+    ST_ADVANCE(s, offset, enc);
+  } else if (offset > 0) {
+    ST_ADVANCE(s, offset, enc);
+  }
+
+  assert(offset + len <= str->length);
+
+  e = s;
+
+  ST_ADVANCE(e, len, enc);
+
+  *start = s;
+  *end = e;
+}
