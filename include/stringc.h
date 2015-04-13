@@ -151,7 +151,7 @@ src += amount; \
 #define ST_UTF8_IS_LEAD(c) ((st_uc_t)((c)-0xc0)<0x3e)
 
 #define ST_UTF8_BACK(s) \
-  while(ST_UTF8_IS_TRAIL(*s)) { --s; }
+  --s; while(ST_UTF8_IS_TRAIL(*s)) { --s; }
 
 #define ST_UTF8_FOWARD(s) \
   s+= ST_UTF8_COUNT_BYTES((st_uc_t) *s)
@@ -754,6 +754,9 @@ ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
  */
 ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
+
+ST_EXTERN st_len_t st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len);
+
 //
 // encode.c
 //
@@ -832,5 +835,7 @@ ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t len, ch
 ST_EXTERN st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8);
 
 ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
+
+ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* offset_length);
 
 #endif

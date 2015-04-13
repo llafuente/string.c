@@ -565,11 +565,13 @@ void test_search() {
 
 
   // st_rpos
-  printf("*********************\n");
+  printf("st_rpos\n");
   hay = st_newc(T_STR_03_REP4, st_enc_utf8);
   ned = st_newc("☃", st_enc_utf8);
   i = st_rpos(hay, ned, 0, hay->length);
   assert(i == 23);
+
+  printf("st_rpos\n");
   i = st_rpos(hay, ned, 0, -1);
   assert(i == 17);
 
@@ -612,6 +614,24 @@ void test_internal() {
   char* start;
   char* end;
 
+  st_len_t start_pos = 0;
+  st_len_t end_pos = 0;
+  st__calc_range(10, &start_pos, &end_pos);
+  assert(start_pos == 0);
+  assert(end_pos == 10);
+
+  start_pos = 1;
+  end_pos = -1;
+  st__calc_range(10, &start_pos, &end_pos);
+  assert(start_pos == 1);
+  assert(end_pos == 9);
+
+  start_pos = 5;
+  end_pos = 5;
+  st__calc_range(10, &start_pos, &end_pos);
+  assert(start_pos == 5);
+  assert(end_pos == 10);
+
   s = st_newc("0123456789", st_enc_ascii);
 
   assert(st__get_char_offset(s, 5) - 5 == s->value);
@@ -621,7 +641,7 @@ void test_internal() {
   assert(st__get_char_offset(s, -5) - 5 == s->value);
   assert(st__get_char_offset(s, -9) - 1 == s->value);
   assert(st__get_char_offset(s, -1) - 9 == s->value);
-
+/*
   st__get_char_range(s, 0, 5, &start, &end);
   assert(start == s->value);
   assert(end == s->value + 5);
@@ -635,7 +655,7 @@ void test_internal() {
   st__get_char_range(s, -2, -1, &start, &end);
   assert(start == s->value + 8);
   assert(end == s->value + 9);
-
+*/
 
   st_delete(&s);
 }

@@ -200,49 +200,68 @@ string* st_char_at(const string* src, st_len_t pos) {
 
 
 st_len_t st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len) {
+  // caches
+  st_len_t nlen = needle->length;
 
+  // working range
   st_len_t start_pos = offset;
   st_len_t end_pos = len;
   st__calc_range(haystack->length, &start_pos, &end_pos);
+  end_pos -= nlen;
 
   char* start;
   char* end;
   st__get_char_range(haystack, start_pos, end_pos, &start, &end);
 
-  printf("start [%p] end [%p] \n", start, end);
-  printf("diff [%ld] \n", end - start);
+  //printf("start [%p] end [%p] \n", start, end);
+  //printf("diff [%ld] \n", end - start);
 
   size_t bytes = needle->used;
-  st_len_t nlen = needle->length;
+
   char* nval = needle->value;
 
-  // go back at least bytes
-  end -= bytes;
-  // update end_pos
-  end_pos -= nlen;
-
-  // end position must be a lead byte
-  if (!ST_UTF8_IS_LEAD(*end)) {
-    do {
-      --end;
-      if (!ST_UTF8_IS_LEAD(*end)) {
-        --nlen;
-      }
-    } while(nlen);
-  }
-
-  printf("start [%p] end2 [%p] \n", start, end);
-  printf("diff [%ld] \n", end - start);
-
+  //printf("start [%p] end2 [%p] \n", start, end);
+  //printf("diff [%ld] \n", end - start);
 
   // loop backwards
-  while (start <= end) {
-    if (!memcmp(nval, end, bytes)) {
-      return end_pos;
-    }
+  switch(haystack->encoding) {
+    case st_enc_binary:
+    case st_enc_ascii:
+      while (start <= end) {
+        if (!memcmp(nval, end, bytes)) {
+          return end_pos;
+        }
 
-    ST_UTF8_BACK(end);
-    --end_pos;
+        --end;
+        --end_pos;
+      }
+
+      return -1;
+    case st_enc_utf8:
+
+      while (start <= end) {
+        if (!memcmp(nval, end, bytes)) {
+          return end_pos;
+        }
+
+        ST_UTF8_BACK(end);
+        --end_pos;
+      }
+
+      return -1;
+    case st_enc_ucs4be:
+      while (start <= end) {
+        if (!memcmp(nval, end, bytes)) {
+          return end_pos;
+        }
+
+        end -= 4;
+        --end_pos;
+      }
+
+      return -1;
   }
+
+
 
 }
