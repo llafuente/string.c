@@ -463,8 +463,9 @@ void test_search() {
   string* hay = st_newc("0123456789", st_enc_ascii);
   string* ned = st_newc("5", st_enc_ascii);
 
-  st_len_t i = st_pos(hay, ned, 0);
+  st_len_t i = st_pos(hay, ned, 0, 0);
 
+  printf("st_pos = %ld\n", i);
   assert(i == 5);
 
   st_delete(&hay);
@@ -473,7 +474,7 @@ void test_search() {
   hay = st_newc("0X123456XX789", st_enc_ascii);
   ned = st_newc("XX", st_enc_ascii);
 
-  i = st_pos(hay, ned, 0);
+  i = st_pos(hay, ned, 0, 0);
   assert(i == 8);
 
   st_delete(&hay);
@@ -482,24 +483,27 @@ void test_search() {
   hay = st_newc("ababababdababdababddx", st_enc_ascii);
   ned = st_newc("d", st_enc_ascii);
 
-  i = st_pos(hay, ned, 0);
+  i = st_pos(hay, ned, 0, 0);
   assert(i == 8);
 
-  i = st_pos(hay, ned, 9);
+st_debug(hay);
+st_debug(ned);
+
+  i = st_pos(hay, ned, 9, 0);
   assert(i == 13);
 
-  i = st_pos(hay, ned, 14);
+  i = st_pos(hay, ned, 14, 0);
   assert(i == 18);
 
-  i = st_pos(hay, ned, 19);
+  i = st_pos(hay, ned, 19, 0);
   assert(i == 19);
 
-  i = st_pos(hay, ned, 20);
+  i = st_pos(hay, ned, 20, 0);
   assert(i == -1);
 
   st_delete(&ned);
   ned = st_newc("fdusgeui", st_enc_ascii);
-  i = st_pos(hay, ned, 20);
+  i = st_pos(hay, ned, 20, 0);
   assert(i == -1);
 
   st_delete(&hay);
@@ -509,16 +513,16 @@ void test_search() {
   hay = st_newc(T_STR_03_REP4, st_enc_utf8);
   ned = st_newc("☃", st_enc_utf8);
 
-  i = st_pos(hay, ned, 0);
+  i = st_pos(hay, ned, 0, 0);
   assert(i == 5);
 
-  i = st_pos(hay, ned, 6);
+  i = st_pos(hay, ned, 6, 0);
   assert(i == 11);
 
-  i = st_pos(hay, ned, 12);
+  i = st_pos(hay, ned, 12, 0);
   assert(i == 17);
 
-  i = st_pos(hay, ned, 18);
+  i = st_pos(hay, ned, 18, 0);
   assert(i == 23);
 
   // st_start_with / st_end_with
@@ -631,6 +635,13 @@ void test_internal() {
   st__calc_range(10, &start_pos, &end_pos);
   assert(start_pos == 5);
   assert(end_pos == 10);
+
+  start_pos = 9;
+  end_pos = 0;
+  st__calc_range(21, &start_pos, &end_pos);
+  assert(start_pos == 9);
+  assert(end_pos == 12);
+
 
   s = st_newc("0123456789", st_enc_ascii);
 

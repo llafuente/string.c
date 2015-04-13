@@ -713,7 +713,8 @@ ST_EXTERN string* st_lower(string* src);
  *  > 0 position of the first occurrence if found
  *  -1 if not found
  */
-ST_EXTERN st_len_t st_pos(string* haystack, string* needle, st_len_t offset);
+ST_EXTERN st_len_t st_pos(string* haystack, string* needle,
+  st_len_t offset, st_len_t len);
 
 /// alias of st_pos
 /// @see st_pos
@@ -814,28 +815,32 @@ ST_EXTERN char* st__memchr(const char *s, st_uc_t c, size_t n);
 ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
 
 /**
- * Find the range
+ * Find the range. Range won't be normalized, use st__calc_range
+ * before.
  *
- * @example
- * string[10] - offset[0] - len[5] --> (0, 5)
- * string[10] - offset[-5] - len[5] --> (5, 10)
- * string[10] - offset[-5] - len[-2] --> (5, 8)
- * string[10] - offset[2] - len[-2] --> (2, 8)
  *
  * @param str
  * @param offset
- *    offset > 0, position from the begining
- *    offset < 0, position from the end
  * @param len
- *    len > 0, length of the string from the offset
- *    len < 0, length of the string from the end
  */
-ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t len, char** start, char** end);
+ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t length, char** start, char** end);
 
 ST_EXTERN st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8);
 
 ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 
+/*
+ * Normalize given range to be useable in st__get_char_range
+ *
+ * @param str_length
+ * @param offset
+ *   < 0 ofsset from the end of the string
+ *   >= 0 ofsset from the begining of the string
+ * @param length
+ *   = 0 end of string
+ *   < 0 from the end of the string
+ *   > 0 length from offset
+ */
 ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* offset_length);
 
 #endif

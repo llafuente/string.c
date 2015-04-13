@@ -62,10 +62,9 @@ char* st__get_char_offset(string* str, st_len_t offset) {
   return p;
 }
 
-
-void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* offset_length) {
+void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* length) {
   st_len_t off = *offset;
-  st_len_t off_len = *offset_length;
+  st_len_t off_len = *length;
 
   if (off < 0) {
     assert(-off < str_length);
@@ -74,36 +73,37 @@ void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* offset_leng
   }
 
   if (off_len == 0) {
-    *offset_length = str_length - *offset;
+    *length = str_length - *offset;
   } else if (off_len < 0) {
-    *offset_length = (str_length + off_len);
+    *length = (str_length + off_len);
   } else {
-    *offset_length = *offset + off_len;
+    *length = *offset + off_len;
   }
 
+  printf("offset = %ld\n", *offset);
+  printf("length = %ld\n", *length);
+
   // overflow?
-  assert(*offset_length <= str_length);
+  assert(*length <= str_length);
 }
 
 
-void st__get_char_range(string* str, st_len_t start_pos, st_len_t end_pos, char** start, char** end) {
+void st__get_char_range(string* str, st_len_t offset, st_len_t length, char** start, char** end) {
   char* s =  str->value; // start == 0
   char* e;
   st_enc_t enc = str->encoding;
 
-  assert(start_pos < end_pos);
-  assert(end_pos <= str->length);
-  assert(start_pos < str->length);
+  assert(offset >= 0);
+  assert(length >= 0);
 
-  if (start_pos < 0) {
-    start_pos = 0;
-  } else if (start_pos > 0) {
-    ST_ADVANCE(s, start_pos, enc);
+  if (offset) {
+    ST_ADVANCE(s, offset, enc);
   }
 
   e = s;
-  st_len_t len = end_pos - start_pos;
-  ST_ADVANCE(e, len, enc);
+  if (length) {
+    ST_ADVANCE(e, length, enc);
+  }
 
   *start = s;
   *end = e;

@@ -28,50 +28,52 @@
 #include "stringc.h"
 // TODO add st_len_t len (to search always inside a substring)
 // Finds position of first occurrence of a string within another */
-st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
-  // TODO return -1 ??
-  // Offset not contained in string
-  assert(offset >= 0);
-  assert(offset < haystack->length);
-  assert(haystack->encoding == needle->encoding);
+st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
+  st_len_t length) {
+  // caches
+  st_len_t nlen = needle->length;
 
-  if (haystack->length == 0) {
+  // working range
+  st__calc_range(haystack->length, &offset, &length);
+  length -= nlen;
+
+  // needle greater than substr?
+  if (length < 0) {
     return -1;
   }
 
-  char* p = haystack->value;
-  char* pp;
-  size_t end = haystack->used - needle->used;
-  char* endp = p + end /*+ 1*/;
+  char* start;
+  char* end;
+  st__get_char_range(haystack, offset, length, &start, &end);
+
+  // first char to comare
   char* needle_val = needle->value;
   st_len_t needle_len = needle->length;
   st_len_t needle_len_m1 = needle_len - 1;
-
-  if (offset) {
-    ST_ADVANCE(p, offset, haystack->encoding);
-  }
-
-  // first char to comare
-  st_uc_t first = *needle->value;
+  char* pp;
+  st_uc_t first = *needle_val;
   // last char to comare
-  st_uc_t last = *(needle->value + needle->used - 1);
+  st_uc_t last = *(needle_val + needle->used - 1);
 
   st_enc_t enc = haystack->encoding;
 
+  st_len_t end_len;
   switch(enc) {
   case st_enc_binary:
   case st_enc_ascii:
   case st_enc_ucs4be:
 
-    while (p <= endp) {
-      pp = st__memchr(p, first, end);
+    end_len = end - start;
+
+    while (start <= end) {
+      pp = st__memchr(start, first, end - start);
       if (!pp) {
         return -1;
       }
 
 
-      end -= pp - p;
-      if (end < needle_len) {
+      end_len -= pp - start;
+      if (end_len < needle_len) {
         return -1;
       }
 
@@ -84,19 +86,19 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
             : pp - haystack->value;
         }
       }
-      p = pp + 1;
+      start = pp + 1;
     }
 
     return -1;
 
   case st_enc_utf8:
 
-    while (p <= endp) {
-      if (!memcmp(needle_val, p, needle_len)) {
+    while (start <= end) {
+      if (!memcmp(needle_val, start, needle_len)) {
         return offset;
       }
 
-      ST_UTF8_FOWARD(p);
+      ST_UTF8_FOWARD(start);
       ++offset;
     }
 
@@ -105,7 +107,7 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset) {
 }
 
 bool st_start_with(string* haystack, string* needle) {
-  return st_pos(haystack, needle, 0) == 0;
+  return st_pos(haystack, needle, 0, 0) == 0;
 }
 
 bool st_end_with(string* haystack, string* needle) {
@@ -114,11 +116,11 @@ bool st_end_with(string* haystack, string* needle) {
     return false;
   }
 
-  return st_pos(haystack, needle, offset) == offset;
+  return st_pos(haystack, needle, offset, 0) == offset;
 }
 
 bool st_contains(string* haystack, string* needle) {
-  return st_pos(haystack, needle, 0) >= 0;
+  return st_pos(haystack, needle, 0, 0) >= 0;
 }
 
 //TODO do it!
@@ -138,7 +140,7 @@ st_len_t st_ipos(string* haystack, string* needle, st_len_t offset) {
   string* haystack_dup = st_lower(haystack);
   string* needle_dup = st_lower(needle_dup);
 
-  st_len_t out = st_pos(haystack_dup, needle_dup, offset);
+  st_len_t out = st_pos(haystack_dup, needle_dup, offset, 0);
 
   st_delete(&needle_dup);
   st_delete(&haystack_dup);
