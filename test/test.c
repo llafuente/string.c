@@ -55,6 +55,7 @@ test_ ## test(); \
 
 
 extern void test_memory_funcs();
+extern void test_case();
 extern void test_repeat();
 extern void test_itr_chars();
 extern void test_utf8_invalid();
@@ -75,6 +76,7 @@ extern void test_encoding();
 int main(int argc, const char * argv[]) {
 
   RUN_TEST(memory_funcs);
+  RUN_TEST(case);
   RUN_TEST(repeat);
   RUN_TEST(utf8_lenc);
   RUN_TEST(utf8_invalid);
@@ -141,6 +143,24 @@ void test_memory_funcs() {
   st_delete(&s2);
 
   st_delete(&s);
+}
+
+void test_case() {
+  string* s = st_newc("abc", st_enc_utf8);
+  string* up = st_upper(s);
+  st_debug(up);
+  CHK_ALL(up, "ABC", st_enc_utf8);
+
+  st_delete(&s);
+  st_delete(&up);
+
+  s = st_newc("áéíóú", st_enc_utf8);
+  up = st_upper(s);
+  st_debug(up);
+  CHK_ALL(up, "ÁÉÍÓÚ", st_enc_utf8);
+
+  st_delete(&s);
+  st_delete(&up);
 }
 
 void test_repeat() {

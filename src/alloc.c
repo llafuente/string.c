@@ -41,6 +41,19 @@ string* st_new(size_t cap, st_enc_t enc) {
   return s;
 }
 
+string* st_new_max(st_len_t len, st_enc_t enc) {
+  switch(enc) {
+    case st_enc_binary:
+    case st_enc_ascii:
+      return st_new(len, enc);
+    case st_enc_utf8:
+    case st_enc_ucs4be:
+      return st_new(len * 4, enc);
+  }
+
+  return 0; // WTF!
+}
+
 //TODO use utf8_len()
 string* st_newc(const char* src, st_enc_t enc) {
   STRING_GET_CHAR_DATA(src, enc, len, used);

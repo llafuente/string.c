@@ -22,6 +22,7 @@ libstringc_la_SOURCES = src/append.c \
                   src/hex2bin.c \
                   src/internal.c \
                   src/iterators.c \
+                  src/picobase.c \
                   src/repeat.c \
                   src/search.c \
                   src/shuffle.c \
