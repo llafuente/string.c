@@ -30,7 +30,7 @@
 string* st_new(size_t cap, st_enc_t enc) {
   size_t size = cap + 1; // null terminated!
 
-  string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
+  string* s = (string*)__STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
 
   s->length = 0;
   s->used = 0;
@@ -42,27 +42,28 @@ string* st_new(size_t cap, st_enc_t enc) {
 }
 
 string* st_new_max(st_len_t len, st_enc_t enc) {
-  switch(enc) {
-    case st_enc_binary:
-    case st_enc_ascii:
-      return st_new(len, enc);
-    case st_enc_utf8:
-    case st_enc_ucs4be:
-      return st_new(len * 4, enc);
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+    return st_new(len, enc);
+  case st_enc_utf8:
+  case st_enc_ucs4be:
+    return st_new(len * 4, enc);
   }
 
   return 0; // WTF!
 }
 
-//TODO use utf8_len()
+// TODO use utf8_len()
 string* st_newc(const char* src, st_enc_t enc) {
   STRING_GET_CHAR_DATA(src, enc, len, used);
   size_t size = used + 1; // null terminated!
 
-//printf("%s\n",  src);
-//printf("len[%zu] used[%zu] enc[%d]", len, used, enc);
+  // printf("%s\n",  src);
+  // printf("len[%zu] used[%zu] enc[%d]", len, used, enc);
 
-  string* s = (string*) __STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));
+  string* s =
+      (string*)__STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));
 
   s->length = len;
   s->used = used;
@@ -74,21 +75,22 @@ string* st_newc(const char* src, st_enc_t enc) {
 }
 
 void st_resize(string** src, size_t cap) {
-  //printf("before st_resize %p - %lu\n", *src, cap);
+  // printf("before st_resize %p - %lu\n", *src, cap);
 
   size_t size = cap + 1; // null terminated!
 
-  *src = (string*) __STRING__REALLOCATOR(*src, sizeof(string) + size * sizeof(char));
+  *src = (string*)__STRING__REALLOCATOR(*src,
+                                        sizeof(string) + size * sizeof(char));
 
   (*src)->capacity = size;
 
-  //printf("after st_resize %p\n", *src);
+  // printf("after st_resize %p\n", *src);
 }
 
 string* st_clone(const string* src) {
   size_t size = sizeof(string) + src->capacity * sizeof(char);
 
-  string* out = (string*) __STRING_ALLOCATOR(size);
+  string* out = (string*)__STRING_ALLOCATOR(size);
 
   memcpy(out, src, size);
 
@@ -103,7 +105,7 @@ string* st_rclone(const string* src, size_t cap) {
   size_t size = sizeof(string) + cap * sizeof(char);
   size_t src_size = sizeof(string) + src->capacity * sizeof(char);
 
-  string* out = (string*) __STRING_ALLOCATOR(size);
+  string* out = (string*)__STRING_ALLOCATOR(size);
 
   memcpy(out, src, src_size); // copy null
   out->capacity = cap;
@@ -136,12 +138,12 @@ string* st_clonec(const char* src, size_t len) {
 */
 
 void st_copy(string** out, string* src) {
-  //printf("st_copy %p - %p\n", *out, src);
+  // printf("st_copy %p - %p\n", *out, src);
 
   size_t src_len = src->length;
 
   if (src_len > (*out)->capacity) {
-    //st_resize(out, src_len);
+    // st_resize(out, src_len);
     st_resize(out, 50);
   }
 
@@ -155,17 +157,17 @@ void st_copy(string** out, string* src) {
 }
 
 void st_copyc(string** out, const char* src, st_enc_t enc) {
-  //printf("st_copy %p - chars* %p\n", *out, src);
+  // printf("st_copy %p - chars* %p\n", *out, src);
   STRING_GET_CHAR_DATA(src, enc, len, used);
 
   string* cache = *out;
 
-  //printf("capacity check %zu - %zu\n", cache->capacity, len);
+  // printf("capacity check %zu - %zu\n", cache->capacity, len);
   if (len > cache->capacity) {
     st_resize(out, len);
     cache = *out;
   }
-  //printf("st_copy %p @ %p\n", cache, cache->value);
+  // printf("st_copy %p @ %p\n", cache, cache->value);
   cache->length = len;
   cache->used = used;
   cache->encoding = enc;
@@ -173,7 +175,7 @@ void st_copyc(string** out, const char* src, st_enc_t enc) {
 }
 
 void st_delete(string** out) {
-  __STRING_DEALLOCATOR((void*) *out);
+  __STRING_DEALLOCATOR((void*)*out);
   *out = __STRING_MEM_FREE_ADDR; // when free set to a know address
 }
 

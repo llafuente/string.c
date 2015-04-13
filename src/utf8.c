@@ -26,7 +26,7 @@
 /// @file
 
 #include "stringc.h"
-//TODO test performance using (also if are compatible)
+// TODO test performance using (also if are compatible)
 /*
 if ((code & 0xffffff80) == 0) return 1;
 else if ((code & 0xfffff800) == 0) return 2;
@@ -37,29 +37,31 @@ else if ((code & 0x80000000) == 0) return 6;
 */
 
 const char string_utf8_skip_data[256] = {
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-  3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,1,1
-};
-const char * const string_utf8_skip = string_utf8_skip_data;
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1};
+const char* const string_utf8_skip = string_utf8_skip_data;
 
-size_t string_utf8_lenc(const char* src, size_t *used_bytes) {
+size_t string_utf8_lenc(const char* src, size_t* used_bytes) {
   size_t len = 0;
-  const char *p = src;
+  const char* p = src;
   char jump;
   size_t capacity = 0;
 
   while (*p != '\0') {
-    //printf("%c @%p %d\n", *p, p, utf8_next(p));
+    // printf("%c @%p %d\n", *p, p, utf8_next(p));
     jump = string_utf8_jump_next(p);
     p += jump;
     capacity += jump;
-    //printf("%c\n", *p);
+    // printf("%c\n", *p);
     ++len;
   }
   //++capacity; do not include '\0'!
@@ -85,11 +87,11 @@ int string_utf8_next_pos(unsigned char chr) {
   return -1;
 }
 
-char* string_utf8_invalid(const unsigned char *str, size_t len) {
+char* string_utf8_invalid(const unsigned char* str, size_t len) {
   size_t i = 0;
   int continuation_bytes = 0;
   unsigned char cache;
-  const unsigned char *end = str + len;
+  const unsigned char* end = str + len;
 
   while (str < end) {
     cache = *str;
@@ -97,45 +99,43 @@ char* string_utf8_invalid(const unsigned char *str, size_t len) {
     continuation_bytes = string_utf8_next_pos(cache);
 
     if (continuation_bytes < 0) {
-      return (char*) str;
+      return (char*)str;
     }
 
     ++str;
-    while (i < len && continuation_bytes > 0
-      && (cache = *str) >= 0x80
-      && cache <= 0xBF) {
+    while (i < len && continuation_bytes > 0 && (cache = *str) >= 0x80 &&
+           cache <= 0xBF) {
       ++str;
       continuation_bytes -= 1;
     }
 
     if (continuation_bytes != 0) {
-      return (char*) str;
+      return (char*)str;
     }
   }
 
   return 0;
 }
 
-
 // TODO i'm almost sure that this could be improved with a sum == X
 // same technique used in ST_UTF8_COUNT_BYTES
 bool st_char_eq_utf8(char* a, char* b) {
-  st_uc_t ac = (st_uc_t) *a;
-  st_uc_t bc = (st_uc_t) *b;
+  st_uc_t ac = (st_uc_t)*a;
+  st_uc_t bc = (st_uc_t)*b;
 
   if (ac != bc) {
     return false;
   }
 
-  if (ac >= 0xc0 && *(a+1) != *(b+1)) {
+  if (ac >= 0xc0 && *(a + 1) != *(b + 1)) {
     return false;
   }
 
-  if (ac >= 0xe0 && *(a+2) != *(b+2)) {
+  if (ac >= 0xe0 && *(a + 2) != *(b + 2)) {
     return false;
   }
 
-  if (ac >= 0xf0 && *(a+3) != *(b+3)) {
+  if (ac >= 0xf0 && *(a + 3) != *(b + 3)) {
     return false;
   }
 

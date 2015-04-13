@@ -27,12 +27,12 @@
 
 #include "stringc.h"
 
-void st_charmask(st_uc_t *input, size_t len, char *mask) {
+void st_charmask(st_uc_t* input, size_t len, char* mask) {
   st_uc_t* end;
 
   memset(mask, 0, 256);
 
-  for (end = input+len; input < end; ++input) {
+  for (end = input + len; input < end; ++input) {
     mask[*input] = 1;
   }
 }
@@ -42,25 +42,21 @@ st_len_t st_length(const char* src, st_enc_t enc) {
     return strlen(src);
   } else if (enc == st_enc_utf8) {
     size_t used;
-    return string_utf8_lenc((const char*) src, &used);
+    return string_utf8_lenc((const char*)src, &used);
   }
 
   return -1;
 }
 
-size_t st_capacity(const char* src, st_enc_t enc) {
-  return strlen(src);
-}
+size_t st_capacity(const char* src, st_enc_t enc) { return strlen(src); }
 
-
-void st_zeronull(string* str) {
-  str->value[str->used] = '\0';
-}
+void st_zeronull(string* str) { str->value[str->used] = '\0'; }
 
 void st_debug(string* str) {
-  printf("st_debug @%p, length[%zu] used[%zu] size[%zu] enc[%d]\n", str, str->length, str->used, str->capacity, str->encoding);
+  printf("st_debug @%p, length[%zu] used[%zu] size[%zu] enc[%d]\n", str,
+         str->length, str->used, str->capacity, str->encoding);
 
-  char *p = str->value;
+  char* p = str->value;
   size_t size = str->capacity;
   printf("\nhexadecimal\n");
   int n;
@@ -81,7 +77,7 @@ void st_debug(string* str) {
     }
   }
   printf("|\n");
-  switch(str->encoding) {
+  switch (str->encoding) {
   case st_enc_binary:
   case st_enc_ascii:
     for (n = 0; n < size; ++n) {
@@ -99,7 +95,7 @@ void st_debug(string* str) {
   case st_enc_ucs4be:
     // encode wide char -> utf8
     // print
-      break;
+    break;
   }
   printf("\nprintf %s\n", str->value);
 }

@@ -30,8 +30,8 @@
 string* string_def_trim_mask = 0;
 
 // TODO review, cache charmask for !what_str
-string* st_trim(const string *str, string *what_str, int mode) {
-  const char *c = str->value;
+string* st_trim(const string* str, string* what_str, int mode) {
+  const char* c = str->value;
   size_t len = str->length;
   size_t i;
   size_t trimmed = 0;
@@ -42,7 +42,7 @@ string* st_trim(const string *str, string *what_str, int mode) {
     }
     what_str = string_def_trim_mask;
   }
-  const char *what = what_str->value;
+  const char* what = what_str->value;
   size_t what_len = what_str->length;
 
   if (what_len == 1) {

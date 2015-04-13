@@ -41,7 +41,7 @@ string* st_shuffle(string* src, size_t len) {
   char* str = out->value;
 
   while (--len) {
-    rnd_idx = (int) (len * (rand() / (RAND_MAX + 1.0)));
+    rnd_idx = (int)(len * (rand() / (RAND_MAX + 1.0)));
 
     if (rnd_idx != len) {
       temp = str[len];

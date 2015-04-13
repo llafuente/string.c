@@ -36,10 +36,9 @@ int st_compare(const string* a, const string* b) {
     return -1;
   }
 
-  const char *pa = a->value,
-    *pb = b->value;
+  const char* pa = a->value, *pb = b->value;
 
-  while(*pa && (*pa == *pb)) {
+  while (*pa && (*pa == *pb)) {
     ++pa;
     ++pb;
   }

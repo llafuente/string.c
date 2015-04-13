@@ -33,7 +33,7 @@ bool string_char(string** out, const string* str, st_len_t pos) {
   const char* s = str->value + pos;
   char* d = (*out)->value;
 
-  while(pos--) {
+  while (pos--) {
     s += string_utf8_jump_next(s);
   }
 
@@ -47,61 +47,55 @@ bool string_char(string** out, const string* str, st_len_t pos) {
 
 // unsafe!
 // same encoding
-st_len_t st_copy_usub(
-  string* out, st_len_t initial_byte,
-  const string* src, st_len_t start, size_t todo
-) {
+st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
+                      st_len_t start, size_t todo) {
   char* dst = out->value + initial_byte;
   const char* itr = src->value;
-
 
   assert(out->encoding == src->encoding);
   st_enc_t enc = out->encoding;
 
   st_len_t done = 0;
 
-  switch(enc) {
-    case st_enc_binary:
-    case st_enc_ascii: {
-      // \0 + end
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii: {
+    // \0 + end
 
-      itr += start;
-      const char* end = itr + todo;
+    itr += start;
+    const char* end = itr + todo;
 
-      while (*itr && itr < end) {
-        st_copy_CHARS(itr, dst, 1);
-        ++done;
-      }
-      *dst = '\0';
+    while (*itr && itr < end) {
+      st_copy_CHARS(itr, dst, 1);
+      ++done;
     }
-    break;
-    case st_enc_utf8: {
-      // \0 + end
-      while(start--) {
-        itr += string_utf8_jump_next(itr);
-      }
-
-      while (*itr && todo--) {
-        int jump = string_utf8_jump_next(itr);
-        done += jump;
-
-        st_copy_CHARS(itr, dst, jump);
-      }
-      *dst = '\0';
+    *dst = '\0';
+  } break;
+  case st_enc_utf8: {
+    // \0 + end
+    while (start--) {
+      itr += string_utf8_jump_next(itr);
     }
-    break;
-    case st_enc_ucs4be: {
-      // \0 + end
-      itr += start * 4;
-      const char* end = itr + (todo * 4);
 
-      while (*itr && itr < end) {
-        st_copy_CHARS(itr, dst, 4);
-        done += 4;
-      }
-      *dst = '\0';
+    while (*itr && todo--) {
+      int jump = string_utf8_jump_next(itr);
+      done += jump;
+
+      st_copy_CHARS(itr, dst, jump);
     }
-    break;
+    *dst = '\0';
+  } break;
+  case st_enc_ucs4be: {
+    // \0 + end
+    itr += start * 4;
+    const char* end = itr + (todo * 4);
+
+    while (*itr && itr < end) {
+      st_copy_CHARS(itr, dst, 4);
+      done += 4;
+    }
+    *dst = '\0';
+  } break;
   }
 
   return done;
@@ -129,7 +123,6 @@ string* st_sub(const string* str, int start, int end) {
   }
 
   len = end - start;
-
 
   out_byte_ptr = st_copy_usub(out, out_byte_ptr, str, start, len);
   out->used += out_byte_ptr;

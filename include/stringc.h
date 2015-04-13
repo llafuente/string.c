@@ -27,9 +27,9 @@
 #include <assert.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
-# include "stdint-msvc2008.h"
+#include "stdint-msvc2008.h"
 #else
-# include <stdint.h>
+#include <stdint.h>
 #endif
 
 #include <stddef.h>
@@ -42,7 +42,7 @@
 #ifndef __STRINGC_TYPE__
 #define __STRINGC_TYPE__
 
-//TODO add static-dynamic link suppor
+// TODO add static-dynamic link suppor
 #define ST_EXTERN extern
 
 /// string length type.
@@ -53,9 +53,9 @@ typedef uint32_t st_uc4_t;
 /// supported encodings
 typedef enum {
   st_enc_binary, ///< Binary encoding for abuse in user land
-  st_enc_ascii, ///< ASCII
-  st_enc_utf8, ///< UTF-8
-  st_enc_ucs4be ///< UCS-4BE, UCS-4 big endian
+  st_enc_ascii,  ///< ASCII
+  st_enc_utf8,   ///< UTF-8
+  st_enc_ucs4be  ///< UCS-4BE, UCS-4 big endian
 } st_enc_t;
 
 /// string type, use value[] at the end, so only one malloc is enough
@@ -72,16 +72,18 @@ typedef struct string_s {
   char value[];
 } string;
 
-typedef void (*st_char_itr_cb)(const string* character, st_len_t pos, const string* src);
+typedef void (*st_char_itr_cb)(const string* character, st_len_t pos,
+                               const string* src);
 
-typedef void (*st_char_map_cb)(string* character, st_len_t pos, const string* src);
+typedef void (*st_char_map_cb)(string* character, st_len_t pos,
+                               const string* src);
 
 //
 // shared globals
 //
 extern string* string_def_trim_mask;
 extern const char string_utf8_skip_data[256];
-extern const char * const string_utf8_skip;
+extern const char* const string_utf8_skip;
 
 //
 // MACROS
@@ -90,154 +92,157 @@ extern const char * const string_utf8_skip;
 #define __STRING_MEM_FREE_ADDR 0
 
 #ifndef __STRING_ALLOCATOR
-  #define __STRING_ALLOCATOR malloc
+#define __STRING_ALLOCATOR malloc
 #endif
 
 #ifndef __STRING__REALLOCATOR
-  #define __STRING__REALLOCATOR realloc
+#define __STRING__REALLOCATOR realloc
 #endif
 
 #ifndef __STRING_DEALLOCATOR
-  #define __STRING_DEALLOCATOR free
+#define __STRING_DEALLOCATOR free
 #endif
 
-#define st_copy_CHARS(src, dst, i) \
-{ \
-  const char* __end = src + i; \
-  while (src < __end) { \
-    *dst = *src; \
-    ++src; \
-    ++dst; \
-  } \
-}
+#define st_copy_CHARS(src, dst, i)                                             \
+  {                                                                            \
+    const char* __end = src + i;                                               \
+    while (src < __end) {                                                      \
+      *dst = *src;                                                             \
+      ++src;                                                                   \
+      ++dst;                                                                   \
+    }                                                                          \
+  }
 
-#define STRING_LOOP(string_val, itr) \
-const char* itr = string_val->value ; \
-const char* __end = itr + string_val->used; \
-while (itr < __end)
+#define STRING_LOOP(string_val, itr)                                           \
+  const char* itr = string_val->value;                                         \
+  const char* __end = itr + string_val->used;                                  \
+  while (itr < __end)
 
-#define STRING_LOOP_START(string_val, itr, start) \
-const char* itr = string_val->value + start; \
-const char* __end = itr + string_val->used - start; \
-while (itr < __end)
+#define STRING_LOOP_START(string_val, itr, start)                              \
+  const char* itr = string_val->value + start;                                 \
+  const char* __end = itr + string_val->used - start;                          \
+  while (itr < __end)
 
-#define STRING_GET_CHAR_DATA(src, enc, len, used) \
-st_len_t len; \
-size_t used; \
-if (enc == st_enc_ascii) { \
-  len = used = strlen(src); \
-} else if (enc == st_enc_utf8) { \
-  len = string_utf8_lenc((const char*) src, &used); \
-} else { \
-  assert(false); \
-} \
+#define STRING_GET_CHAR_DATA(src, enc, len, used)                              \
+  st_len_t len;                                                                \
+  size_t used;                                                                 \
+  if (enc == st_enc_ascii) {                                                   \
+    len = used = strlen(src);                                                  \
+  } else if (enc == st_enc_utf8) {                                             \
+    len = string_utf8_lenc((const char*)src, &used);                           \
+  } else {                                                                     \
+    assert(false);                                                             \
+  }
 
-#define STRING_ADVANCE(src, amount) \
-src += amount; \
-
+#define STRING_ADVANCE(src, amount) src += amount;
 
 //
 // MACROS (good ones)
 //
 
-#define ST_UTF8_COUNT_BYTES(byte) \
-  (1 + (((byte)>=0xc0)+((byte)>=0xe0)+((byte)>=0xf0)))
+#define ST_UTF8_COUNT_BYTES(byte)                                              \
+  (1 + (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0)))
 
-#define ST_UTF8_COUNT_TRAIL(byte) \
-  (((byte)>=0xc0)+((byte)>=0xe0)+((byte)>=0xf0))
+#define ST_UTF8_COUNT_TRAIL(byte)                                              \
+  (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0))
 
-#define ST_UTF8_IS_TRAIL(c) (((c)&0xc0)==0x80)
+#define ST_UTF8_IS_TRAIL(c) (((c)&0xc0) == 0x80)
 
-#define ST_UTF8_IS_LEAD(c) ((st_uc_t)((c)-0xc0)<0x3e)
+#define ST_UTF8_IS_LEAD(c) ((st_uc_t)((c)-0xc0) < 0x3e)
 
-#define ST_UTF8_BACK(s) \
-  --s; while(ST_UTF8_IS_TRAIL(*s)) { --s; }
+#define ST_UTF8_BACK(s)                                                        \
+  --s;                                                                         \
+  while (ST_UTF8_IS_TRAIL(*s)) {                                               \
+    --s;                                                                       \
+  }
 
-#define ST_UTF8_FOWARD(s) \
-  s+= ST_UTF8_COUNT_BYTES((st_uc_t) *s)
+#define ST_UTF8_FOWARD(s) s += ST_UTF8_COUNT_BYTES((st_uc_t)*s)
 
 extern const st_uc_t st_bom[];
 
-#define ST_UTF8_HAS_BOM(s) \
-  *s == st_bom[0] && *(s+1) == st_bom[1] && *(s+2) == st_bom[2]
+#define ST_UTF8_HAS_BOM(s)                                                     \
+  *s == st_bom[0] && *(s + 1) == st_bom[1] && *(s + 2) == st_bom[2]
 
 /// advance pointer to amount positions ASCII
-#define ST_ADVANCE_ASCII(s, amount) \
-  s += amount
+#define ST_ADVANCE_ASCII(s, amount) s += amount
 
 /// advance pointer to amount positions UTF8
-#define ST_ADVANCE_UTF8(s, amount) \
-  { \
-    st_len_t tmp = amount; \
-    while(tmp--) { ST_UTF8_FOWARD(s); } \
-  } \
+#define ST_ADVANCE_UTF8(s, amount)                                             \
+  {                                                                            \
+    st_len_t tmp = amount;                                                     \
+    while (tmp--) {                                                            \
+      ST_UTF8_FOWARD(s);                                                       \
+    }                                                                          \
+  }
 
 /// advance pointer to amount positions UCS4BE
-#define ST_ADVANCE_UCS4BE(s, amount) \
-  s += amount * 4
+#define ST_ADVANCE_UCS4BE(s, amount) s += amount * 4
 
 /// advance pointer to amount positions
-#define ST_ADVANCE(s, amount, enc) \
-  switch (enc) { \
-    case st_enc_binary: \
-    case st_enc_ascii: ST_ADVANCE_ASCII(s, amount); break; \
-    case st_enc_utf8: ST_ADVANCE_UTF8(s, amount); break; \
-    case st_enc_ucs4be: ST_ADVANCE_UCS4BE(s, amount); break; \
-  } \
+#define ST_ADVANCE(s, amount, enc)                                             \
+  switch (enc) {                                                               \
+  case st_enc_binary:                                                          \
+  case st_enc_ascii:                                                           \
+    ST_ADVANCE_ASCII(s, amount);                                               \
+    break;                                                                     \
+  case st_enc_utf8:                                                            \
+    ST_ADVANCE_UTF8(s, amount);                                                \
+    break;                                                                     \
+  case st_enc_ucs4be:                                                          \
+    ST_ADVANCE_UCS4BE(s, amount);                                              \
+    break;                                                                     \
+  }
 
-#define ST_CHAR_CP_ASCII(dst, src, null_end) \
-  dst[0] = src[0];                           \
-  if (null_end) {                            \
-    dst[1] = '\0';                           \
-  }                                          \
+#define ST_CHAR_CP_ASCII(dst, src, null_end)                                   \
+  dst[0] = src[0];                                                             \
+  if (null_end) {                                                              \
+    dst[1] = '\0';                                                             \
+  }
 
-#define ST_CHAR_CP_UCS4BE(dst, src, null_end) \
-  dst[0] = src[0];                            \
-  dst[1] = src[1];                            \
-  dst[2] = src[2];                            \
-  dst[3] = src[3];                            \
-  if (null_end) {                             \
-    dst[4] = '\0';                            \
-  }                                           \
+#define ST_CHAR_CP_UCS4BE(dst, src, null_end)                                  \
+  dst[0] = src[0];                                                             \
+  dst[1] = src[1];                                                             \
+  dst[2] = src[2];                                                             \
+  dst[3] = src[3];                                                             \
+  if (null_end) {                                                              \
+    dst[4] = '\0';                                                             \
+  }
 
-#define ST_CHAR_CP_UTF8(dst, src, null_end) \
-  {                                         \
-    st_uc_t c = (st_uc_t) *src;             \
-                                            \
-    dst[0] = src[0];                        \
-    if (c >= 0xc0) {                        \
-      dst[1] = src[1];                      \
-      if (c >= 0xe0) {                      \
-        dst[2] = src[2];                    \
-        if (c >= 0xf0) {                    \
-          dst[3] = src[3];                  \
-          dst[4] = '\0';                    \
-        } else {                            \
-          dst[3] = '\0';                    \
-        }                                   \
-      } else {                              \
-        dst[2] = '\0';                      \
-      }                                     \
-    } else {                                \
-      dst[1] = '\0';                        \
-    }                                       \
-  }                                         \
+#define ST_CHAR_CP_UTF8(dst, src, null_end)                                    \
+  {                                                                            \
+    st_uc_t c = (st_uc_t)*src;                                                 \
+                                                                               \
+    dst[0] = src[0];                                                           \
+    if (c >= 0xc0) {                                                           \
+      dst[1] = src[1];                                                         \
+      if (c >= 0xe0) {                                                         \
+        dst[2] = src[2];                                                       \
+        if (c >= 0xf0) {                                                       \
+          dst[3] = src[3];                                                     \
+          dst[4] = '\0';                                                       \
+        } else {                                                               \
+          dst[3] = '\0';                                                       \
+        }                                                                      \
+      } else {                                                                 \
+        dst[2] = '\0';                                                         \
+      }                                                                        \
+    } else {                                                                   \
+      dst[1] = '\0';                                                           \
+    }                                                                          \
+  }
 
-
-#define ST_CHAR_CP(dst, src, amount, null_end)       \
-  {                                                  \
-    st_len_t tmp = amount;                           \
-                                                     \
-    if (null_end) {                                  \
-      dst[tmp + 1] = src[tmp + 1];                   \
-    }                                                \
-                                                     \
-    while(tmp--) {                                   \
-      dst[tmp] = src[tmp];                           \
-    }                                                \
-  }                                                  \
-
-//    dst[0] = src[0];                                 \
+#define ST_CHAR_CP(dst, src, amount, null_end)                                 \
+  {                                                                            \
+    st_len_t tmp = amount;                                                     \
+                                                                               \
+    if (null_end) {                                                            \
+      dst[tmp + 1] = src[tmp + 1];                                             \
+    }                                                                          \
+                                                                               \
+    while (tmp--) {                                                            \
+      dst[tmp] = src[tmp];                                                     \
+    }                                                                          \
+  }
 
 //
 // utils.c
@@ -302,7 +307,6 @@ ST_EXTERN void st_append(string** out, string* src);
  */
 ST_EXTERN string* st_concat(string* first, string* second);
 
-
 //
 // bin2hex.c
 //
@@ -313,7 +317,8 @@ ST_EXTERN string* st_concat(string* first, string* second);
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  * @see st_hex2bin
- * @return Returns an ASCII string containing the hexadecimal representation of str
+ * @return Returns an ASCII string containing the hexadecimal representation of
+ *str
  */
 ST_EXTERN string* st_bin2hex(const string* src);
 
@@ -348,7 +353,6 @@ ST_EXTERN int st_compare(const string* a, const string* b);
  */
 ST_EXTERN string* string_encode(string* src, st_enc_t to_enc);
 
-
 //
 // to.c
 //
@@ -362,7 +366,7 @@ ST_EXTERN string* string_encode(string* src, st_enc_t to_enc);
  * @param base
  * @return number
  */
-ST_EXTERN double st_base2number(string *src, int base);
+ST_EXTERN double st_base2number(string* src, int base);
 
 /// binary to decimal
 #define st_bin2dec(value) st_number2base(value, 2)
@@ -427,7 +431,7 @@ size_t st_ord(const string* str, st_len_t offset);
  * @param src
  * @return new string
  */
-ST_EXTERN string *st_hex2bin(string *src);
+ST_EXTERN string* st_hex2bin(string* src);
 
 //
 // iterators.c
@@ -592,16 +596,23 @@ ST_EXTERN string* st_shuffle(string* src, size_t len);
 //
 
 /**
- * Extracts the characters from a string, between two specified indices, and returns the new sub string.
+ * Extracts the characters from a string, between two specified indices, and
+ *returns the new sub string.
  *
  * @param str
  * @param start
- *   If non-negative, the returned string will start at the start'th position in string, counting from zero
- *   If negative, the returned string will start at the start'th character from the end of string.
+ *   If non-negative, the returned string will start at the start'th position in
+ *string, counting from zero
+ *   If negative, the returned string will start at the start'th character from
+ *the end of string.
  * @param end [-length, +length]
- *   If positive, the string returned will contain at most length characters beginning from start (depending on the length of string).
- *   If is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes the position of this truncation or beyond.
- *   If length is 0 the substring starting from start until the end of the string will be returned.
+ *   If positive, the string returned will contain at most length characters
+ *beginning from start (depending on the length of string).
+ *   If is negative, then that many characters will be omitted from the end of
+ *string (after the start position has been calculated when a start is
+ *negative). If start denotes the position of this truncation or beyond.
+ *   If length is 0 the substring starting from start until the end of the
+ *string will be returned.
  * @return new string
  */
 ST_EXTERN string* st_sub(const string* str, int start, int end);
@@ -624,24 +635,25 @@ ST_EXTERN string* st_sub(const string* str, int start, int end);
  *    3 trim both
  * @return new string
  */
-ST_EXTERN string* st_trim(const string *str, string *character_mask, int mode);
+ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 
 /// alias st_trim (right only)
-#define st_chop(str, character_mask) st_trim (str, character_mask, 2)
+#define st_chop(str, character_mask) st_trim(str, character_mask, 2)
 
 /// alias st_trim (right only)
-#define st_rtrim(str, character_mask) st_trim (str, character_mask, 2)
+#define st_rtrim(str, character_mask) st_trim(str, character_mask, 2)
 
 /// alias st_trim (left only)
-#define st_ltrim(str, character_mask) st_trim (str, character_mask, 1)
+#define st_ltrim(str, character_mask) st_trim(str, character_mask, 1)
 
 //
 // utf8.c
 //
 
-#define string_utf8_next_char(p) (char *)((p) + string_utf8_skip[*(unsigned char *)(p)])
+#define string_utf8_next_char(p)                                               \
+  (char*)((p)+string_utf8_skip[*(unsigned char*)(p)])
 
-#define string_utf8_jump_next(p) string_utf8_skip[*(unsigned char *)(p)]
+#define string_utf8_jump_next(p) string_utf8_skip[*(unsigned char*)(p)]
 
 /**
  * Return utf8 length and capacity
@@ -652,7 +664,7 @@ ST_EXTERN string* st_trim(const string *str, string *character_mask, int mode);
  *   Optional, 0 means you don't want the value
  * @return string length utf-8 encoded
  */
-ST_EXTERN size_t string_utf8_lenc(const char* src, size_t *out_capacity);
+ST_EXTERN size_t string_utf8_lenc(const char* src, size_t* out_capacity);
 
 /**
  * Check if the given unsigned char * is a valid utf-8 sequence.
@@ -678,7 +690,7 @@ ST_EXTERN size_t string_utf8_lenc(const char* src, size_t *out_capacity);
  * @return
  *   first invalid position found or 0 if success
  */
-ST_EXTERN char* string_utf8_invalid(const unsigned char *str, size_t len);
+ST_EXTERN char* string_utf8_invalid(const unsigned char* str, size_t len);
 
 /**
  * Returns if two utf8 are the same. Comparison is multibyte.
@@ -713,8 +725,8 @@ ST_EXTERN string* st_lower(string* src);
  *  > 0 position of the first occurrence if found
  *  -1 if not found
  */
-ST_EXTERN st_len_t st_pos(string* haystack, string* needle,
-  st_len_t offset, st_len_t len);
+ST_EXTERN st_len_t
+    st_pos(string* haystack, string* needle, st_len_t offset, st_len_t len);
 
 /// alias of st_pos
 /// @see st_pos
@@ -755,8 +767,8 @@ ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
  */
 ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
-
-ST_EXTERN st_len_t st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len);
+ST_EXTERN st_len_t
+    st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len);
 
 //
 // encode.c
@@ -782,7 +794,7 @@ ST_EXTERN string* st_to_utf8(const string* src);
 // picobase.c
 //
 
-ST_EXTERN st_uc4_t st_utf32_uppercase (st_uc4_t utf32);
+ST_EXTERN st_uc4_t st_utf32_uppercase(st_uc4_t utf32);
 ST_EXTERN st_uc4_t st_utf32_lowercase(st_uc4_t utf32);
 
 //
@@ -796,7 +808,7 @@ ST_EXTERN st_uc4_t st_utf32_lowercase(st_uc4_t utf32);
  * @param c
  * @param n
  */
-ST_EXTERN char* st__memchr(const char *s, st_uc_t c, size_t n);
+ST_EXTERN char* st__memchr(const char* s, st_uc_t c, size_t n);
 
 /**
  * Return a pointer to given string offset
@@ -815,18 +827,24 @@ ST_EXTERN char* st__memchr(const char *s, st_uc_t c, size_t n);
 ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
 
 /**
- * Find the range. Range won't be normalized, use st__calc_range
- * before.
- *
+ * Find given range in the string.
+ * Ranges (offset+length) won't be normalized, call st__calc_range before.
  *
  * @param str
  * @param offset
  * @param len
  */
-ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t length, char** start, char** end);
+ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t length,
+                                  char** start, char** end);
 
+/**
+ * utf8 string to utf32 code point
+ */
 ST_EXTERN st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8);
 
+/**
+ * utf32 code point to utf8 string
+ */
 ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 
 /*
@@ -841,6 +859,7 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
  *   < 0 from the end of the string
  *   > 0 length from offset
  */
-ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* offset_length);
+ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset,
+                              st_len_t* offset_length);
 
 #endif

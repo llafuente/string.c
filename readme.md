@@ -40,3 +40,12 @@ make
 ```bash
 make check
 ```
+
+## Style / format
+
+We use clang-format
+To keep coding style sanity, before PR use:
+
+```bash
+format.sh
+```

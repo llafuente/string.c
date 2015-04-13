@@ -29,7 +29,7 @@
 // TODO add st_len_t len (to search always inside a substring)
 // Finds position of first occurrence of a string within another */
 st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
-  st_len_t length) {
+                st_len_t length) {
   // caches
   st_len_t nlen = needle->length;
 
@@ -58,7 +58,7 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
   st_enc_t enc = haystack->encoding;
 
   st_len_t end_len;
-  switch(enc) {
+  switch (enc) {
   case st_enc_binary:
   case st_enc_ascii:
   case st_enc_ucs4be:
@@ -71,7 +71,6 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
         return -1;
       }
 
-
       end_len -= pp - start;
       if (end_len < needle_len) {
         return -1;
@@ -81,9 +80,8 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
       if (last == pp[needle_len_m1]) {
         // compare until last
         if (!memcmp(needle_val, pp, needle_len_m1)) {
-          return (enc == st_enc_ucs4be)
-            ? (pp - haystack->value) * 0.25 // /4
-            : pp - haystack->value;
+          return (enc == st_enc_ucs4be) ? (pp - haystack->value) * 0.25 // /4
+                                        : pp - haystack->value;
         }
       }
       start = pp + 1;
@@ -123,13 +121,14 @@ bool st_contains(string* haystack, string* needle) {
   return st_pos(haystack, needle, 0, 0) >= 0;
 }
 
-//TODO do it!
+// TODO do it!
 #define st_lower
 /**
- * Finds position of first occurrence of a string within another, case insensitive
+ * Finds position of first occurrence of a string within another, case
+ * insensitive
  */
 st_len_t st_ipos(string* haystack, string* needle, st_len_t offset) {
-  //TODO maybe return -1
+  // TODO maybe return -1
   assert(offset > -1);
   assert(offset > haystack->length);
 
@@ -157,51 +156,47 @@ string* st_char_at(const string* src, st_len_t pos) {
   char* dst;
   const char* p = src->value;
 
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+    ST_ADVANCE_ASCII(p, pos);
 
+    out = st_new(1, enc);
+    dst = out->value;
 
-  switch(enc) {
-    case st_enc_binary:
-    case st_enc_ascii:
-      ST_ADVANCE_ASCII(p, pos);
+    ST_CHAR_CP_ASCII(dst, p, true);
 
-      out = st_new(1, enc);
-      dst = out->value;
-
-      ST_CHAR_CP_ASCII(dst, p, true);
-
-      out->length = 1;
-      out->used = 1;
+    out->length = 1;
+    out->used = 1;
     break;
-    case st_enc_utf8:
-      ST_ADVANCE_UTF8(p, pos);
+  case st_enc_utf8:
+    ST_ADVANCE_UTF8(p, pos);
 
-      out = st_new(4, enc);
-      dst = out->value;
+    out = st_new(4, enc);
+    dst = out->value;
 
+    ST_CHAR_CP_UTF8(dst, p, true);
 
-      ST_CHAR_CP_UTF8(dst, p, true);
-
-      out->length = 1;
-      out->used = strlen(dst);
+    out->length = 1;
+    out->used = strlen(dst);
     break;
-    case st_enc_ucs4be:
-      ST_ADVANCE_UCS4BE(p, pos);
+  case st_enc_ucs4be:
+    ST_ADVANCE_UCS4BE(p, pos);
 
-      out = st_new(4, enc);
-      dst = out->value;
+    out = st_new(4, enc);
+    dst = out->value;
 
-      ST_CHAR_CP_UCS4BE(dst, p, true);
-      out->length = 1;
-      out->used = 4;
+    ST_CHAR_CP_UCS4BE(dst, p, true);
+    out->length = 1;
+    out->used = 4;
     break;
   }
 
   return out;
 }
 
-
-
-st_len_t st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len) {
+st_len_t st_rpos(string* haystack, string* needle, st_len_t offset,
+                 st_len_t len) {
   // caches
   st_len_t nlen = needle->length;
 
@@ -215,55 +210,52 @@ st_len_t st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len
   char* end;
   st__get_char_range(haystack, start_pos, end_pos, &start, &end);
 
-  //printf("start [%p] end [%p] \n", start, end);
-  //printf("diff [%ld] \n", end - start);
+  // printf("start [%p] end [%p] \n", start, end);
+  // printf("diff [%ld] \n", end - start);
 
   size_t bytes = needle->used;
 
   char* nval = needle->value;
 
-  //printf("start [%p] end2 [%p] \n", start, end);
-  //printf("diff [%ld] \n", end - start);
+  // printf("start [%p] end2 [%p] \n", start, end);
+  // printf("diff [%ld] \n", end - start);
 
   // loop backwards
-  switch(haystack->encoding) {
-    case st_enc_binary:
-    case st_enc_ascii:
-      while (start <= end) {
-        if (!memcmp(nval, end, bytes)) {
-          return end_pos;
-        }
-
-        --end;
-        --end_pos;
+  switch (haystack->encoding) {
+  case st_enc_binary:
+  case st_enc_ascii:
+    while (start <= end) {
+      if (!memcmp(nval, end, bytes)) {
+        return end_pos;
       }
 
-      return -1;
-    case st_enc_utf8:
+      --end;
+      --end_pos;
+    }
 
-      while (start <= end) {
-        if (!memcmp(nval, end, bytes)) {
-          return end_pos;
-        }
+    return -1;
+  case st_enc_utf8:
 
-        ST_UTF8_BACK(end);
-        --end_pos;
+    while (start <= end) {
+      if (!memcmp(nval, end, bytes)) {
+        return end_pos;
       }
 
-      return -1;
-    case st_enc_ucs4be:
-      while (start <= end) {
-        if (!memcmp(nval, end, bytes)) {
-          return end_pos;
-        }
+      ST_UTF8_BACK(end);
+      --end_pos;
+    }
 
-        end -= 4;
-        --end_pos;
+    return -1;
+  case st_enc_ucs4be:
+    while (start <= end) {
+      if (!memcmp(nval, end, bytes)) {
+        return end_pos;
       }
 
-      return -1;
+      end -= 4;
+      --end_pos;
+    }
+
+    return -1;
   }
-
-
-
 }

@@ -40,7 +40,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   const char* itr = str->value;
   const char* end = itr + str->capacity - 1;
 
-  switch(enc) {
+  switch (enc) {
   case st_enc_binary:
   case st_enc_ascii:
     // \0 + end
@@ -98,7 +98,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
   char* dst;
   const char* end = itr + str->capacity - 1;
 
-  switch(enc) {
+  switch (enc) {
   case st_enc_binary:
   case st_enc_ascii:
     out = st_new(str->length, enc);
@@ -134,7 +134,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
       printf("jump [%ld][%d]\n", pos, jump);
 
       ST_CHAR_CP(bufp, itr, jump, true);
-      itr+=jump; //advance now, to reuse jump later
+      itr += jump; // advance now, to reuse jump later
 
       map_cb(buffer, pos, str);
 
@@ -171,7 +171,6 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     *dst = '\0';
     break;
   }
-
 
   st_delete(&buffer);
 

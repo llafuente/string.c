@@ -29,7 +29,7 @@
 
 // TODO test & handle diff/enc
 void st_append(string** out, string* src) {
-  //printf("string_append %p - %p\n", *out, src);
+  // printf("string_append %p - %p\n", *out, src);
 
   string* cache = *out;
 
@@ -40,7 +40,7 @@ void st_append(string** out, string* src) {
     // out will be reallocated if src is the same we should use it.
     bool same = cache == src;
 
-    //assert(*out == src);
+    // assert(*out == src);
     st_resize(out, cache->used + bytes_to_cpy);
     cache = *out;
     if (same) {
@@ -48,14 +48,12 @@ void st_append(string** out, string* src) {
     }
   }
 
-
   memcpy(cache->value + cache->used, src->value, bytes_to_cpy);
   cache->length += src->length;
   cache->used += bytes_to_cpy;
 
   cache->value[cache->used] = '\0';
 }
-
 
 string* st_concat(string* first, string* second) {
   assert(first->encoding == second->encoding);

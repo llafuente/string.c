@@ -29,13 +29,13 @@
 
 const st_uc_t st_bom[] = {0xef, 0xbb, 0xbf};
 
-char* st__memchr(const char *s, st_uc_t c, size_t n) {
+char* st__memchr(const char* s, st_uc_t c, size_t n) {
   if (n != 0) {
-    const st_uc_t* p = (st_uc_t*) s;
+    const st_uc_t* p = (st_uc_t*)s;
 
     do {
       if (*p++ == c) {
-        return ((char *)(p - 1));
+        return ((char*)(p - 1));
       }
     } while (--n != 0);
   }
@@ -80,16 +80,13 @@ void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* length) {
     *length = *offset + off_len;
   }
 
-  printf("offset = %ld\n", *offset);
-  printf("length = %ld\n", *length);
-
   // overflow?
   assert(*length <= str_length);
 }
 
-
-void st__get_char_range(string* str, st_len_t offset, st_len_t length, char** start, char** end) {
-  char* s =  str->value; // start == 0
+void st__get_char_range(string* str, st_len_t offset, st_len_t length,
+                        char** start, char** end) {
+  char* s = str->value; // start == 0
   char* e;
   st_enc_t enc = str->encoding;
 
@@ -109,7 +106,6 @@ void st__get_char_range(string* str, st_len_t offset, st_len_t length, char** st
   *end = e;
 }
 
-// utf8 chars to utf32 code point
 st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8) {
   st_uc_t c = *utf8;
 
@@ -122,7 +118,9 @@ st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8) {
   }
 
   if ((c >= (st_uc_t)'\360')) {
-    return ((((262144 * (c % 8)) + (4096 * (utf8[1] % 64))) + (64 * (utf8[2] % 64))) + (utf8[3] % 64));
+    return ((((262144 * (c % 8)) + (4096 * (utf8[1] % 64))) +
+             (64 * (utf8[2] % 64))) +
+            (utf8[3] % 64));
   }
 
   if ((c >= (st_uc_t)'\340')) {
@@ -169,5 +167,5 @@ st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8) {
     utf8[0] = (240 + utf32);
     return 4;
   }
-  return 0; //err
+  return 0; // err
 }

@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-double st_base2number(string *src, int base) {
+double st_base2number(string* src, int base) {
   assert(src->encoding == st_enc_ascii);
 
   size_t num = 0;
@@ -58,7 +58,7 @@ double st_base2number(string *src, int base) {
     }
 
     switch (mode) {
-      case 0: /* Integer */
+    case 0: /* Integer */
       if (num < cutoff || (num == cutoff && c <= cutlim)) {
         num = num * base + c;
         break;
@@ -66,8 +66,8 @@ double st_base2number(string *src, int base) {
         fnum = (double)num;
         mode = 1;
       }
-      /* fall-through */
-      case 1: /* Float */
+    /* fall-through */
+    case 1: /* Float */
       fnum = fnum * base + c;
     }
   }
@@ -79,12 +79,11 @@ double st_base2number(string *src, int base) {
   return num;
 }
 
-
 string* st_number2base(size_t value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
   string* result;
-  char *ptr;
-  char *end;
+  char* ptr;
+  char* end;
   char buf[(sizeof(double) << 3) + 1]; // maximum size for binary
 
   end = ptr = buf + sizeof(buf) - 1;
@@ -98,7 +97,7 @@ string* st_number2base(size_t value, int base) {
   // size
   result = st_new(end - ptr, st_enc_ascii);
   st_copyc(&result, ptr, st_enc_ascii);
-  //result->length = end - ptr;
+  // result->length = end - ptr;
   return result;
 }
 
@@ -110,142 +109,133 @@ string* st_chr(st_uc4_t value, st_enc_t enc) {
   string* out;
   char* dst;
 
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+    out = st_new(1, enc);
+    dst = out->value;
 
-  switch(enc) {
-    case st_enc_binary:
-    case st_enc_ascii:
+    dst[0] = value;
+    dst[1] = '\0';
+
+    out->length = 1;
+    out->used = 1;
+    break;
+
+  case st_enc_utf8:
+    if (value < 0x80) {
       out = st_new(1, enc);
       dst = out->value;
 
-      dst[0] = value;
+      dst[0] = (char)value;
       dst[1] = '\0';
 
       out->length = 1;
       out->used = 1;
-    break;
+      return out;
+    }
 
-    case st_enc_utf8:
-      if (value < 0x80) {
-        out = st_new(1, enc);
-        dst = out->value;
+    if (value < 0x800) {
+      out = st_new(2, enc);
+      dst = out->value;
 
-        dst[0] = (char)value;
-        dst[1] = '\0';
+      dst[0] = (value >> 6) | 0xC0;
+      dst[1] = (value & 0x3F) | 0x80;
+      dst[2] = '\0';
 
-        out->length = 1;
-        out->used = 1;
-        return out;
-      }
+      out->length = 1;
+      out->used = 2;
+      return out;
+    }
 
-      if (value < 0x800) {
-        out = st_new(2, enc);
-        dst = out->value;
+    if (value < 0x10000) {
+      out = st_new(3, enc);
+      dst = out->value;
 
-        dst[0] = (value >> 6) | 0xC0;
-        dst[1] = (value & 0x3F) | 0x80;
-        dst[2] = '\0';
+      dst[0] = (value >> 12) | 0xE0;
+      dst[1] = ((value >> 6) & 0x3F) | 0x80;
+      dst[2] = (value & 0x3F) | 0x80;
+      dst[3] = '\0';
 
-        out->length = 1;
-        out->used = 2;
-        return out;
-      }
+      out->length = 1;
+      out->used = 3;
+      return out;
+    }
 
-      if (value < 0x10000) {
-        out = st_new(3, enc);
-        dst = out->value;
-
-        dst[0] = (value >> 12) | 0xE0;
-        dst[1] = ((value >> 6) & 0x3F) | 0x80;
-        dst[2] = (value & 0x3F) | 0x80;
-        dst[3] = '\0';
-
-        out->length = 1;
-        out->used = 3;
-        return out;
-      }
-
-      if (value < 0x110000) {
-        out = st_new(4, enc);
-        dst = out->value;
-
-        dst[0] = (value >> 18) | 0xF0;
-        dst[1] = ((value >> 12) & 0x3F) | 0x80;
-        dst[2] = ((value >> 6) & 0x3F) | 0x80;
-        dst[3] = (value & 0x3F) | 0x80;
-        dst[4] = '\0';
-
-        out->length = 1;
-        out->used = 4;
-        return out;
-      }
-    break;
-
-    case st_enc_ucs4be:
+    if (value < 0x110000) {
       out = st_new(4, enc);
       dst = out->value;
 
-      ((uint32_t*) out->value)[0] = value;
+      dst[0] = (value >> 18) | 0xF0;
+      dst[1] = ((value >> 12) & 0x3F) | 0x80;
+      dst[2] = ((value >> 6) & 0x3F) | 0x80;
+      dst[3] = (value & 0x3F) | 0x80;
+      dst[4] = '\0';
+
+      out->length = 1;
+      out->used = 4;
+      return out;
+    }
     break;
 
+  case st_enc_ucs4be:
+    out = st_new(4, enc);
+    dst = out->value;
+
+    ((uint32_t*)out->value)[0] = value;
+    break;
   }
 
   return out;
 }
-
 
 size_t st_ord(const string* str, st_len_t offset) {
   assert(str->length > offset);
 
   st_enc_t enc = str->encoding;
   const char* itr = str->value;
-  switch(enc) {
-    case st_enc_binary:
-    case st_enc_ascii:
-      itr +=offset;
-      return (size_t) *itr;
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+    itr += offset;
+    return (size_t)*itr;
     break;
 
-    case st_enc_utf8: {
-      while(offset--) {
-        itr += string_utf8_jump_next(itr);
-      }
-
-      size_t out = (unsigned char) *itr;
-      if (out <= 0x7F) {
-        return out;
-      }
-      if (out < 0xC2) {
-        return 0; // invalid?
-      }
-
-      if (out <= 0xDF) {
-        return (out & 0x1F) << 6
-        | (*(itr + 1) & 0x3F);
-      }
-
-      if (out <= 0xEF) {
-        return (out & 0x0F) << 12
-        | (*(itr + 1) & 0x3F) << 6
-        | (*(itr + 2) & 0x3F);
-      }
-
-      if (out <= 0xF4) {
-        return (out & 0x0F) << 18
-        | (*(itr + 1) & 0x3F) << 12
-        | (*(itr + 2) & 0x3F) << 6
-        | (*(itr + 3) & 0x3F);
-      }
-
-      return 0;
+  case st_enc_utf8: {
+    while (offset--) {
+      itr += string_utf8_jump_next(itr);
     }
-    break;
-    case st_enc_ucs4be: {
-      itr += offset * 4;
-      size_t out = 0;
 
-      return (size_t) *((size_t*) itr);
+    size_t out = (unsigned char)*itr;
+    if (out <= 0x7F) {
+      return out;
     }
-    break;
+    if (out < 0xC2) {
+      return 0; // invalid?
+    }
+
+    if (out <= 0xDF) {
+      return (out & 0x1F) << 6 | (*(itr + 1) & 0x3F);
+    }
+
+    if (out <= 0xEF) {
+      return (out & 0x0F) << 12 | (*(itr + 1) & 0x3F) << 6 |
+             (*(itr + 2) & 0x3F);
+    }
+
+    if (out <= 0xF4) {
+      return (out & 0x0F) << 18 | (*(itr + 1) & 0x3F) << 12 |
+             (*(itr + 2) & 0x3F) << 6 | (*(itr + 3) & 0x3F);
+    }
+
+    return 0;
+  } break;
+  case st_enc_ucs4be: {
+    itr += offset * 4;
+    size_t out = 0;
+
+    return (size_t) * ((size_t*)itr);
+  } break;
   }
 
   return 0;
