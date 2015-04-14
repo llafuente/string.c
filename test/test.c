@@ -340,6 +340,13 @@ void char_itr_cb(const string* chr, st_len_t pos, string* src) {
   strcat(buffer, chr->value);
 }
 
+void byte_itr_cb(st_uc_t chr, st_len_t pos, const string* src) {
+  st_len_t i = strlen(buffer);
+  buffer[i] = (char) chr;
+  buffer[i + 1] = '\0';
+}
+
+
 void char_map_cb(string* chr, st_len_t pos, string* src) {
   chr->value[0] += 1;
 }
@@ -350,11 +357,16 @@ void test_itr_chars() {
   string* nstr;
 
   str = st_newc(T_STR_03_REP3, st_enc_utf8);
-  st_char_iterator(str, (st_char_itr_cb) char_itr_cb);
-  st_delete(&str);
 
+  st_char_iterator(str, (st_char_itr_cb) char_itr_cb);
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
   buffer[0] = '\0';
+
+  st_byte_iterator(str, byte_itr_cb);
+  assert(strcmp(buffer, T_STR_03_REP3) == 0);
+  buffer[0] = '\0';
+
+  st_delete(&str);
 
   str = st_newc("abc", st_enc_ascii);
 

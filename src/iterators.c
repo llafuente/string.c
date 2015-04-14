@@ -165,3 +165,17 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
 
   return out;
 }
+
+void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb) {
+  // maximum char size is 7 bytes
+  // 6 utf-8 + null
+  st_len_t pos = 0;
+  const char* itr = str->value;
+  const char* end = itr + str->used;
+
+  while (*itr && itr < end) {
+    itr_cb((st_uc_t) *itr, pos, str);
+    ++itr;
+    ++pos;
+  }
+}
