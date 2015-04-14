@@ -42,13 +42,29 @@ st_len_t st_length(const char* src, st_enc_t enc) {
     return strlen(src);
   } else if (enc == st_enc_utf8) {
     size_t used;
-    return string_utf8_lenc((const char*)src, &used);
+    return st_utf8_length((const char*)src, &used);
   }
 
   return -1;
 }
 
 size_t st_capacity(const char* src, st_enc_t enc) { return strlen(src); }
+
+void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
+                 st_len_t* bytes) {
+  switch (enc) {
+  case st_enc_ascii:
+  case st_enc_binary:
+    *len = *bytes = strlen(src);
+    return;
+  case st_enc_utf8:
+    *len = st_utf8_length((const char*)src, bytes);
+    return;
+  case st_enc_ucs4be:
+    *bytes = strlen(src);
+    *len = *bytes * 0.25;
+  }
+}
 
 void st_zeronull(string* str) { str->value[str->used] = '\0'; }
 

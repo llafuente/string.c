@@ -56,7 +56,10 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
 
 // TODO use utf8_len()
 string* st_newc(const char* src, st_enc_t enc) {
-  STRING_GET_CHAR_DATA(src, enc, len, used);
+  st_len_t len;
+  st_len_t used;
+
+  st_get_meta(src, enc, &len, &used);
   size_t size = used + 1; // null terminated!
 
   // printf("%s\n",  src);
@@ -158,7 +161,10 @@ void st_copy(string** out, string* src) {
 
 void st_copyc(string** out, const char* src, st_enc_t enc) {
   // printf("st_copy %p - chars* %p\n", *out, src);
-  STRING_GET_CHAR_DATA(src, enc, len, used);
+  st_len_t len;
+  st_len_t used;
+
+  st_get_meta(src, enc, &len, &used);
 
   string* cache = *out;
 

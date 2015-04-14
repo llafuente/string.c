@@ -33,8 +33,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   st_enc_t enc = str->encoding;
   string* buffer = st_new(7, enc);
   buffer->length = 1;
-  char* s = buffer->value;
-  char* dst;
+  char* dst = buffer->value;
 
   st_len_t pos = 0;
   const char* itr = str->value;
@@ -43,39 +42,31 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   switch (enc) {
   case st_enc_binary:
   case st_enc_ascii:
-    // \0 + end
     while (*itr && itr < end) {
-      dst = s;
-
-      st_copy_CHARS(itr, dst, 1);
-      *dst = '\0';
+      ST_CHAR_CP(dst, itr, 1, true);
 
       itr_cb(buffer, pos, str);
+      ++itr;
       ++pos;
     }
     break;
   case st_enc_utf8:
-    // \0 + end
     while (*itr && itr < end) {
-      dst = s;
       int jump = string_utf8_jump_next(itr);
 
-      st_copy_CHARS(itr, dst, jump);
-      *dst = '\0';
+      ST_CHAR_CP(dst, itr, jump, true);
 
       itr_cb(buffer, pos, str);
+      itr += jump;
       ++pos;
     }
     break;
   case st_enc_ucs4be:
-    // \0 + end
     while (*itr && itr < end) {
-      dst = s;
-
-      st_copy_CHARS(itr, dst, 4);
-      *dst = '\0';
+      ST_CHAR_CP(dst, itr, 4, true);
 
       itr_cb(buffer, pos, str);
+      itr += 4;
       ++pos;
     }
   }
@@ -86,10 +77,10 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
 string* st_char_map(const string* str, st_char_map_cb map_cb) {
   string* out;
 
-  // maximum char size is 7 bytes
-  // 6 utf-8 + null
+  // maximum char size is 5 bytes
+  // 4 utf-8/ucs4be + null
   st_enc_t enc = str->encoding;
-  string* buffer = st_new(7, enc);
+  string* buffer = st_new(5, enc);
   buffer->length = 1;
   char* bufp = buffer->value;
 
@@ -106,7 +97,6 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     out->used = str->used;
     dst = out->value;
 
-    // \0 + end
     while (*itr && itr < end) {
 
       ST_CHAR_CP_ASCII(bufp, itr, true);
@@ -156,7 +146,6 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     out->used = str->used;
     dst = out->value;
 
-    // \0 + end
     while (*itr && itr < end) {
 
       ST_CHAR_CP_UCS4BE(bufp, itr, true);

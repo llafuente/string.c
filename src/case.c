@@ -33,19 +33,7 @@ void string_char_low(string* str, st_len_t pos) {
 }
 
 // http://pastebin.com/fuw4Uizk
-void string_capitalize(string* str) {
-  assert(str->encoding == st_enc_ascii);
-
-  if (STRING_IS_UP_ASCII(str->value[0])) {
-    STRING_LOW_ASCCI(str->value[0]);
-  }
-
-  STRING_LOOP_START(str, itr, 1) {
-    if (STRING_IS_UP_ASCII(*itr)) {
-      STRING_LOW_ASCCI(itr);
-    }
-  }
-}
+void string_capitalize(string* str) { assert(str->encoding == st_enc_ascii); }
 
 string* string_ucfirst(string* src) { return 0; }
 

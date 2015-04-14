@@ -309,17 +309,17 @@ void test_trim() {
 
 void test_utf8_lenc() {
   size_t cap;
-  assert(string_utf8_lenc(T_STR_01, &cap) == 12);
+  assert(st_utf8_length(T_STR_01, &cap) == 12);
   assert(strlen(T_STR_01) == cap);
-  assert(string_utf8_lenc(T_STR_02, &cap) == 33);
+  assert(st_utf8_length(T_STR_02, &cap) == 33);
   assert(strlen(T_STR_02) == cap);
-  assert(string_utf8_lenc(T_STR_03, &cap) == 6);
+  assert(st_utf8_length(T_STR_03, &cap) == 6);
   assert(strlen(T_STR_03) == cap);
-  assert(string_utf8_lenc(T_STR_03_REP2, &cap) == 12);
+  assert(st_utf8_length(T_STR_03_REP2, &cap) == 12);
   assert(strlen(T_STR_03_REP2) == cap);
-  assert(string_utf8_lenc(T_STR_03_REP3, &cap) == 18);
+  assert(st_utf8_length(T_STR_03_REP3, &cap) == 18);
   assert(strlen(T_STR_03_REP3) == cap);
-  assert(string_utf8_lenc(T_STR_03_REP4, &cap) == 24);
+  assert(st_utf8_length(T_STR_03_REP4, &cap) == 24);
   assert(strlen(T_STR_03_REP4) == cap);
 }
 

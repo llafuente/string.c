@@ -30,17 +30,15 @@
 bool string_char(string** out, const string* str, st_len_t pos) {
   assert(str->length > pos);
 
-  const char* s = str->value + pos;
-  char* d = (*out)->value;
+  const char* src = str->value + pos;
+  char* dst = (*out)->value;
 
   while (pos--) {
-    s += string_utf8_jump_next(s);
+    src += string_utf8_jump_next(src);
   }
 
-  int i = string_utf8_jump_next(s);
-  st_copy_CHARS(s, d, i);
-
-  *d = '\0';
+  st_len_t jump = string_utf8_jump_next(src);
+  ST_CHAR_CP(dst, src, jump, true);
 
   return true;
 }
@@ -66,7 +64,10 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
     const char* end = itr + todo;
 
     while (*itr && itr < end) {
-      st_copy_CHARS(itr, dst, 1);
+      *dst = *itr;
+
+      ++itr;
+      ++dst;
       ++done;
     }
     *dst = '\0';
@@ -81,7 +82,10 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
       int jump = string_utf8_jump_next(itr);
       done += jump;
 
-      st_copy_CHARS(itr, dst, jump);
+      ST_CHAR_CP(dst, itr, jump, false);
+
+      dst += jump;
+      itr += jump;
     }
     *dst = '\0';
   } break;
@@ -91,7 +95,9 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
     const char* end = itr + (todo * 4);
 
     while (*itr && itr < end) {
-      st_copy_CHARS(itr, dst, 4);
+      ST_CHAR_CP(dst, itr, 4, false);
+      dst += 4;
+      itr += 4;
       done += 4;
     }
     *dst = '\0';

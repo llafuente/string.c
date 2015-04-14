@@ -103,39 +103,6 @@ extern const char* const string_utf8_skip;
 #define __STRING_DEALLOCATOR free
 #endif
 
-#define st_copy_CHARS(src, dst, i)                                             \
-  {                                                                            \
-    const char* __end = src + i;                                               \
-    while (src < __end) {                                                      \
-      *dst = *src;                                                             \
-      ++src;                                                                   \
-      ++dst;                                                                   \
-    }                                                                          \
-  }
-
-#define STRING_LOOP(string_val, itr)                                           \
-  const char* itr = string_val->value;                                         \
-  const char* __end = itr + string_val->used;                                  \
-  while (itr < __end)
-
-#define STRING_LOOP_START(string_val, itr, start)                              \
-  const char* itr = string_val->value + start;                                 \
-  const char* __end = itr + string_val->used - start;                          \
-  while (itr < __end)
-
-#define STRING_GET_CHAR_DATA(src, enc, len, used)                              \
-  st_len_t len;                                                                \
-  size_t used;                                                                 \
-  if (enc == st_enc_ascii) {                                                   \
-    len = used = strlen(src);                                                  \
-  } else if (enc == st_enc_utf8) {                                             \
-    len = string_utf8_lenc((const char*)src, &used);                           \
-  } else {                                                                     \
-    assert(false);                                                             \
-  }
-
-#define STRING_ADVANCE(src, amount) src += amount;
-
 //
 // MACROS (good ones)
 //
@@ -219,14 +186,16 @@ extern const st_uc_t st_bom[];
         dst[2] = src[2];                                                       \
         if (c >= 0xf0) {                                                       \
           dst[3] = src[3];                                                     \
-          dst[4] = '\0';                                                       \
-        } else {                                                               \
+          if (null_end) {                                                      \
+            dst[4] = '\0';                                                     \
+          }                                                                    \
+        } else if (null_end) {                                                 \
           dst[3] = '\0';                                                       \
         }                                                                      \
-      } else {                                                                 \
+      } else if (null_end) {                                                   \
         dst[2] = '\0';                                                         \
       }                                                                        \
-    } else {                                                                   \
+    } else if (null_end) {                                                     \
       dst[1] = '\0';                                                           \
     }                                                                          \
   }
@@ -236,7 +205,7 @@ extern const st_uc_t st_bom[];
     st_len_t tmp = amount;                                                     \
                                                                                \
     if (null_end) {                                                            \
-      dst[tmp + 1] = src[tmp + 1];                                             \
+      dst[tmp] = '\0';                                                         \
     }                                                                          \
                                                                                \
     while (tmp--) {                                                            \
@@ -265,7 +234,7 @@ ST_EXTERN void st_charmask(st_uc_t* input, size_t len, char* mask);
  */
 ST_EXTERN st_len_t st_length(const char* src, st_enc_t enc);
 /**
- * get plain string (null terminated) capacity in given encoding
+ * Get plain string (null terminated) capacity in given encoding
  * it's just strlen alias atm.
  *
  * @param src
@@ -273,6 +242,18 @@ ST_EXTERN st_len_t st_length(const char* src, st_enc_t enc);
  * @return string length
  */
 ST_EXTERN size_t st_capacity(const char* src, st_enc_t enc);
+
+/**
+ * Get capacity and length of given string in given encoding
+ *
+ * @param src
+ * @param enc
+ * @param len length
+ * @param bytes capacity needed to store the string (+1 if you want null
+ * terminated)
+ */
+ST_EXTERN void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
+                           st_len_t* bytes);
 
 /**
  * add '\0' at the end of the string
@@ -656,6 +637,16 @@ ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 #define string_utf8_jump_next(p) string_utf8_skip[*(unsigned char*)(p)]
 
 /**
+ * Return how many bytes contains given lead
+ *
+ * @param lead_chr
+ * @return
+ *  -1 on error
+ *  1-4 if success
+ */
+ST_EXTERN int string_utf8_count_bytes(unsigned char lead_chr);
+
+/**
  * Return utf8 length and capacity
  * based on glib_utf8_offset_to_pointer
  *
@@ -664,7 +655,7 @@ ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
  *   Optional, 0 means you don't want the value
  * @return string length utf-8 encoded
  */
-ST_EXTERN size_t string_utf8_lenc(const char* src, size_t* out_capacity);
+ST_EXTERN size_t st_utf8_length(const char* src, size_t* out_capacity);
 
 /**
  * Check if the given unsigned char * is a valid utf-8 sequence.
@@ -721,6 +712,8 @@ ST_EXTERN string* st_lower(string* src);
  *
  * @param haystack
  * @param needle
+ * @param offset
+ * @param len
  * @return
  *  > 0 position of the first occurrence if found
  *  -1 if not found
@@ -839,11 +832,16 @@ ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t length,
 
 /**
  * utf8 string to utf32 code point
+ *
+ * @param utf8
  */
 ST_EXTERN st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8);
 
 /**
  * utf32 code point to utf8 string
+ *
+ * @param utf32
+ * @param utf8
  */
 ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 

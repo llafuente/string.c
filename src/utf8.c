@@ -50,7 +50,7 @@ const char string_utf8_skip_data[256] = {
     4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1};
 const char* const string_utf8_skip = string_utf8_skip_data;
 
-size_t string_utf8_lenc(const char* src, size_t* used_bytes) {
+size_t st_utf8_length(const char* src, size_t* used_bytes) {
   size_t len = 0;
   const char* p = src;
   char jump;
@@ -73,14 +73,14 @@ size_t string_utf8_lenc(const char* src, size_t* used_bytes) {
   return len;
 }
 
-int string_utf8_next_pos(unsigned char chr) {
-  if (chr <= 0x7F) {
+int string_utf8_count_bytes(unsigned char lead_chr) {
+  if (lead_chr <= 0x7F) {
     return 0;
-  } else if (chr >= 0xC0 /*11000000*/ && chr <= 0xDF /*11011111*/) {
+  } else if (lead_chr >= 0xC0 /*11000000*/ && lead_chr <= 0xDF /*11011111*/) {
     return 1;
-  } else if (chr >= 0xE0 /*11100000*/ && chr <= 0xEF /*11101111*/) {
+  } else if (lead_chr >= 0xE0 /*11100000*/ && lead_chr <= 0xEF /*11101111*/) {
     return 2;
-  } else if (chr >= 0xF0 /*11110000*/ && chr <= 0xF4 /* Cause of RFC 3629 */) {
+  } else if (lead_chr >= 0xF0 /*11110000*/ && lead_chr <= 0xF4 /* Cause of RFC 3629 */) {
     return 3;
   }
   // invalid!
@@ -96,7 +96,7 @@ char* string_utf8_invalid(const unsigned char* str, size_t len) {
   while (str < end) {
     cache = *str;
 
-    continuation_bytes = string_utf8_next_pos(cache);
+    continuation_bytes = string_utf8_count_bytes(cache);
 
     if (continuation_bytes < 0) {
       return (char*)str;
