@@ -43,6 +43,23 @@ char* st__memchr(const char* s, st_uc_t c, size_t n) {
   return 0;
 }
 
+char* st__mempbrk(const char* s, const char* accept) {
+
+  while (*s != '\0') {
+    const char* a = accept;
+
+    while (*a != '\0') {
+      if (*a++ == *s) {
+        return (char*)s;
+      }
+    }
+
+    ++s;
+  }
+
+  return 0;
+}
+
 char* st__get_char_offset(string* str, st_len_t offset) {
   if (!offset) {
     return str->value;

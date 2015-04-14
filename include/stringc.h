@@ -841,6 +841,8 @@ ST_EXTERN st_uc4_t st_utf32_lowercase(st_uc4_t utf32);
  */
 ST_EXTERN char* st__memchr(const char* s, st_uc_t c, size_t n);
 
+ST_EXTERN char* st__mempbrk(const char* s1, const char* s2);
+
 /**
  * Return a pointer to given string offset
  *

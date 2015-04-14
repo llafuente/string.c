@@ -73,6 +73,7 @@ extern void test_search();
 extern void test_utf8();
 extern void test_encoding();
 extern void test_internal();
+extern void test_utils();
 
 int main(int argc, const char * argv[]) {
 
@@ -95,6 +96,7 @@ int main(int argc, const char * argv[]) {
   RUN_TEST(utf8);
   RUN_TEST(encoding);
   RUN_TEST(internal);
+  RUN_TEST(utils);
 
   st_cleanup();
   printf("OK\n");
@@ -704,4 +706,50 @@ void test_internal() {
 */
 
   st_delete(&s);
+
+  // st__mempbrk
+
+  // Check 1
+  string* x;
+  string* y;
+  char* ret;
+  x = st_newc("I will not have my fwends widiculed by the common soldiewy", st_enc_ascii);
+  y = st_newc("zpm1", st_enc_ascii); // Finds the 'm'
+  ret = st__mempbrk(x->value, y->value);
+  assert(ret == &x->value[16]); //, "Simple strpbrk()" );
+st_delete(&x); st_delete(&y);
+
+  // Check 2
+  x = st_newc("Not bad for a little fur ball. You! Stay here.", st_enc_ascii);
+  y = st_newc("zx", st_enc_ascii);
+  ret = st__mempbrk(x->value, y->value);
+  assert(ret == NULL); //, "Letters not found");
+st_delete(&x); st_delete(&y);
+
+  // Check 3 (boundary condition)
+  x = st_newc("", st_enc_ascii);
+  y = st_newc("zx", st_enc_ascii);
+  ret = st__mempbrk(x->value, y->value);
+  assert(ret == 0); //, "String to search empty" );
+st_delete(&x); st_delete(&y);
+
+  // Check 4 (boundary condition)
+  x = st_newc("zx", st_enc_ascii);
+  y = st_newc("", st_enc_ascii);
+  ret = st__mempbrk(x->value, y->value);
+  assert(ret == 0); //, "Empty search string" );
+st_delete(&x); st_delete(&y);
+
+  // Check 5 (boundary condition)
+  x = st_newc("", st_enc_ascii);
+  y = st_newc("", st_enc_ascii);
+  ret = st__mempbrk(x->value, y->value);
+  assert(ret == 0); //, "Both strings empty" );
+st_delete(&x); st_delete(&y);
+
+
+}
+
+void test_utils() {
+  assert(st_length("Iñtërnâtiônàlizætiøn", st_enc_utf8) == 20);
 }
