@@ -313,12 +313,28 @@ ST_EXTERN string* st_bin2hex(const string* src);
 /**
  * Compare two strings byte-to-byte.
  *
+ * @param a
+ * @param b
  * @return
  *   <0 a < b (length or content)
  *   =0 Both strings has same content & length.
  *   >0 a > b (length or content)
  */
 ST_EXTERN int st_compare(const string* a, const string* b);
+/**
+ * Compare a substring against a string
+ *
+ * @param a
+ * @param b
+ * @param offset
+ * @param length
+ * @return
+ *   <0 a < b (length or content)
+ *   =0 Both strings has same content & length.
+ *   >0 a > b (length or content)
+ */
+int st_scompare(const string* a, const string* b,
+st_len_t offset, st_len_t length);
 
 /// alias
 /// @see st_compare

@@ -196,6 +196,17 @@ void test_compare() {
 
   st_delete(&aux);
   st_delete(&s);
+
+  s = st_newc("ab01cd", st_enc_ascii);
+  aux = st_newc("01", st_enc_ascii);
+
+  assert(st_scompare(s, aux, 2, 2) == 0);
+  assert(st_scompare(s, aux, 2, 3) == 1);
+  assert(st_scompare(s, aux, 2, 1) == -1);
+  assert(st_scompare(s, aux, 3, 2) == 1);
+
+  st_delete(&aux);
+  st_delete(&s);
 }
 
 void test_hexbinhex() {
