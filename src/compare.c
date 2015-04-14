@@ -46,10 +46,8 @@ int st_compare(const string* a, const string* b) {
   return *(const unsigned char*)pa - *(const unsigned char*)pb;
 }
 
-
-int st_scompare(const string* a, const string* b,
-  st_len_t offset, st_len_t length) {
-
+int st_scompare(const string* a, const string* b, st_len_t offset,
+                st_len_t length) {
 
   // working range
   st__calc_range(a->length, &offset, &length);
@@ -58,28 +56,28 @@ int st_scompare(const string* a, const string* b,
 
   // length check
   if (diff > b->length) {
-    //printf("length [%ld] > b->length\n", diff);
+    // printf("length [%ld] > b->length\n", diff);
     return 1;
   }
 
   if (diff < b->length) {
-    //printf("length [%ld] < b->length\n", diff);
+    // printf("length [%ld] < b->length\n", diff);
     return -1;
   }
 
   char* start;
   char* end;
-  st__get_char_range((string*) a, offset, length, &start, &end);
+  st__get_char_range((string*)a, offset, length, &start, &end);
 
   const char* pb = b->value;
 
-  //printf("[%c] = [%c]\n", *start, *pb);
+  // printf("[%c] = [%c]\n", *start, *pb);
 
   while (start < end && *pb && (*start == *pb)) {
 
     ++start;
     ++pb;
-    //printf("[%c] = [%c]\n", *start, *pb);
+    // printf("[%c] = [%c]\n", *start, *pb);
   }
   if (!*pb) {
     return 0;

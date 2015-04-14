@@ -75,8 +75,7 @@ typedef struct string_s {
 typedef void (*st_char_itr_cb)(const string* character, st_len_t pos,
                                const string* src);
 
-typedef void (*st_byte_itr_cb)(st_uc_t byte, st_len_t pos,
-const string* src);
+typedef void (*st_byte_itr_cb)(st_uc_t byte, st_len_t pos, const string* src);
 
 typedef void (*st_char_map_cb)(string* character, st_len_t pos,
                                const string* src);
@@ -333,8 +332,8 @@ ST_EXTERN int st_compare(const string* a, const string* b);
  *   =0 Both strings has same content & length.
  *   >0 a > b (length or content)
  */
-int st_scompare(const string* a, const string* b,
-st_len_t offset, st_len_t length);
+int st_scompare(const string* a, const string* b, st_len_t offset,
+                st_len_t length);
 
 /// alias
 /// @see st_compare

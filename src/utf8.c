@@ -80,7 +80,8 @@ int string_utf8_count_bytes(unsigned char lead_chr) {
     return 1;
   } else if (lead_chr >= 0xE0 /*11100000*/ && lead_chr <= 0xEF /*11101111*/) {
     return 2;
-  } else if (lead_chr >= 0xF0 /*11110000*/ && lead_chr <= 0xF4 /* Cause of RFC 3629 */) {
+  } else if (lead_chr >= 0xF0 /*11110000*/ &&
+             lead_chr <= 0xF4 /* Cause of RFC 3629 */) {
     return 3;
   }
   // invalid!

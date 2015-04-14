@@ -174,7 +174,7 @@ void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb) {
   const char* end = itr + str->used;
 
   while (*itr && itr < end) {
-    itr_cb((st_uc_t) *itr, pos, str);
+    itr_cb((st_uc_t)*itr, pos, str);
     ++itr;
     ++pos;
   }
