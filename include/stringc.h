@@ -442,8 +442,14 @@ ST_EXTERN string* st_char_map(const string* str, st_char_map_cb map_cb);
 
 ST_EXTERN void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb);
 
-// TODO
-void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
+/**
+ * Iterate the string and call given callback with any line found
+ * Line separator is '\n' and it's not include in the callback
+ *
+ * @param str
+ * @param itr_cb
+ */
+ST_EXTERN void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
 
 //
 // alloc.c
@@ -492,6 +498,18 @@ ST_EXTERN string* st_newc(const char* src, st_enc_t enc);
  * @return new string
  */
 ST_EXTERN void st_resize(string** src, size_t cap);
+
+/**
+ * Grow given string.
+ * If string point to 0 -> st_new
+ * if string has less capacity that needed -> st_resize
+ *
+ *
+ * @param src src
+ * @param cap new capacity
+ * @param enc
+ */
+ST_EXTERN void st_grow(string** out, size_t cap, st_enc_t enc);
 
 /**
  * Return a new string clone of src (same capacity)

@@ -369,13 +369,25 @@ void test_itr_chars() {
 
   str = st_newc(T_STR_03_REP3, st_enc_utf8);
 
+  buffer[0] = '\0';
   st_char_iterator(str, (st_char_itr_cb) char_itr_cb);
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
-  buffer[0] = '\0';
 
+  buffer[0] = '\0';
   st_byte_iterator(str, byte_itr_cb);
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
+
+  st_delete(&str);
+
+  //
+  // line iterator
+  //
+  str = st_newc("01\n2\n345\n\n67\n89", st_enc_utf8);
+
   buffer[0] = '\0';
+  st_line_iterator(str, (st_char_itr_cb) char_itr_cb);
+  printf("buffer --> %s\n", buffer);
+  assert(strcmp(buffer, "0123456789") == 0);
 
   st_delete(&str);
 

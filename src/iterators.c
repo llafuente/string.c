@@ -179,3 +179,43 @@ void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb) {
     ++pos;
   }
 }
+
+void st_line_iterator(const string* str, st_char_itr_cb itr_cb) {
+  string* buffer = 0;
+
+  const char* itr = str->value;
+  const char* end = itr + str->used;
+  const char* found;
+
+  st_len_t len;
+  st_len_t pos = 0;
+  st_enc_t enc = str->encoding;
+
+  while (*itr && itr < end) {
+    found = st__memchr(itr, '\n', end - itr);
+    if (found) {
+      len = found - itr;
+    } else {
+      found = end;
+      len = found - itr;
+    }
+
+    // printf("found %p @ %ld\n", found, found - str->value);
+    // printf("st_grow %ld\n", len);
+
+    st_grow(&buffer, len, enc);
+    strncpy(buffer->value, itr, len);
+    buffer->value[len] = '\0';
+    buffer->used = len;
+    buffer->length = st_length(buffer->value, enc); // TODO optimize
+
+    // printf("ITR[%d] %s\n", pos, buffer->value);
+
+    itr_cb(buffer, pos, str);
+
+    itr = found + 1;
+    ++pos;
+  }
+
+  st_delete(&buffer);
+}

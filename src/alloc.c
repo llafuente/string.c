@@ -90,6 +90,16 @@ void st_resize(string** src, size_t cap) {
   // printf("after st_resize %p\n", *src);
 }
 
+void st_grow(string** src, size_t cap, st_enc_t enc) {
+  if (*src == 0) {
+    *src = st_new(cap, enc);
+  } else {
+    if (cap + 1 > (*src)->capacity) {
+      st_resize(src, cap);
+    }
+  }
+}
+
 string* st_clone(const string* src) {
   size_t size = sizeof(string) + src->capacity * sizeof(char);
 
