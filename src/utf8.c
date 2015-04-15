@@ -50,7 +50,7 @@ size_t st_utf8_length(const char* src, size_t* used_bytes) {
   return len;
 }
 
-int st_utf8_char_size_safe(unsigned char lead_chr) {
+st_len_t st_utf8_char_size_safe(st_uc_t lead_chr) {
   if (lead_chr <= 0x7F) {
     return 1;
   } else if (lead_chr >= 0xC0 /*11000000*/ && lead_chr <= 0xDF /*11011111*/) {
@@ -65,11 +65,11 @@ int st_utf8_char_size_safe(unsigned char lead_chr) {
   return -1;
 }
 
-char* st_utf8_invalid(const unsigned char* str, size_t len) {
+char* st_utf8_invalid(const st_uc_t* str, size_t len) {
   size_t i = 0;
   int continuation_bytes = 0;
-  unsigned char cache;
-  const unsigned char* end = str + len;
+  st_uc_t cache;
+  const st_uc_t* end = str + len;
 
   while (str < end) {
     cache = *str;
@@ -122,4 +122,13 @@ bool st_utf8_char_eq(char* a, char* b) {
 
 st_len_t st_utf8_char_size(st_uc_t byte) {
   return 1 + (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0));
+}
+
+bool st_utf8_valid_codepoint(st_uc4_t uc_cp) {
+  if (uc_cp < 0 || uc_cp >= 0x110000 || ((uc_cp & 0xFFFF) >= 0xFFFE) ||
+      (uc_cp >= 0xD800 && uc_cp < 0xE000) ||
+      (uc_cp >= 0xFDD0 && uc_cp < 0xFDF0)) {
+    return false;
+  }
+  return true;
 }

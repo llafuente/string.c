@@ -61,7 +61,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
       ++pos;
     }
     break;
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     while (*itr && itr < end) {
       ST_CHAR_CP(dst, itr, 4, true);
 
@@ -140,7 +140,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     *dst = '\0';
     out->used = used;
     break;
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     out = st_new(str->length * 4, enc);
     out->length = str->length;
     out->used = str->used;

@@ -35,7 +35,7 @@
  * @return   a single character encoded in UTF32
 */
 string* st_to_utf32(const string* src) {
-  string* out = st_new(src->length * 4, st_enc_ucs4be);
+  string* out = st_new(src->length * 4, st_enc_utf32be);
 
   switch (src->encoding) {
   // TODO what we do?
@@ -84,7 +84,7 @@ string* st_to_utf32(const string* src) {
     return out;
   }
 
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     return 0;
   }
 }
@@ -98,7 +98,7 @@ string* st_to_utf8(const string* src) {
   case st_enc_binary:
   case st_enc_ascii:
   case st_enc_utf8:
-  case st_enc_ucs4be: {
+  case st_enc_utf32be: {
 
     st_uc4_t* p = (st_uc4_t*)src->value;
     st_uc4_t* end = (st_uc4_t*)(p + src->used);

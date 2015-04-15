@@ -1,12 +1,21 @@
 # string.c
 
 Single allocation string implementation (with struct) c99 at least,
-more convinient and performance that common null terminated char*,
-100% compatible with them :) and accept multiple encodings: ascii, utf8 &
-ucs4be.
+more convenient and performance that common null terminated char*,
+100% compatible with them :) and accept multiple encodings.
 
 It's not yet ready to be a shared library, use static instead. It's not stable
 enough.
+
+## Encodings
+
+* UTF8
+* UTF32be
+* UTF32le
+* ascii
+* binary
+
+  Used for unknown or user data. Internally is handled as ascii (byte to byte)
 
 ## Usage
 

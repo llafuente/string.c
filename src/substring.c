@@ -89,7 +89,7 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
     }
     *dst = '\0';
   } break;
-  case st_enc_ucs4be: {
+  case st_enc_utf32be: {
     // \0 + end
     itr += start * 4;
     const char* end = itr + (todo * 4);

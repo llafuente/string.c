@@ -61,7 +61,7 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
   switch (enc) {
   case st_enc_binary:
   case st_enc_ascii:
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
 
     end_len = end - start;
 
@@ -80,8 +80,8 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
       if (last == pp[needle_len_m1]) {
         // compare until last
         if (!memcmp(needle_val, pp, needle_len_m1)) {
-          return (enc == st_enc_ucs4be) ? (pp - haystack->value) * 0.25 // /4
-                                        : pp - haystack->value;
+          return (enc == st_enc_utf32be) ? (pp - haystack->value) * 0.25 // /4
+                                         : pp - haystack->value;
         }
       }
       start = pp + 1;
@@ -180,7 +180,7 @@ string* st_char_at(const string* src, st_len_t pos) {
     out->length = 1;
     out->used = strlen(dst);
     break;
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     ST_ADVANCE_UCS4BE(p, pos);
 
     out = st_new(4, enc);
@@ -246,7 +246,7 @@ st_len_t st_rpos(string* haystack, string* needle, st_len_t offset,
     }
 
     return -1;
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     while (start <= end) {
       if (!memcmp(nval, end, bytes)) {
         return end_pos;

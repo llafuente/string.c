@@ -52,10 +52,11 @@ typedef uint32_t st_uc4_t;
 
 /// supported encodings
 typedef enum {
-  st_enc_binary, ///< Binary encoding for abuse in user land
-  st_enc_ascii,  ///< ASCII
-  st_enc_utf8,   ///< UTF-8
-  st_enc_ucs4be  ///< UCS-4BE, UCS-4 big endian
+  st_enc_binary,  ///< Binary encoding for abuse in user land
+  st_enc_ascii,   ///< ASCII
+  st_enc_utf8,    ///< UTF-8
+  st_enc_utf32be, ///< UCS-4BE, UCS-4 big endian
+  st_enc_utf32le  ///< UCS-4LE, UCS-4 little endian
 } st_enc_t;
 
 /// string type, use value[] at the end, so only one malloc is enough
@@ -155,7 +156,7 @@ extern const st_uc_t st_bom[];
   case st_enc_utf8:                                                            \
     ST_ADVANCE_UTF8(s, amount);                                                \
     break;                                                                     \
-  case st_enc_ucs4be:                                                          \
+  case st_enc_utf32be:                                                         \
     ST_ADVANCE_UCS4BE(s, amount);                                              \
     break;                                                                     \
   }
@@ -264,6 +265,8 @@ ST_EXTERN void st_zeronull(string* str);
  * print to stdout useful information to debug
  */
 ST_EXTERN void st_debug(string* str);
+
+ST_EXTERN bool st_validate_encoding(char* input, st_enc_t enc);
 
 //
 // append.c
@@ -412,7 +415,7 @@ ST_EXTERN string* st_chr(st_uc4_t value, st_enc_t enc);
 * @param offset
 * @return code point
 */
-size_t st_ord(const string* str, st_len_t offset);
+st_uc4_t st_ord(const string* str, st_len_t offset);
 
 #define st_char_code_at st_ord
 
@@ -665,75 +668,6 @@ ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 #define st_ltrim(str, character_mask) st_trim(str, character_mask, 1)
 
 //
-// utf8.c
-//
-
-/**
- * Return how many bytes contains given lead and -1 if it's invalid.
- *
- * @param lead_chr
- * @return
- *  -1 on error
- *  1-4 if success
- */
-ST_EXTERN int st_utf8_char_size_safe(unsigned char lead_chr);
-
-/**
-* Return how many bytes contains given lead, with no error control.
-*
-* @param lead_chr
-* @return
-*  1-4 if success
-*/
-ST_EXTERN st_len_t st_utf8_char_size(st_uc_t byte);
-
-/**
- * Return utf8 length and capacity
- * based on glib_utf8_offset_to_pointer
- *
- * @param src
- * @param out_capacity
- *   Optional, 0 means you don't want the value
- * @return string length utf-8 encoded
- */
-ST_EXTERN size_t st_utf8_length(const char* src, size_t* out_capacity);
-
-/**
- * Check if the given unsigned char * is a valid utf-8 sequence.
- * Return value :
- * If the string is valid utf-8, 0 is returned.
- * Else the position, starting from 1, is returned.
- *
- * Valid utf-8 sequences look like this :
- * 0xxxxxxx
- * 110xxxxx 10xxxxxx
- * 1110xxxx 10xxxxxx 10xxxxxx
- * 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
- * 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
- * 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
- *
- * Based on is_utf8 by JulienPalard, heavily modified by llafuente
- * to archieve great performance.
- *
- * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
- *
- * @param str
- * @param len
- * @return
- *   first invalid position found or 0 if success
- */
-ST_EXTERN char* st_utf8_invalid(const unsigned char* str, size_t len);
-
-/**
- * Returns if two utf8 are the same. Comparison is multibyte.
- *
- * @param a
- * @param b
- * @return true if are the same
- */
-ST_EXTERN bool st_utf8_char_eq(char* a, char* b);
-
-//
 // case.c
 //
 
@@ -902,5 +836,108 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
  */
 ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset,
                               st_len_t* offset_length);
+
+//--------------------------------//
+//        encoding group          //
+//--------------------------------//
+
+//
+// utf8.c
+//
+
+/**
+* Return how many bytes contains given lead and -1 if it's invalid.
+*
+* @param lead_chr
+* @return
+*  -1 on error
+*  1-4 if success
+*/
+ST_EXTERN st_len_t st_utf8_char_size_safe(st_uc_t lead_chr);
+
+/**
+* Return how many bytes contains given lead, with no error control.
+*
+* @param lead_chr
+* @return
+*  1-4 if success
+*/
+ST_EXTERN st_len_t st_utf8_char_size(st_uc_t byte);
+
+/**
+* Return utf8 length and capacity
+* based on glib_utf8_offset_to_pointer
+*
+* @param src
+* @param out_capacity
+*   Optional, 0 means you don't want the value
+* @return string length utf-8 encoded
+*/
+ST_EXTERN size_t st_utf8_length(const char* src, size_t* out_capacity);
+
+/**
+* Check if the given uchar* is a valid utf-8 sequence.
+* Return value :
+* If the string is valid utf-8, 0 is returned.
+* Else the position, starting from 1, is returned.
+*
+* Valid utf-8 sequences look like this :
+* 0xxxxxxx
+* 110xxxxx 10xxxxxx
+* 1110xxxx 10xxxxxx 10xxxxxx
+* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+* 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+* 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+*
+* Based on is_utf8 by JulienPalard, heavily modified by llafuente
+* to archieve great performance.
+*
+* based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
+*
+* @param str
+* @param len
+* @return
+*   first invalid position found or 0 if success
+*/
+ST_EXTERN char* st_utf8_invalid(const st_uc_t* str, size_t len);
+
+/**
+* Returns if two utf8 are the same. Comparison is multibyte.
+*
+* @param a
+* @param b
+* @return true if are the same
+*/
+ST_EXTERN bool st_utf8_char_eq(char* a, char* b);
+
+/*
+* Returns if the given unicode code-point is valid
+* @param uc_cp unicode codepoint
+* @return
+*/
+ST_EXTERN bool st_utf8_valid_codepoint(st_uc4_t cp);
+
+//
+// ascii.c
+//
+ST_EXTERN st_len_t st_ascii_length(const char* src, size_t* used_bytes);
+
+ST_EXTERN st_len_t st_ascii_char_size_safe(st_uc_t lead_chr);
+
+ST_EXTERN st_len_t st_ascii_char_size(st_uc_t lead_chr);
+
+ST_EXTERN st_uc4_t st_ascii_code_point(const char* input);
+
+//
+// utf32.c
+//
+
+ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
+
+ST_EXTERN st_uc4_t st_utf32le_codepoint(const st_uc_t* input);
+ST_EXTERN st_uc4_t st_utf32be_codepoint(const st_uc_t* input);
+ST_EXTERN bool st_utf32_valid_codepoint(st_uc4_t code_point);
+
+ST_EXTERN st_len_t st_utf32_char_size(st_uc_t lead_chr);
 
 #endif

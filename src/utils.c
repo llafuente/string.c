@@ -60,7 +60,8 @@ void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
   case st_enc_utf8:
     *len = st_utf8_length((const char*)src, bytes);
     return;
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
+  case st_enc_utf32le:
     *bytes = strlen(src);
     *len = *bytes * 0.25;
   }
@@ -108,10 +109,77 @@ void st_debug(string* str) {
       st_delete(&x);
     }
     break;
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
+  case st_enc_utf32le:
     // encode wide char -> utf8
     // print
+    printf("utf32 output TODO\n");
     break;
   }
   printf("\nprintf %s\n", str->value);
+}
+
+st_enc_t st_detect_encoding(char* input) {
+  st_len_t len = strlen(input);
+
+  // UTF32 4-byte BOM
+  if (len >= 4) {
+    st_uc4_t uc = (st_uc4_t) * ((st_uc4_t*)input);
+    // BE
+    if (uc = 0x0000FEFF && st_validate_encoding(input, st_enc_utf32be)) {
+      return st_enc_utf32be;
+    }
+    // LE
+    if (uc == 0xFFFE0000 && st_validate_encoding(input, st_enc_utf32le)) {
+      return st_enc_utf32le;
+    }
+  }
+
+  // ASCII
+  if (st_validate_encoding(input, st_enc_ascii))
+    return st_enc_ascii;
+
+  // UTF8
+  if (st_validate_encoding(input, st_enc_utf8))
+    return st_enc_utf8;
+
+  // unknown encoding -> binary!
+  return st_enc_binary;
+}
+
+st_len_t st_char_size_safe(const char* input, st_enc_t enc) {
+  switch (enc) {
+  case st_enc_binary:
+    return 1;
+  case st_enc_ascii:
+  case st_enc_utf8:
+    return st_utf8_char_size_safe(input);
+  case st_enc_utf32le:
+    if (st_utf32_valid_codepoint(st_utf32le_codepoint(input))) {
+      return 4;
+    }
+    return -1;
+  case st_enc_utf32be:
+    if (st_utf32_valid_codepoint(st_utf32be_codepoint(input))) {
+      return 4;
+    }
+    return -1;
+  }
+}
+bool st_validate_encoding(char* input, st_enc_t enc) {
+  // start at the beginning
+  size_t pos = 0;
+  char* p = input;
+  while (*p) {
+    // check if the character is valid
+    st_len_t len = st_char_size_safe(input, enc);
+
+    if (len <= 0) {
+      return false;
+    }
+    // move to the next character
+    input += len;
+  }
+  // if we didn't fail yet, return success
+  return true;
 }

@@ -14,6 +14,7 @@ libstringc_la_CFLAGS = @CFLAGS@
 libstringc_la_LDFLAGS = -no-undefined -version-info 1:0:0
 libstringc_la_SOURCES = src/append.c \
                   src/alloc.c \
+                  src/ascii.c \
                   src/bin2hex.c \
                   src/case.c \
                   src/compare.c \
@@ -29,6 +30,7 @@ libstringc_la_SOURCES = src/append.c \
                   src/substring.c \
                   src/trim.c \
                   src/utf8.c \
+                  src/utf32.c \
                   src/utils.c
 
 

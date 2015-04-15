@@ -178,7 +178,7 @@ string* st_chr(st_uc4_t value, st_enc_t enc) {
     }
     break;
 
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     out = st_new(4, enc);
     dst = out->value;
 
@@ -189,7 +189,7 @@ string* st_chr(st_uc4_t value, st_enc_t enc) {
   return out;
 }
 
-size_t st_ord(const string* str, st_len_t offset) {
+st_uc4_t st_ord(const string* str, st_len_t offset) {
   assert(str->length > offset);
 
   st_enc_t enc = str->encoding;
@@ -198,7 +198,7 @@ size_t st_ord(const string* str, st_len_t offset) {
   case st_enc_binary:
   case st_enc_ascii:
     itr += offset;
-    return (size_t)*itr;
+    return (st_uc4_t)*itr;
     break;
 
   case st_enc_utf8: {
@@ -206,7 +206,7 @@ size_t st_ord(const string* str, st_len_t offset) {
       itr += st_utf8_char_size(*itr);
     }
 
-    size_t out = (unsigned char)*itr;
+    st_uc_t out = (st_uc_t)*itr;
     if (out <= 0x7F) {
       return out;
     }
@@ -230,12 +230,12 @@ size_t st_ord(const string* str, st_len_t offset) {
 
     return 0;
   } break;
-  case st_enc_ucs4be: {
+  case st_enc_utf32be:
     itr += offset * 4;
-    size_t out = 0;
-
-    return (size_t) * ((size_t*)itr);
-  } break;
+    return st_utf32be_codepoint(itr);
+  case st_enc_utf32le:
+    itr += offset * 4;
+    return st_utf32le_codepoint(itr);
   }
 
   return 0;

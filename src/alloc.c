@@ -47,7 +47,7 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
   case st_enc_ascii:
     return st_new(len, enc);
   case st_enc_utf8:
-  case st_enc_ucs4be:
+  case st_enc_utf32be:
     return st_new(len * 4, enc);
   }
 
