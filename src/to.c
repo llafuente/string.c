@@ -203,7 +203,7 @@ size_t st_ord(const string* str, st_len_t offset) {
 
   case st_enc_utf8: {
     while (offset--) {
-      itr += string_utf8_jump_next(itr);
+      itr += st_utf8_char_size(*itr);
     }
 
     size_t out = (unsigned char)*itr;

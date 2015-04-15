@@ -52,7 +52,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
     break;
   case st_enc_utf8:
     while (*itr && itr < end) {
-      int jump = string_utf8_jump_next(itr);
+      int jump = st_utf8_char_size(*itr);
 
       ST_CHAR_CP(dst, itr, jump, true);
 
@@ -120,7 +120,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     int jump;
 
     while (*itr && itr < end) {
-      jump = string_utf8_jump_next(itr);
+      jump = st_utf8_char_size(*itr);
       printf("jump [%ld][%d]\n", pos, jump);
 
       ST_CHAR_CP(bufp, itr, jump, true);
@@ -128,7 +128,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
 
       map_cb(buffer, pos, str);
 
-      jump = string_utf8_jump_next(bufp);
+      jump = st_utf8_char_size(*bufp);
 
       used += jump;
 

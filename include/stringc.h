@@ -84,8 +84,6 @@ typedef void (*st_char_map_cb)(string* character, st_len_t pos,
 // shared globals
 //
 extern string* string_def_trim_mask;
-extern const char string_utf8_skip_data[256];
-extern const char* const string_utf8_skip;
 
 //
 // MACROS
@@ -109,9 +107,6 @@ extern const char* const string_utf8_skip;
 // MACROS (good ones)
 //
 
-#define ST_UTF8_COUNT_BYTES(byte)                                              \
-  (1 + (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0)))
-
 #define ST_UTF8_COUNT_TRAIL(byte)                                              \
   (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0))
 
@@ -125,7 +120,10 @@ extern const char* const string_utf8_skip;
     --s;                                                                       \
   }
 
-#define ST_UTF8_FOWARD(s) s += ST_UTF8_COUNT_BYTES((st_uc_t)*s)
+// moved to a function rather than macro
+// macro *str will dereference 3 times
+// this could get inlined and give better performance...
+#define ST_UTF8_FOWARD(s) s += st_utf8_char_size((st_uc_t)*s)
 
 extern const st_uc_t st_bom[];
 
@@ -344,6 +342,7 @@ int st_scompare(const string* a, const string* b, st_len_t offset,
 //
 
 /**
+ * TODO
  * encode a string to given encoding
  *
  * @param src
@@ -669,20 +668,24 @@ ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 // utf8.c
 //
 
-#define string_utf8_next_char(p)                                               \
-  (char*)((p)+string_utf8_skip[*(unsigned char*)(p)])
-
-#define string_utf8_jump_next(p) string_utf8_skip[*(unsigned char*)(p)]
-
 /**
- * Return how many bytes contains given lead
+ * Return how many bytes contains given lead and -1 if it's invalid.
  *
  * @param lead_chr
  * @return
  *  -1 on error
  *  1-4 if success
  */
-ST_EXTERN int string_utf8_count_bytes(unsigned char lead_chr);
+ST_EXTERN int st_utf8_char_size_safe(unsigned char lead_chr);
+
+/**
+* Return how many bytes contains given lead, with no error control.
+*
+* @param lead_chr
+* @return
+*  1-4 if success
+*/
+ST_EXTERN st_len_t st_utf8_char_size(st_uc_t byte);
 
 /**
  * Return utf8 length and capacity
@@ -719,7 +722,7 @@ ST_EXTERN size_t st_utf8_length(const char* src, size_t* out_capacity);
  * @return
  *   first invalid position found or 0 if success
  */
-ST_EXTERN char* string_utf8_invalid(const unsigned char* str, size_t len);
+ST_EXTERN char* st_utf8_invalid(const unsigned char* str, size_t len);
 
 /**
  * Returns if two utf8 are the same. Comparison is multibyte.
@@ -728,7 +731,7 @@ ST_EXTERN char* string_utf8_invalid(const unsigned char* str, size_t len);
  * @param b
  * @return true if are the same
  */
-ST_EXTERN bool st_char_eq_utf8(char* a, char* b);
+ST_EXTERN bool st_utf8_char_eq(char* a, char* b);
 
 //
 // case.c

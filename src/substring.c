@@ -34,10 +34,10 @@ bool string_char(string** out, const string* str, st_len_t pos) {
   char* dst = (*out)->value;
 
   while (pos--) {
-    src += string_utf8_jump_next(src);
+    src += st_utf8_char_size(*src);
   }
 
-  st_len_t jump = string_utf8_jump_next(src);
+  st_len_t jump = st_utf8_char_size(*src);
   ST_CHAR_CP(dst, src, jump, true);
 
   return true;
@@ -75,11 +75,11 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
   case st_enc_utf8: {
     // \0 + end
     while (start--) {
-      itr += string_utf8_jump_next(itr);
+      itr += st_utf8_char_size(*itr);
     }
 
     while (*itr && todo--) {
-      int jump = string_utf8_jump_next(itr);
+      int jump = st_utf8_char_size(*itr);
       done += jump;
 
       ST_CHAR_CP(dst, itr, jump, false);

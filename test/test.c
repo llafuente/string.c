@@ -1,12 +1,41 @@
 /*
-* this file is CPP because I use clang address-analyzer
-* and dont run in c11 (dont ask me why! i don't know)
+* Copyright 2015 Luis Lafuente <llafuente@noboxout.com>
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+* 1. Redistributions of source code must retain the above copyright
+* notice, this list of conditions and the following disclaimer.
+* 2. Redistributions in binary form must reproduce the above copyright
+* notice, this list of conditions and the following disclaimer in the
+* documentation and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+* OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+* IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+* NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+* DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+* THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+* THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+/// @file
 
 #include "stringc.h"
 
+#include <execinfo.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <wchar.h>
 #include <fcntl.h>
+
+//
+// working group
+//
 
 #define T_STR_01 "hello world!"
 #define T_STR_02 "hello my friend i'm even larger!!"
@@ -28,7 +57,6 @@
 #define T_STR_UTF8_6 "Elis\xc9"
 #define T_STR_UTF8_7 "Привет"
 
-
 #define T_STR_CAP_1 "word"
 #define T_STR_CAP_2 "word up"
 #define T_STR_CAP_3 "WORD UP"
@@ -36,25 +64,61 @@
 #define T_STR_CAP_T2 "Word up"
 #define T_STR_CAP_T3 "Word up"
 
-#define CHK_LEN(src) assert(src->length == strlen(src->value));
-#define CHK_VAL(src, dst) assert(0 == strcmp(src->value, dst));
+//
+// assert macro + backtrace
+//
 
-#define CHK_ALL(src, dst, enc) \
-printf("src = %s [%ld][%ld][%lu]\n", src->value, src->length, src->used, src->capacity); \
-printf("dst = %s [%ld][%lu]\n", dst, st_length(dst, enc), st_capacity(dst, enc)); \
-assert(0 == strcmp(src->value, dst)); \
-assert(src->length == st_length(dst, enc)); \
-assert(src->used == st_capacity(dst, enc)); \
-assert(src->capacity >= src->used); \
-assert(src->encoding == enc); \
+void print_trace(void) {
+  void* array[10];
+  size_t size;
+  char** strings;
+  size_t i;
 
+  size = backtrace(array, 10);
+  strings = backtrace_symbols(array, size);
 
-#define RUN_TEST(test) \
-printf("%s\n", #test); \
-test_ ## test(); \
+  printf("Obtained %zd stack frames.\n", size);
 
+  for (i = 0; i < size; i++) {
+    printf("%s\n", strings[i]);
+  }
+  free(strings);
+}
 
-extern void test_memory_funcs();
+#define ASSERT(comparison, name)                                               \
+  if (comparison) {                                                            \
+    printf("\x1B[32mtest PASS\x1B[39m: %s\n", name);                           \
+  } else {                                                                     \
+    printf("\x1B[31mtest FAIL\x1B[39m: %s\n", name);                           \
+    print_trace();                                                             \
+    exit(1);                                                                   \
+  }
+
+#define STRINGIFY2(x) #x
+#define STRINGIFY(x) STRINGIFY2(x)
+
+#define PASTE2(a, b) a##b
+#define PASTE(a, b) PASTE2(a, b)
+
+#define CHK_ALL(src, dst, enc)                                                 \
+  printf("@%s:%s (%s)\n", __FILE__, STRINGIFY(__LINE__), __func__);            \
+  printf("CHECK %s = %s L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,       \
+         src->length, src->used, src->capacity);                               \
+  printf("CHECK %s = %s L[%ld]C[%lu]\n", STRINGIFY(y), dst,                    \
+         st_length(dst, enc), st_capacity(dst, enc));                          \
+  ASSERT(0 == strcmp(src->value, dst), "value");                               \
+  ASSERT(src->length == st_length(dst, enc), "length");                        \
+  ASSERT(src->used == st_capacity(dst, enc), "used");                          \
+  ASSERT(src->capacity >= src->used, "capacity");                              \
+  ASSERT(src->encoding == enc, "encoding");
+
+#define RUN_TEST(test)                                                         \
+  printf("\n\n################\n");                                            \
+  printf("## %s\n", #test);                                                    \
+  printf("################\n");                                                \
+  test_##test();
+
+extern void test_alloc();
 extern void test_case();
 extern void test_repeat();
 extern void test_itr_chars();
@@ -75,9 +139,9 @@ extern void test_encoding();
 extern void test_internal();
 extern void test_utils();
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
 
-  RUN_TEST(memory_funcs);
+  RUN_TEST(alloc);
   RUN_TEST(case);
   RUN_TEST(repeat);
   RUN_TEST(utf8_lenc);
@@ -104,25 +168,24 @@ int main(int argc, const char * argv[]) {
   return 0;
 }
 
-void test_memory_funcs() {
+void test_alloc() {
   //
   // memory
   //
   string* s = st_new(2, st_enc_ascii);
   string* s2;
 
-  assert(s->used == 0);
-  assert(s->length == 0);
-  assert(s->capacity == 3); // 3 because is null-terminated
-  assert(s->value[0] == '\0');
+  ASSERT(s->used == 0, "string used");
+  ASSERT(s->length == 0, "string length");
+  ASSERT(s->capacity == 3, "string capacity"); // 3 because is null-terminated
+  ASSERT(s->value[0] == '\0', "string value");
 
+  // ASSERT(is_utf8(T_STR_02) == 0);
+  // ASSERT(is_utf8(T_STR_03_REP4) == 0);
 
-  //assert(is_utf8(T_STR_02) == 0);
-  //assert(is_utf8(T_STR_03_REP4) == 0);
-
-  //st_resize(&s, 50);
+  // st_resize(&s, 50);
   st_copyc(&s, T_STR_01, st_enc_ascii);
-  assert(s->capacity == 13);
+  ASSERT(s->capacity == 13, "string T_STR_01 capacity");
   CHK_ALL(s, T_STR_01, st_enc_ascii);
 
   st_copyc(&s, T_STR_02, st_enc_ascii);
@@ -132,18 +195,17 @@ void test_memory_funcs() {
   CHK_ALL(s, T_STR_03, st_enc_utf8);
   st_delete(&s);
 
-
   s = st_newc(T_STR_03, st_enc_utf8);
   CHK_ALL(s, T_STR_03, st_enc_utf8);
 
   s2 = st_clone(s);
   CHK_ALL(s2, T_STR_03, st_enc_utf8);
-  assert(s->capacity == s2->capacity);
+  ASSERT(s->capacity == s2->capacity, "s & s2 capacity must be the same");
   st_delete(&s2);
 
   s2 = st_rclone(s, 128);
   CHK_ALL(s2, T_STR_03, st_enc_utf8);
-  assert(s2->capacity == 129);
+  ASSERT(s2->capacity == 129, "s capacity 129");
   st_delete(&s2);
 
   st_delete(&s);
@@ -307,7 +369,6 @@ void test_trim() {
   st_delete(&s);
   st_delete(&aux);
 
-
   s = st_new(10, st_enc_ascii);
   string* mask = st_newc("0", st_enc_ascii);
   st_copyc(&s, "000123x0", st_enc_ascii);
@@ -337,15 +398,22 @@ void test_utf8_lenc() {
 }
 
 void test_utf8_invalid() {
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_1, strlen(T_STR_UTF8_1)) == 0);
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_2, strlen(T_STR_UTF8_2)) == 0);
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_3, strlen(T_STR_UTF8_3)) == 0);
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_4, strlen(T_STR_UTF8_4)) == 0);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_1,
+                         strlen(T_STR_UTF8_1)) == 0);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_2,
+                         strlen(T_STR_UTF8_2)) == 0);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_3,
+                         strlen(T_STR_UTF8_3)) == 0);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_4,
+                         strlen(T_STR_UTF8_4)) == 0);
 
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_5, strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1);
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_6, strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_5,
+                         strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_6,
+                         strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5);
 
-  assert(string_utf8_invalid((const unsigned char *) T_STR_UTF8_7, strlen(T_STR_UTF8_7)) == 0);
+  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_7,
+                         strlen(T_STR_UTF8_7)) == 0);
 }
 
 char buffer[256];
@@ -355,14 +423,11 @@ void char_itr_cb(const string* chr, st_len_t pos, string* src) {
 
 void byte_itr_cb(st_uc_t chr, st_len_t pos, const string* src) {
   st_len_t i = strlen(buffer);
-  buffer[i] = (char) chr;
+  buffer[i] = (char)chr;
   buffer[i + 1] = '\0';
 }
 
-
-void char_map_cb(string* chr, st_len_t pos, string* src) {
-  chr->value[0] += 1;
-}
+void char_map_cb(string* chr, st_len_t pos, string* src) { chr->value[0] += 1; }
 
 void test_itr_chars() {
   buffer[0] = '\0';
@@ -372,7 +437,7 @@ void test_itr_chars() {
   str = st_newc(T_STR_03_REP3, st_enc_utf8);
 
   buffer[0] = '\0';
-  st_char_iterator(str, (st_char_itr_cb) char_itr_cb);
+  st_char_iterator(str, (st_char_itr_cb)char_itr_cb);
   assert(strcmp(buffer, T_STR_03_REP3) == 0);
 
   buffer[0] = '\0';
@@ -387,7 +452,7 @@ void test_itr_chars() {
   str = st_newc("01\n2\n345\n\n67\n89", st_enc_utf8);
 
   buffer[0] = '\0';
-  st_line_iterator(str, (st_char_itr_cb) char_itr_cb);
+  st_line_iterator(str, (st_char_itr_cb)char_itr_cb);
   printf("buffer --> %s\n", buffer);
   assert(strcmp(buffer, "0123456789") == 0);
 
@@ -395,17 +460,16 @@ void test_itr_chars() {
 
   str = st_newc("abc", st_enc_ascii);
 
-  nstr = st_char_map(str, (st_char_map_cb) char_map_cb);
+  nstr = st_char_map(str, (st_char_map_cb)char_map_cb);
 
   CHK_ALL(nstr, "bcd", st_enc_ascii);
   st_delete(&str);
   st_delete(&nstr);
 
-
   str = st_newc("abc", st_enc_utf8);
 
   st_debug(str);
-  nstr = st_char_map(str, (st_char_map_cb) char_map_cb);
+  nstr = st_char_map(str, (st_char_map_cb)char_map_cb);
   printf("***********\n");
   st_debug(nstr);
 
@@ -413,11 +477,10 @@ void test_itr_chars() {
   st_delete(&str);
   st_delete(&nstr);
 
-
   str = st_newc(T_STR_03, st_enc_utf8);
 
   st_debug(str);
-  nstr = st_char_map(str, (st_char_map_cb) char_map_cb);
+  nstr = st_char_map(str, (st_char_map_cb)char_map_cb);
   printf("***********\n");
   st_debug(nstr);
 
@@ -431,19 +494,19 @@ void test_capitalize() {
   string* str = st_newc(T_STR_CAP_1, st_enc_ascii);
   string_capitalize(str);
   st_debug(str);
-  CHK_VAL(str, T_STR_CAP_T1);
+  CHK_ALL(str, T_STR_CAP_T1, st_enc_ascii);
   st_delete(&str);
 
   str = st_newc(T_STR_CAP_2, st_enc_ascii);
   string_capitalize(str);
   st_debug(str);
-  CHK_VAL(str, T_STR_CAP_T2);
+  CHK_ALL(str, T_STR_CAP_T2, st_enc_ascii);
   st_delete(&str);
 
   str = st_newc(T_STR_CAP_3, st_enc_ascii);
   string_capitalize(str);
   st_debug(str);
-  CHK_VAL(str, T_STR_CAP_T3);
+  CHK_ALL(str, T_STR_CAP_T3, st_enc_ascii);
   st_delete(&str);
 }
 
@@ -483,7 +546,7 @@ void test_chr() {
   assert(st_ord(s, 3) == 111);
   assert(st_ord(s, 4) == 32);
   assert(st_ord(s, 5) == 9731);
-  //assert(st_ord(s, 6) == 0); out-of-range
+  // assert(st_ord(s, 6) == 0); out-of-range
   st_delete(&s);
 
   s = st_chr(9731, st_enc_utf8);
@@ -495,7 +558,6 @@ void test_chr() {
   st_delete(&s);
 }
 
-
 void test_search() {
   string* hay = st_newc("0123456789", st_enc_ascii);
   string* ned = st_newc("5", st_enc_ascii);
@@ -503,7 +565,7 @@ void test_search() {
   st_len_t i = st_pos(hay, ned, 0, 0);
 
   printf("st_pos = %ld\n", i);
-  assert(i == 5);
+  ASSERT(i == 5, "st_pos = 5");
 
   st_delete(&hay);
   st_delete(&ned);
@@ -512,7 +574,7 @@ void test_search() {
   ned = st_newc("XX", st_enc_ascii);
 
   i = st_pos(hay, ned, 0, 0);
-  assert(i == 8);
+  ASSERT(i == 8, "st_pos = 8");
 
   st_delete(&hay);
   st_delete(&ned);
@@ -521,27 +583,27 @@ void test_search() {
   ned = st_newc("d", st_enc_ascii);
 
   i = st_pos(hay, ned, 0, 0);
-  assert(i == 8);
+  ASSERT(i == 8, "st_pos = 8");
 
-st_debug(hay);
-st_debug(ned);
+  st_debug(hay);
+  st_debug(ned);
 
   i = st_pos(hay, ned, 9, 0);
-  assert(i == 13);
+  ASSERT(i == 13, "st_pos = 13");
 
   i = st_pos(hay, ned, 14, 0);
-  assert(i == 18);
+  ASSERT(i == 18, "st_pos = 18");
 
   i = st_pos(hay, ned, 19, 0);
-  assert(i == 19);
+  ASSERT(i == 19, "st_pos = 19");
 
   i = st_pos(hay, ned, 20, 0);
-  assert(i == -1);
+  ASSERT(i == -1, "st_pos = -1");
 
   st_delete(&ned);
   ned = st_newc("fdusgeui", st_enc_ascii);
   i = st_pos(hay, ned, 20, 0);
-  assert(i == -1);
+  ASSERT(i == -1, "st_pos = -1");
 
   st_delete(&hay);
   st_delete(&ned);
@@ -551,16 +613,16 @@ st_debug(ned);
   ned = st_newc("☃", st_enc_utf8);
 
   i = st_pos(hay, ned, 0, 0);
-  assert(i == 5);
+  ASSERT(i == 5, "st_pos = 5");
 
   i = st_pos(hay, ned, 6, 0);
-  assert(i == 11);
+  ASSERT(i == 11, "st_pos = 11");
 
   i = st_pos(hay, ned, 12, 0);
-  assert(i == 17);
+  ASSERT(i == 17, "st_pos = 17");
 
   i = st_pos(hay, ned, 18, 0);
-  assert(i == 23);
+  ASSERT(i == 23, "st_pos = 23");
 
   // st_start_with / st_end_with
   assert(st_start_with(hay, ned) == false);
@@ -604,7 +666,6 @@ st_debug(ned);
 
   st_delete(&s);
 
-
   // st_rpos
   printf("st_rpos\n");
   hay = st_newc(T_STR_03_REP4, st_enc_utf8);
@@ -622,13 +683,12 @@ st_debug(ned);
   st_delete(&hay);
 }
 
-
 void test_utf8() {
-  assert(st_char_eq_utf8("☃", "☃") == true);
-  assert(st_char_eq_utf8("ñ", "ñ") == true);
-  assert(st_char_eq_utf8("☃", "a") == false);
-  assert(st_char_eq_utf8("A", "a") == false);
-  assert(st_char_eq_utf8("ñ", "☃") == false);
+  assert(st_utf8_char_eq("☃", "☃") == true);
+  assert(st_utf8_char_eq("ñ", "ñ") == true);
+  assert(st_utf8_char_eq("☃", "a") == false);
+  assert(st_utf8_char_eq("A", "a") == false);
+  assert(st_utf8_char_eq("ñ", "☃") == false);
 }
 
 void test_encoding() {
@@ -637,7 +697,7 @@ void test_encoding() {
 
   string* go = st_to_utf32(src);
 
-  assert(strcmp(go->value, (const char *) utf32p) == 0);
+  assert(strcmp(go->value, (const char*)utf32p) == 0);
 
   string* back = st_to_utf8(go);
 
@@ -646,9 +706,7 @@ void test_encoding() {
   st_delete(&src);
   st_delete(&go);
   st_delete(&back);
-
 }
-
 
 void test_internal() {
   string* s;
@@ -679,7 +737,6 @@ void test_internal() {
   assert(start_pos == 9);
   assert(end_pos == 12);
 
-
   s = st_newc("0123456789", st_enc_ascii);
 
   assert(st__get_char_offset(s, 5) - 5 == s->value);
@@ -689,21 +746,21 @@ void test_internal() {
   assert(st__get_char_offset(s, -5) - 5 == s->value);
   assert(st__get_char_offset(s, -9) - 1 == s->value);
   assert(st__get_char_offset(s, -1) - 9 == s->value);
-/*
-  st__get_char_range(s, 0, 5, &start, &end);
-  assert(start == s->value);
-  assert(end == s->value + 5);
+  /*
+    st__get_char_range(s, 0, 5, &start, &end);
+    assert(start == s->value);
+    assert(end == s->value + 5);
 
 
-  st__get_char_range(s, -2, 2, &start, &end);
-  assert(start == s->value + 8);
-  assert(end == s->value + 10);
+    st__get_char_range(s, -2, 2, &start, &end);
+    assert(start == s->value + 8);
+    assert(end == s->value + 10);
 
 
-  st__get_char_range(s, -2, -1, &start, &end);
-  assert(start == s->value + 8);
-  assert(end == s->value + 9);
-*/
+    st__get_char_range(s, -2, -1, &start, &end);
+    assert(start == s->value + 8);
+    assert(end == s->value + 9);
+  */
 
   st_delete(&s);
 
@@ -713,41 +770,45 @@ void test_internal() {
   string* x;
   string* y;
   char* ret;
-  x = st_newc("I will not have my fwends widiculed by the common soldiewy", st_enc_ascii);
+  x = st_newc("I will not have my fwends widiculed by the common soldiewy",
+              st_enc_ascii);
   y = st_newc("zpm1", st_enc_ascii); // Finds the 'm'
   ret = st__mempbrk(x->value, y->value);
   assert(ret == &x->value[16]); //, "Simple strpbrk()" );
-st_delete(&x); st_delete(&y);
+  st_delete(&x);
+  st_delete(&y);
 
   // Check 2
   x = st_newc("Not bad for a little fur ball. You! Stay here.", st_enc_ascii);
   y = st_newc("zx", st_enc_ascii);
   ret = st__mempbrk(x->value, y->value);
   assert(ret == NULL); //, "Letters not found");
-st_delete(&x); st_delete(&y);
+  st_delete(&x);
+  st_delete(&y);
 
   // Check 3 (boundary condition)
   x = st_newc("", st_enc_ascii);
   y = st_newc("zx", st_enc_ascii);
   ret = st__mempbrk(x->value, y->value);
   assert(ret == 0); //, "String to search empty" );
-st_delete(&x); st_delete(&y);
+  st_delete(&x);
+  st_delete(&y);
 
   // Check 4 (boundary condition)
   x = st_newc("zx", st_enc_ascii);
   y = st_newc("", st_enc_ascii);
   ret = st__mempbrk(x->value, y->value);
   assert(ret == 0); //, "Empty search string" );
-st_delete(&x); st_delete(&y);
+  st_delete(&x);
+  st_delete(&y);
 
   // Check 5 (boundary condition)
   x = st_newc("", st_enc_ascii);
   y = st_newc("", st_enc_ascii);
   ret = st__mempbrk(x->value, y->value);
   assert(ret == 0); //, "Both strings empty" );
-st_delete(&x); st_delete(&y);
-
-
+  st_delete(&x);
+  st_delete(&y);
 }
 
 void test_utils() {

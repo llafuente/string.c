@@ -26,29 +26,6 @@
 /// @file
 
 #include "stringc.h"
-// TODO test performance using (also if are compatible)
-/*
-if ((code & 0xffffff80) == 0) return 1;
-else if ((code & 0xfffff800) == 0) return 2;
-else if ((code & 0xffff0000) == 0) return 3;
-else if ((code & 0xffe00000) == 0) return 4;
-else if ((code & 0xfc000000) == 0) return 5;
-else if ((code & 0x80000000) == 0) return 6;
-*/
-
-const char string_utf8_skip_data[256] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1};
-const char* const string_utf8_skip = string_utf8_skip_data;
 
 size_t st_utf8_length(const char* src, size_t* used_bytes) {
   size_t len = 0;
@@ -58,7 +35,7 @@ size_t st_utf8_length(const char* src, size_t* used_bytes) {
 
   while (*p != '\0') {
     // printf("%c @%p %d\n", *p, p, utf8_next(p));
-    jump = string_utf8_jump_next(p);
+    jump = st_utf8_char_size(*p);
     p += jump;
     capacity += jump;
     // printf("%c\n", *p);
@@ -73,22 +50,22 @@ size_t st_utf8_length(const char* src, size_t* used_bytes) {
   return len;
 }
 
-int string_utf8_count_bytes(unsigned char lead_chr) {
+int st_utf8_char_size_safe(unsigned char lead_chr) {
   if (lead_chr <= 0x7F) {
-    return 0;
-  } else if (lead_chr >= 0xC0 /*11000000*/ && lead_chr <= 0xDF /*11011111*/) {
     return 1;
-  } else if (lead_chr >= 0xE0 /*11100000*/ && lead_chr <= 0xEF /*11101111*/) {
+  } else if (lead_chr >= 0xC0 /*11000000*/ && lead_chr <= 0xDF /*11011111*/) {
     return 2;
+  } else if (lead_chr >= 0xE0 /*11100000*/ && lead_chr <= 0xEF /*11101111*/) {
+    return 3;
   } else if (lead_chr >= 0xF0 /*11110000*/ &&
              lead_chr <= 0xF4 /* Cause of RFC 3629 */) {
-    return 3;
+    return 4;
   }
   // invalid!
   return -1;
 }
 
-char* string_utf8_invalid(const unsigned char* str, size_t len) {
+char* st_utf8_invalid(const unsigned char* str, size_t len) {
   size_t i = 0;
   int continuation_bytes = 0;
   unsigned char cache;
@@ -97,7 +74,7 @@ char* string_utf8_invalid(const unsigned char* str, size_t len) {
   while (str < end) {
     cache = *str;
 
-    continuation_bytes = string_utf8_count_bytes(cache);
+    continuation_bytes = st_utf8_char_size_safe(cache) - 1;
 
     if (continuation_bytes < 0) {
       return (char*)str;
@@ -119,8 +96,8 @@ char* string_utf8_invalid(const unsigned char* str, size_t len) {
 }
 
 // TODO i'm almost sure that this could be improved with a sum == X
-// same technique used in ST_UTF8_COUNT_BYTES
-bool st_char_eq_utf8(char* a, char* b) {
+// same technique used in st_utf8_char_size_safe
+bool st_utf8_char_eq(char* a, char* b) {
   st_uc_t ac = (st_uc_t)*a;
   st_uc_t bc = (st_uc_t)*b;
 
@@ -141,4 +118,8 @@ bool st_char_eq_utf8(char* a, char* b) {
   }
 
   return true;
+}
+
+st_len_t st_utf8_char_size(st_uc_t byte) {
+  return 1 + (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0));
 }
