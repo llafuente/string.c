@@ -44,14 +44,31 @@ bool st_utf32_valid_codepoint(st_uc4_t code_point) {
   return code_point <= 0x10FFFF ? 4 : -1;
 }
 
-st_uc4_t st_utf32be_codepoint(const st_uc_t* input) {
-  return ((input[0]) << 24) + ((input[1]) << 16) + ((input[2]) << 8) +
-         (input[3]);
+st_uc4_t st_utf32be_codepoint(const char* input) {
+  const st_uc_t* uc_input = (const st_uc_t*)input;
+
+  return ((uc_input[0]) << 24) + ((uc_input[1]) << 16) + ((uc_input[2]) << 8) +
+         (uc_input[3]);
 }
 
-st_uc4_t st_utf32le_codepoint(const st_uc_t* input) {
-  return ((input[3]) << 24) + ((input[2]) << 16) + ((input[1]) << 8) +
-         (input[0]);
+st_uc4_t st_utf32le_codepoint(const char* input) {
+  const st_uc_t* uc_input = (const st_uc_t*)input;
+
+  return ((uc_input[3]) << 24) + ((uc_input[2]) << 16) + ((uc_input[1]) << 8) +
+         (uc_input[0]);
 }
 
 st_len_t st_utf32_char_size(st_uc_t lead_chr) { return 4; }
+
+st_len_t st_utf32le_char_size_safe(const char* input) {
+  if (st_utf32_valid_codepoint(st_utf32le_codepoint(input))) {
+    return 4;
+  }
+  return -1;
+}
+st_len_t st_utf32be_char_size_safe(const char* input) {
+  if (st_utf32_valid_codepoint(st_utf32be_codepoint(input))) {
+    return 4;
+  }
+  return -1;
+}

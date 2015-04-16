@@ -27,30 +27,32 @@
 
 #include "stringc.h"
 
-size_t st_utf8_length(const char* src, size_t* used_bytes) {
-  size_t len = 0;
+st_len_t st_utf8_length(const char* src, size_t* capacity) {
+  st_len_t len = 0;
   const char* p = src;
   char jump;
-  size_t capacity = 0;
+  size_t used_bytes = 0;
 
   while (*p != '\0') {
     // printf("%c @%p %d\n", *p, p, utf8_next(p));
     jump = st_utf8_char_size(*p);
     p += jump;
-    capacity += jump;
+    used_bytes += jump;
     // printf("%c\n", *p);
     ++len;
   }
-  //++capacity; do not include '\0'!
+  //++used_bytes; do not include '\0'!
 
-  if (used_bytes) {
-    *used_bytes = capacity;
+  if (capacity) {
+    *capacity = used_bytes;
   }
 
   return len;
 }
 
-st_len_t st_utf8_char_size_safe(st_uc_t lead_chr) {
+st_len_t st_utf8_char_size_safe(const char* input) {
+  st_uc_t lead_chr = (st_uc_t)*input;
+
   if (lead_chr <= 0x7F) {
     return 1;
   } else if (lead_chr >= 0xC0 /*11000000*/ && lead_chr <= 0xDF /*11011111*/) {
@@ -72,9 +74,7 @@ char* st_utf8_invalid(const st_uc_t* str, size_t len) {
   const st_uc_t* end = str + len;
 
   while (str < end) {
-    cache = *str;
-
-    continuation_bytes = st_utf8_char_size_safe(cache) - 1;
+    continuation_bytes = st_utf8_char_size_safe((const char*)str) - 1;
 
     if (continuation_bytes < 0) {
       return (char*)str;
@@ -125,7 +125,7 @@ st_len_t st_utf8_char_size(st_uc_t byte) {
 }
 
 bool st_utf8_valid_codepoint(st_uc4_t uc_cp) {
-  if (uc_cp < 0 || uc_cp >= 0x110000 || ((uc_cp & 0xFFFF) >= 0xFFFE) ||
+  if (uc_cp >= 0x110000 || ((uc_cp & 0xFFFF) >= 0xFFFE) ||
       (uc_cp >= 0xD800 && uc_cp < 0xE000) ||
       (uc_cp >= 0xFDD0 && uc_cp < 0xFDF0)) {
     return false;

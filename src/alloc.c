@@ -47,6 +47,7 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
   case st_enc_ascii:
     return st_new(len, enc);
   case st_enc_utf8:
+  case st_enc_utf32le:
   case st_enc_utf32be:
     return st_new(len * 4, enc);
   }
@@ -57,7 +58,7 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
 // TODO use utf8_len()
 string* st_newc(const char* src, st_enc_t enc) {
   st_len_t len;
-  st_len_t used;
+  size_t used;
 
   st_get_meta(src, enc, &len, &used);
   size_t size = used + 1; // null terminated!
@@ -150,7 +151,7 @@ string* st_clonec(const char* src, size_t len) {
 }
 */
 
-void st_copy(string** out, string* src) {
+void st_copy(string** out, const string* src) {
   // printf("st_copy %p - %p\n", *out, src);
 
   size_t src_len = src->length;
@@ -172,7 +173,7 @@ void st_copy(string** out, string* src) {
 void st_copyc(string** out, const char* src, st_enc_t enc) {
   // printf("st_copy %p - chars* %p\n", *out, src);
   st_len_t len;
-  st_len_t used;
+  size_t used;
 
   st_get_meta(src, enc, &len, &used);
 

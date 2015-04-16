@@ -41,6 +41,7 @@ string* st_to_utf32(const string* src) {
   // TODO what we do?
   case st_enc_binary:
   case st_enc_ascii:
+    assert(false); // TODO
   case st_enc_utf8: {
 
     st_uc_t* p = (st_uc_t*)src->value;
@@ -84,8 +85,10 @@ string* st_to_utf32(const string* src) {
     return out;
   }
 
+  case st_enc_utf32le:
   case st_enc_utf32be:
-    return 0;
+    st_copy(&out, (const string*)src);
+    return out;
   }
 }
 
@@ -97,7 +100,12 @@ string* st_to_utf8(const string* src) {
   // TODO what we do?
   case st_enc_binary:
   case st_enc_ascii:
+    assert(false); // TODO
   case st_enc_utf8:
+    // clone
+    st_copy(&out, (const string*)src);
+    return out;
+  case st_enc_utf32le:
   case st_enc_utf32be: {
 
     st_uc4_t* p = (st_uc4_t*)src->value;

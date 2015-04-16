@@ -50,8 +50,7 @@ st_len_t st_length(const char* src, st_enc_t enc) {
 
 size_t st_capacity(const char* src, st_enc_t enc) { return strlen(src); }
 
-void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
-                 st_len_t* bytes) {
+void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
   switch (enc) {
   case st_enc_ascii:
   case st_enc_binary:
@@ -126,7 +125,7 @@ st_enc_t st_detect_encoding(char* input) {
   if (len >= 4) {
     st_uc4_t uc = (st_uc4_t) * ((st_uc4_t*)input);
     // BE
-    if (uc = 0x0000FEFF && st_validate_encoding(input, st_enc_utf32be)) {
+    if (uc == 0x0000FEFF && st_validate_encoding(input, st_enc_utf32be)) {
       return st_enc_utf32be;
     }
     // LE
@@ -152,18 +151,13 @@ st_len_t st_char_size_safe(const char* input, st_enc_t enc) {
   case st_enc_binary:
     return 1;
   case st_enc_ascii:
+    return st_ascii_char_size_safe(input);
   case st_enc_utf8:
     return st_utf8_char_size_safe(input);
   case st_enc_utf32le:
-    if (st_utf32_valid_codepoint(st_utf32le_codepoint(input))) {
-      return 4;
-    }
-    return -1;
+    return st_utf32le_char_size_safe(input);
   case st_enc_utf32be:
-    if (st_utf32_valid_codepoint(st_utf32be_codepoint(input))) {
-      return 4;
-    }
-    return -1;
+    return st_utf32le_char_size_safe(input);
   }
 }
 bool st_validate_encoding(char* input, st_enc_t enc) {

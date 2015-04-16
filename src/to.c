@@ -178,6 +178,7 @@ string* st_chr(st_uc4_t value, st_enc_t enc) {
     }
     break;
 
+  case st_enc_utf32le:
   case st_enc_utf32be:
     out = st_new(4, enc);
     dst = out->value;

@@ -144,7 +144,7 @@ extern const st_uc_t st_bom[];
   }
 
 /// advance pointer to amount positions UCS4BE
-#define ST_ADVANCE_UCS4BE(s, amount) s += amount * 4
+#define ST_ADVANCE_UTF32(s, amount) s += amount * 4
 
 /// advance pointer to amount positions
 #define ST_ADVANCE(s, amount, enc)                                             \
@@ -156,8 +156,9 @@ extern const st_uc_t st_bom[];
   case st_enc_utf8:                                                            \
     ST_ADVANCE_UTF8(s, amount);                                                \
     break;                                                                     \
+  case st_enc_utf32le:                                                         \
   case st_enc_utf32be:                                                         \
-    ST_ADVANCE_UCS4BE(s, amount);                                              \
+    ST_ADVANCE_UTF32(s, amount);                                               \
     break;                                                                     \
   }
 
@@ -254,7 +255,7 @@ ST_EXTERN size_t st_capacity(const char* src, st_enc_t enc);
  * terminated)
  */
 ST_EXTERN void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
-                           st_len_t* bytes);
+                           size_t* bytes);
 
 /**
  * add '\0' at the end of the string
@@ -296,6 +297,7 @@ ST_EXTERN string* st_concat(string* first, string* second);
 //
 
 /**
+ * @brief
  * Returns a new string result of converting binary data
  * into hexadecimal representation
  *
@@ -542,7 +544,7 @@ ST_EXTERN string* st_clone_subc(const char* src, size_t len, st_enc_t enc);
  * @param out
  * @param src
  */
-ST_EXTERN void st_copy(string** out, string* src);
+ST_EXTERN void st_copy(string** out, const string* src);
 
 /// alias of st_copyc
 #define st_cp st_copy
@@ -848,12 +850,12 @@ ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset,
 /**
 * Return how many bytes contains given lead and -1 if it's invalid.
 *
-* @param lead_chr
+* @param input
 * @return
 *  -1 on error
 *  1-4 if success
 */
-ST_EXTERN st_len_t st_utf8_char_size_safe(st_uc_t lead_chr);
+ST_EXTERN st_len_t st_utf8_char_size_safe(const char* input);
 
 /**
 * Return how many bytes contains given lead, with no error control.
@@ -869,11 +871,11 @@ ST_EXTERN st_len_t st_utf8_char_size(st_uc_t byte);
 * based on glib_utf8_offset_to_pointer
 *
 * @param src
-* @param out_capacity
+* @param capacity
 *   Optional, 0 means you don't want the value
 * @return string length utf-8 encoded
 */
-ST_EXTERN size_t st_utf8_length(const char* src, size_t* out_capacity);
+ST_EXTERN st_len_t st_utf8_length(const char* src, size_t* capacity);
 
 /**
 * Check if the given uchar* is a valid utf-8 sequence.
@@ -922,7 +924,7 @@ ST_EXTERN bool st_utf8_valid_codepoint(st_uc4_t cp);
 //
 ST_EXTERN st_len_t st_ascii_length(const char* src, size_t* used_bytes);
 
-ST_EXTERN st_len_t st_ascii_char_size_safe(st_uc_t lead_chr);
+ST_EXTERN st_len_t st_ascii_char_size_safe(const char* input);
 
 ST_EXTERN st_len_t st_ascii_char_size(st_uc_t lead_chr);
 
@@ -934,10 +936,13 @@ ST_EXTERN st_uc4_t st_ascii_code_point(const char* input);
 
 ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
 
-ST_EXTERN st_uc4_t st_utf32le_codepoint(const st_uc_t* input);
-ST_EXTERN st_uc4_t st_utf32be_codepoint(const st_uc_t* input);
+ST_EXTERN st_uc4_t st_utf32le_codepoint(const char* input);
+ST_EXTERN st_uc4_t st_utf32be_codepoint(const char* input);
 ST_EXTERN bool st_utf32_valid_codepoint(st_uc4_t code_point);
 
 ST_EXTERN st_len_t st_utf32_char_size(st_uc_t lead_chr);
+
+ST_EXTERN st_len_t st_utf32le_char_size_safe(const char* input);
+ST_EXTERN st_len_t st_utf32be_char_size_safe(const char* input);
 
 #endif

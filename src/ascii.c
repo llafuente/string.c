@@ -37,7 +37,9 @@ st_len_t st_ascii_length(const char* src, size_t* used_bytes) {
   return out;
 }
 
-st_len_t st_ascii_char_size_safe(st_uc_t lead_chr) {
+st_len_t st_ascii_char_size_safe(const char* input) {
+  st_uc_t lead_chr = (st_uc_t)input;
+
   return lead_chr <= 127 ? 1 : -1;
 }
 
