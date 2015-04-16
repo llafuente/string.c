@@ -58,3 +58,17 @@ To keep coding style sanity, before PR use:
 ```bash
 format.sh
 ```
+
+
+## Code-coverage
+
+Edit Makefile.am add "--coverage" to
+* libstringc_la_CFLAGS
+* libstringc_la_LDFLAGS
+
+```bash
+sh autogen.sh && ./configure && make check
+# gcovr install
+# pip install gcovr
+gcovr -r . --html --html-details -o code-coverage.html
+```

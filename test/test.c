@@ -244,20 +244,22 @@ void test_repeat() {
 
 void test_compare() {
   string* s = st_newc(T_STR_CMP1, st_enc_ascii);
-  CHK_ALL(s, T_STR_CMP1, st_enc_ascii);
-
   string* aux = st_newc(T_STR_CMP2, st_enc_ascii);
-  CHK_ALL(aux, T_STR_CMP2, st_enc_ascii);
 
   assert(st_compare(s, s) == 0);
   assert(st_compare(aux, aux) == 0);
   assert(st_compare(s, aux) > 0);
 
   st_copyc(&aux, T_STR_CMP3, st_enc_ascii);
-  CHK_ALL(aux, T_STR_CMP3, st_enc_ascii);
-
   assert(st_compare(s, aux) < 0);
 
+  st_delete(&aux);
+  st_delete(&s);
+
+  s = st_newc("123", st_enc_ascii);
+  aux = st_newc("1", st_enc_ascii);
+  assert(st_compare(s, aux) > 0);
+  assert(st_compare(aux, s) < 0);
   st_delete(&aux);
   st_delete(&s);
 
@@ -514,6 +516,12 @@ void test_capitalize() {
 void test_shuffle() {
   string* s = st_newc("123456789", st_enc_ascii);
   string* aux = st_shuffle(s, s->length);
+  st_delete(&s);
+  st_delete(&aux);
+
+  s = st_newc("1", st_enc_ascii);
+  aux = st_shuffle(s, s->length);
+  CHK_ALL(aux, "1", st_enc_ascii);
   st_delete(&s);
   st_delete(&aux);
 }

@@ -28,6 +28,7 @@
 #include "stringc.h"
 
 int st_compare(const string* a, const string* b) {
+  printf("%ld, %ld", a->length, b->length);
   if (a->length > b->length) {
     return 1;
   }
