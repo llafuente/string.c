@@ -456,6 +456,19 @@ ST_EXTERN void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb);
 ST_EXTERN void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
 
 //
+// justify.c
+//
+
+ST_EXTERN string* st_justify(const string* src, st_len_t width,
+                             const string* padstr, char mode);
+ST_EXTERN string* st_center(const string* src, size_t width,
+                            const string* padstr);
+ST_EXTERN string* st_right(const string* src, size_t width,
+                           const string* padstr);
+ST_EXTERN string* st_left(const string* src, size_t width,
+                          const string* padstr);
+
+//
 // alloc.c
 //
 
@@ -599,7 +612,11 @@ ST_EXTERN void st_cleanup();
  * @param x
  * @return new string
  */
-ST_EXTERN string* st_repeat(const string* src, size_t x);
+ST_EXTERN string* st_repeat(const string* src, size_t times);
+
+/// alias of st_repeat
+/// @see st_repeat
+#define st_times st_repeat
 
 //
 // shuffle.c
@@ -843,6 +860,9 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset,
                               st_len_t* offset_length);
 
+ST_EXTERN void st__repeat(char* dst, const char* src, size_t src_len,
+                          size_t times);
+
 //--------------------------------//
 //        encoding group          //
 //--------------------------------//
@@ -945,6 +965,8 @@ ST_EXTERN st_len_t st_ascii_lead_size(st_uc_t lead_chr);
 
 ST_EXTERN st_uc4_t st_ascii_codepoint(const char* input);
 ST_EXTERN bool st_ascii_valid_codepoint(st_uc4_t codepoint);
+
+ST_EXTERN bool st_is_ascii(const char* input);
 
 //
 // utf32.c

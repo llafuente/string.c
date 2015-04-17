@@ -52,3 +52,13 @@ st_len_t st_ascii_lead_size(st_uc_t lead_chr) { return 1; }
 st_uc4_t st_ascii_codepoint(const char* input) { return (st_uc4_t)*input; }
 
 bool st_ascii_valid_codepoint(st_uc4_t codepoint) { return codepoint <= 127; }
+
+bool st_is_ascii(const char* input) {
+  char c;
+  while (c = *input) {
+    if (c > 127) {
+      return false;
+    }
+  }
+  return true;
+}

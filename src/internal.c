@@ -186,3 +186,26 @@ st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8) {
   }
   return 0; // err
 }
+
+void st__repeat(char* dst, const char* src, size_t src_len, size_t times) {
+  // Heavy optimization for situations where src string is 1 byte long
+  if (src_len == 1) {
+    memset(dst, *(src), times);
+    return;
+  }
+
+  st_len_t result_len = src_len * times;
+
+  char* s, *e, *ee;
+  // TODO review: ptrdiff_t l=0;
+  size_t l = 0;
+  memcpy(dst, src, src_len);
+  s = dst;
+  e = dst + src_len;
+  ee = dst + result_len;
+  while (e < ee) {
+    l = (e - s) < (ee - e) ? (e - s) : (ee - e);
+    memmove(e, s, l);
+    e += l;
+  }
+}

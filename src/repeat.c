@@ -27,36 +27,22 @@
 
 #include "stringc.h"
 
-string* st_repeat(const string* src, size_t x) {
+string* st_repeat(const string* src, size_t times) {
   st_len_t src_len = src->used; // @cache & use byte size not real length!
   /* Don't waste our time if it's empty */
   /* ... or if the multiplier is zero */
-  if (src_len == 0 || x == 0) {
+  if (src_len == 0 || times == 0) {
     return st_new((size_t)0, st_enc_ascii);
   }
 
+  st_len_t result_len = src_len * times; // Length of the resulting string
   /* Initialize the result string */
-  st_len_t result_len = src_len * x; // Length of the resulting string
   string* result = st_new(result_len, src->encoding);
-  // Heavy optimization for situations where src string is 1 byte long
-  if (src_len == 1) {
-    memset(result->value, *(src->value), x);
-  } else {
-    char* s, *e, *ee;
-    // TODO review: ptrdiff_t l=0;
-    size_t l = 0;
-    memcpy(result->value, src->value, src_len);
-    s = result->value;
-    e = result->value + src_len;
-    ee = result->value + result_len;
-    while (e < ee) {
-      l = (e - s) < (ee - e) ? (e - s) : (ee - e);
-      memmove(e, s, l);
-      e += l;
-    }
-  }
+
+  st__repeat(result->value, src->value, src_len, times);
+
   result->value[result_len] = '\0';
-  result->length = src->length * x;
-  result->used = src_len * x;
+  result->length = src->length * times;
+  result->used = src_len * times;
   return result;
 }

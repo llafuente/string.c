@@ -116,9 +116,9 @@ void print_trace(void) {
     printf("# CHECK %s = utf32 L[%ld]C[%lu]\n", STRINGIFY(y),                  \
            st_length(dst, enc), st_capacity(dst, enc));                        \
   } else {                                                                     \
-    printf("# CHECK %s = %s L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,   \
+    printf("# CHECK %s = '%s' L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,   \
            src->length, src->used, src->capacity);                             \
-    printf("# CHECK %s = %s L[%ld]C[%lu]\n", STRINGIFY(y), dst,                \
+    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), dst,                \
            st_length(dst, enc), st_capacity(dst, enc));                        \
   }                                                                            \
   ASSERT(0 == strcmp(src->value, dst), "value");                               \
@@ -154,6 +154,7 @@ extern void test_utf8();
 extern void test_encoding();
 extern void test_internal();
 extern void test_utils();
+extern void test_justify();
 
 int main(int argc, const char* argv[]) {
 
@@ -182,6 +183,7 @@ int main(int argc, const char* argv[]) {
   RUN_TEST(encoding);
   RUN_TEST(internal);
   RUN_TEST(utils);
+  RUN_TEST(justify);
 
   st_cleanup();
   printf("OK\n");
@@ -931,4 +933,37 @@ void test_internal() {
 
 void test_utils() {
   assert(st_length("Iñtërnâtiônàlizætiøn", st_enc_utf8) == 20);
+}
+
+extern void test_justify() {
+  string* x;
+  string* z;
+
+  x = st_newc("abc", st_enc_ascii);
+
+  z = st_center(x, 5, 0);
+  CHK_ALL(z, " abc ", st_enc_ascii);
+  st_delete(&z);
+
+  z = st_left(x, 5, 0);
+  CHK_ALL(z, "abc  ", st_enc_ascii);
+  st_delete(&z);
+
+  z = st_right(x, 5, 0);
+  CHK_ALL(z, "  abc", st_enc_ascii);
+  st_delete(&z);
+
+  z = st_center(x, 6, 0);
+  CHK_ALL(z, " abc  ", st_enc_ascii);
+  st_delete(&z);
+
+  z = st_left(x, 6, 0);
+  CHK_ALL(z, "abc   ", st_enc_ascii);
+  st_delete(&z);
+
+  z = st_right(x, 6, 0);
+  CHK_ALL(z, "   abc", st_enc_ascii);
+  st_delete(&z);
+
+  st_delete(&x);
 }

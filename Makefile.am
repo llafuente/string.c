@@ -23,6 +23,7 @@ libstringc_la_SOURCES = src/append.c \
                   src/to.c \
                   src/hex2bin.c \
                   src/internal.c \
+                  src/justify.c \
                   src/iterators.c \
                   src/picobase.c \
                   src/repeat.c \
