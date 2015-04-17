@@ -83,7 +83,7 @@ void st_upper_cb(string* character, st_len_t pos, const string* src) {
 }
 
 // TODO improve performance
-string* st_upper(string* src) { return st_char_map(src, st_upper_cb); }
+string* st_upper(const string* src) { return st_char_map(src, st_upper_cb); }
 
 string* string_lcfirst(string* src) { return 0; }
 
@@ -106,6 +106,6 @@ void st_lower_cb(string* character, st_len_t pos, const string* src) {
 }
 
 // TODO improve performance
-string* st_lower(string* src) { return st_char_map(src, st_lower_cb); }
+string* st_lower(const string* src) { return st_char_map(src, st_lower_cb); }
 
 string* string_swapcase(string* src) { return 0; }

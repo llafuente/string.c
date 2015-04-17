@@ -28,7 +28,7 @@
 #include "stringc.h"
 // TODO add st_len_t len (to search always inside a substring)
 // Finds position of first occurrence of a string within another */
-st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
+st_len_t st_pos(const string* haystack, const string* needle, st_len_t offset,
                 st_len_t length) {
   // caches
   st_len_t nlen = needle->length;
@@ -47,7 +47,7 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
   st__get_char_range(haystack, offset, length, &start, &end);
 
   // first char to comare
-  char* needle_val = needle->value;
+  const char* needle_val = needle->value;
   st_len_t needle_len = needle->length;
   st_len_t needle_len_m1 = needle_len - 1;
   char* pp;
@@ -105,11 +105,11 @@ st_len_t st_pos(string* haystack, string* needle, st_len_t offset,
   }
 }
 
-bool st_start_with(string* haystack, string* needle) {
+bool st_start_with(const string* haystack, const string* needle) {
   return st_pos(haystack, needle, 0, 0) == 0;
 }
 
-bool st_end_with(string* haystack, string* needle) {
+bool st_end_with(const string* haystack, const string* needle) {
   st_len_t offset = haystack->length - needle->length;
   if (offset < 0) {
     return false;
@@ -118,29 +118,21 @@ bool st_end_with(string* haystack, string* needle) {
   return st_pos(haystack, needle, offset, 0) == offset;
 }
 
-bool st_contains(string* haystack, string* needle) {
+bool st_contains(const string* haystack, const string* needle) {
   return st_pos(haystack, needle, 0, 0) >= 0;
 }
 
-// TODO do it!
-#define st_lower
-/**
- * Finds position of first occurrence of a string within another, case
- * insensitive
- */
-st_len_t st_ipos(string* haystack, string* needle, st_len_t offset) {
-  // TODO maybe return -1
-  assert(offset > -1);
-  assert(offset > haystack->length);
+st_len_t st_ipos(const string* haystack, const string* needle, st_len_t offset,
+                 st_len_t length) {
 
   if (haystack->length == 0) {
     return -1;
   }
 
   string* haystack_dup = st_lower(haystack);
-  string* needle_dup = st_lower(needle_dup);
+  string* needle_dup = st_lower(needle);
 
-  st_len_t out = st_pos(haystack_dup, needle_dup, offset, 0);
+  st_len_t out = st_pos(haystack_dup, needle_dup, offset, length);
 
   st_delete(&needle_dup);
   st_delete(&haystack_dup);
@@ -263,4 +255,22 @@ st_len_t st_rpos(string* haystack, string* needle, st_len_t offset,
 
     return -1;
   }
+}
+
+st_len_t st_irpos(const string* haystack, const string* needle, st_len_t offset,
+                  st_len_t length) {
+
+  if (haystack->length == 0) {
+    return -1;
+  }
+
+  string* haystack_dup = st_lower(haystack);
+  string* needle_dup = st_lower(needle);
+
+  st_len_t out = st_rpos(haystack_dup, needle_dup, offset, length);
+
+  st_delete(&needle_dup);
+  st_delete(&haystack_dup);
+
+  return out;
 }

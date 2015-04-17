@@ -114,11 +114,10 @@ string* st_sub(const string* str, int start, int end) {
   }
 
   if (end == 0) { // end of string!
-    len = str->length - start;        
+    len = str->length - start;
   } else {
     len = end - start;
   }
-
 
   out_byte_ptr = st_copy_usub(out, out_byte_ptr, str, start, len);
   out->used += out_byte_ptr;

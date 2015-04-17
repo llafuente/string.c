@@ -38,17 +38,29 @@ void st_charmask(st_uc_t* input, size_t len, char* mask) {
 }
 
 st_len_t st_length(const char* src, st_enc_t enc) {
-  if (enc == st_enc_ascii) {
+  switch (enc) {
+  case st_enc_ascii:
+  case st_enc_binary:
     return strlen(src);
-  } else if (enc == st_enc_utf8) {
-    size_t used;
-    return st_utf8_length((const char*)src, &used);
+  case st_enc_utf8:
+    return st_utf8_length((const char*)src, 0);
+  case st_enc_utf32be:
+  case st_enc_utf32le:
+    return wcslen(src);
   }
-
-  return -1;
 }
 
-size_t st_capacity(const char* src, st_enc_t enc) { return strlen(src); }
+size_t st_capacity(const char* src, st_enc_t enc) {
+  switch (enc) {
+  case st_enc_ascii:
+  case st_enc_binary:
+  case st_enc_utf8:
+    return strlen(src);
+  case st_enc_utf32be:
+  case st_enc_utf32le:
+    return wcslen(src) * 4;
+  }
+}
 
 void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
   switch (enc) {
@@ -61,8 +73,8 @@ void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
     return;
   case st_enc_utf32be:
   case st_enc_utf32le:
-    *bytes = strlen(src);
-    *len = *bytes * 0.25;
+    *len = wcslen(src);
+    *bytes = *len * 4;
   }
 }
 

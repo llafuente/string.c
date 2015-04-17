@@ -122,7 +122,6 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
 
     while (*itr && itr < end) {
       jump = st_utf8_char_size(itr);
-      printf("jump [%ld][%d]\n", pos, jump);
 
       ST_CHAR_CP(bufp, itr, jump, true);
       itr += jump; // advance now, to reuse jump later

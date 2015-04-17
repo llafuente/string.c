@@ -168,7 +168,7 @@ extern const st_uc_t st_bom[];
     dst[1] = '\0';                                                             \
   }
 
-#define ST_CHAR_CP_UTF32(dst, src, null_end)                                  \
+#define ST_CHAR_CP_UTF32(dst, src, null_end)                                   \
   dst[0] = src[0];                                                             \
   dst[1] = src[1];                                                             \
   dst[2] = src[2];                                                             \
@@ -675,8 +675,8 @@ ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 
 ST_EXTERN void string_capitalize(string* str);
 
-ST_EXTERN string* st_upper(string* src);
-ST_EXTERN string* st_lower(string* src);
+ST_EXTERN string* st_upper(const string* src);
+ST_EXTERN string* st_lower(const string* src);
 
 //
 // search.c
@@ -695,14 +695,14 @@ ST_EXTERN string* st_lower(string* src);
  *  > 0 position of the first occurrence if found
  *  -1 if not found
  */
-ST_EXTERN st_len_t
-    st_pos(string* haystack, string* needle, st_len_t offset, st_len_t len);
+ST_EXTERN st_len_t st_pos(const string* haystack, const string* needle,
+                          st_len_t offset, st_len_t len);
 
 /// alias of st_pos
 /// @see st_pos
 #define st_index_of st_pos
 
-ST_EXTERN bool st_contains(string* haystack, string* needle);
+ST_EXTERN bool st_contains(const string* haystack, const string* needle);
 
 /// alias of st_contains
 /// @see st_contains
@@ -715,7 +715,7 @@ ST_EXTERN bool st_contains(string* haystack, string* needle);
  * @param needle
  * @return
  */
-ST_EXTERN bool st_start_with(string* haystack, string* needle);
+ST_EXTERN bool st_start_with(const string* haystack, const string* needle);
 
 /**
  * Returns if haystack ends with needle
@@ -724,9 +724,10 @@ ST_EXTERN bool st_start_with(string* haystack, string* needle);
  * @param needle
  * @return
  */
-ST_EXTERN bool st_end_with(string* haystack, string* needle);
+ST_EXTERN bool st_end_with(const string* haystack, const string* needle);
 
-ST_EXTERN st_len_t st_ipos(string* haystack, string* needle, st_len_t offset);
+ST_EXTERN st_len_t st_ipos(const string* haystack, const string* needle,
+                           st_len_t offset, st_len_t length);
 
 /**
  * Return a string with the char at given position
@@ -739,6 +740,9 @@ ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
 ST_EXTERN st_len_t
     st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len);
+
+ST_EXTERN st_len_t st_irpos(const string* haystack, const string* needle,
+                            st_len_t offset, st_len_t length);
 
 //
 // encode.c
@@ -796,7 +800,7 @@ ST_EXTERN char* st__mempbrk(const char* s1, const char* s2);
  * @param offset
  * @return offset position
  */
-ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
+ST_EXTERN char* st__get_char_offset(const string* str, st_len_t offset);
 
 /**
  * Find given range in the string.
@@ -806,8 +810,8 @@ ST_EXTERN char* st__get_char_offset(string* str, st_len_t offset);
  * @param offset
  * @param len
  */
-ST_EXTERN void st__get_char_range(string* str, st_len_t offset, st_len_t length,
-                                  char** start, char** end);
+ST_EXTERN void st__get_char_range(const string* str, st_len_t offset,
+                                  st_len_t length, char** start, char** end);
 
 /**
  * utf8 string to utf32 code point

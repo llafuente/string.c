@@ -60,9 +60,9 @@ char* st__mempbrk(const char* s, const char* accept) {
   return 0;
 }
 
-char* st__get_char_offset(string* str, st_len_t offset) {
+char* st__get_char_offset(const string* str, st_len_t offset) {
   if (!offset) {
-    return str->value;
+    return (char*)str->value;
   }
 
   assert(offset < str->length);
@@ -72,7 +72,7 @@ char* st__get_char_offset(string* str, st_len_t offset) {
     offset = str->length + offset;
   }
 
-  char* p = str->value;
+  char* p = (char*)str->value;
 
   ST_ADVANCE(p, offset, str->encoding);
 
@@ -101,9 +101,9 @@ void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* length) {
   assert(*length <= str_length);
 }
 
-void st__get_char_range(string* str, st_len_t offset, st_len_t length,
+void st__get_char_range(const string* str, st_len_t offset, st_len_t length,
                         char** start, char** end) {
-  char* s = str->value; // start == 0
+  char* s = (char*)str->value; // start == 0
   char* e;
   st_enc_t enc = str->encoding;
 

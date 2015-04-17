@@ -64,8 +64,19 @@ format.sh
 
 ```bash
 sh autogen.sh && ./configure && make check "CFLAGS='--coverage'"
-# gcovr install
-# pip install gcovr
-mkdir -p code-coverage
+rm -rf code-coverage
+mkdir code-coverage
 gcovr -r . --html --html-details -o code-coverage/index.html
+```
+
+
+# install pip & gcovr
+
+install phyton...
+
+```bash
+cd /tmp
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python get-pip.py
+sudo pip install gcovr
 ```

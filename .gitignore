@@ -8,6 +8,7 @@
 /test/test.cpp
 /string_test_mem
 /string_test_c
+/build
 
 #documentation
 /docs

@@ -1,6 +1,5 @@
 ## TODO add `rm -f *.gcno *.gcda *.gcov` to clean
 
-CC = clang
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -12,7 +11,7 @@ include_HEADERS=include/stringc.h
 CLEANFILES =
 
 lib_LTLIBRARIES = libstringc.la
-libstringc_la_CFLAGS = @CFLAGS@
+libstringc_la_CFLAGS =
 libstringc_la_LDFLAGS = -no-undefined -version-info 1:0:0
 libstringc_la_SOURCES = src/append.c \
                   src/alloc.c \
@@ -38,7 +37,7 @@ libstringc_la_SOURCES = src/append.c \
 
 TESTS = test/run-tests
 check_PROGRAMS = test/run-tests
-test_run_tests_CFLAGS = -fsanitize=address -fno-omit-frame-pointer -O1 --coverage
-test_run_tests_LDFLAGS = -fsanitize=address -fno-omit-frame-pointer -O1 --coverage
+test_run_tests_CFLAGS = -O1
+test_run_tests_LDFLAGS = -O1
 test_run_tests_SOURCES = test/test.c
 test_run_tests_LDADD = libstringc.la

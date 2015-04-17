@@ -92,7 +92,8 @@ string* st_to_utf32(const string* src) {
   }
 }
 
-// TODO bench against: https://github.com/ireader/sdk/blob/0719160348cc6d4d094fb2459e25ee687c188939/source/unicode.c
+// TODO bench against:
+// https://github.com/ireader/sdk/blob/0719160348cc6d4d094fb2459e25ee687c188939/source/unicode.c
 string* st_to_utf8(const string* src) {
   // at most it will be the same, so do it
   string* out = st_new(src->length * 4, st_enc_utf8);

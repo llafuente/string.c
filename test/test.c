@@ -37,7 +37,14 @@
 // working group
 //
 
-#define T_STR_ASCII " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+#define T_STR_ASCII                                                            \
+  " !\"#$%&'()*+,-./"                                                          \
+  "0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"                         \
+  "abcdefghijklmnopqrstuvwxyz{|}~"
+#define T_STR_ASCII_UTF32                                                      \
+  L" !\"#$%&'()*+,-./"                                                         \
+  L"0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"                        \
+  L"abcdefghijklmnopqrstuvwxyz{|}~"
 #define T_STR_01 "hello world!"
 #define T_STR_02 "hello my friend i'm even larger!!"
 #define T_STR_03 "niño ☃"
@@ -88,9 +95,9 @@ void print_trace(void) {
 
 #define ASSERT(comparison, name)                                               \
   if (comparison) {                                                            \
-    printf("\x1B[32mtest PASS\x1B[39m: %-32s [@%d]\n", name, __LINE__);                           \
+    printf("\x1B[32mtest PASS\x1B[39m: %-32s [@%d]\n", name, __LINE__);        \
   } else {                                                                     \
-    printf("\x1B[31mtest FAIL\x1B[39m: %-32s [@%d]\n", name, __LINE__);                           \
+    printf("\x1B[31mtest FAIL\x1B[39m: %-32s [@%d]\n", name, __LINE__);        \
     print_trace();                                                             \
     exit(1);                                                                   \
   }
@@ -103,10 +110,17 @@ void print_trace(void) {
 
 // printf("@%s:%s (%s)\n", __FILE__, STRINGIFY(__LINE__), __func__);
 #define CHK_ALL(src, dst, enc)                                                 \
-  printf("# CHECK %s = %s L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,       \
-         src->length, src->used, src->capacity);                               \
-  printf("# CHECK %s = %s L[%ld]C[%lu]\n", STRINGIFY(y), dst,                    \
-         st_length(dst, enc), st_capacity(dst, enc));                          \
+  if (enc == st_enc_utf32be || enc == st_enc_utf32le) {                        \
+    printf("# CHECK %s = utf32 L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x),            \
+           src->length, src->used, src->capacity);                             \
+    printf("# CHECK %s = utf32 L[%ld]C[%lu]\n", STRINGIFY(y),                  \
+           st_length(dst, enc), st_capacity(dst, enc));                        \
+  } else {                                                                     \
+    printf("# CHECK %s = %s L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,   \
+           src->length, src->used, src->capacity);                             \
+    printf("# CHECK %s = %s L[%ld]C[%lu]\n", STRINGIFY(y), dst,                \
+           st_length(dst, enc), st_capacity(dst, enc));                        \
+  }                                                                            \
   ASSERT(0 == strcmp(src->value, dst), "value");                               \
   ASSERT(src->length == st_length(dst, enc), "length");                        \
   ASSERT(src->used == st_capacity(dst, enc), "used");                          \
@@ -338,9 +352,6 @@ void test_hexbinhex() {
   st_delete(&aux);
   st_delete(&aux2);
 
-
-
-
   st_delete(&s);
 }
 
@@ -348,7 +359,7 @@ void test_from() {
   // st_base2number
   string* s = st_newc(T_STR_5BIN, st_enc_ascii);
   int d = st_base2number(s, 2);
-  assert(d == 5);
+  ASSERT(d == 5, "st_base2number is 5");
   st_delete(&s);
 
   // st_number2base
@@ -400,6 +411,14 @@ void test_sub() {
   CHK_ALL(aux, T_STR_ASCII, st_enc_ascii);
   st_delete(&aux);
   st_delete(&s);
+
+  const char* utf32p = (const char*)T_STR_ASCII_UTF32;
+  s = st_newc(utf32p, st_enc_utf32be);
+  CHK_ALL(s, utf32p, st_enc_utf32be);
+  aux = st_sub(s, 0, 0);
+  CHK_ALL(aux, (const char*)T_STR_ASCII_UTF32, st_enc_utf32be);
+  st_delete(&aux);
+  st_delete(&s);
 }
 
 void test_trim() {
@@ -417,7 +436,7 @@ void test_trim() {
   st_copyc(&s, "000123x0", st_enc_ascii);
   aux = st_trim(s, mask, 3);
 
-  assert(strcmp(aux->value, "123x") == 0);
+  ASSERT(strcmp(aux->value, "123x") == 0, "trim('000123x0') = '123x'");
 
   st_delete(&mask);
   st_delete(&s);
@@ -426,18 +445,18 @@ void test_trim() {
 
 void test_utf8_lenc() {
   size_t cap;
-  assert(st_utf8_length(T_STR_01, &cap) == 12);
-  assert(strlen(T_STR_01) == cap);
-  assert(st_utf8_length(T_STR_02, &cap) == 33);
-  assert(strlen(T_STR_02) == cap);
-  assert(st_utf8_length(T_STR_03, &cap) == 6);
-  assert(strlen(T_STR_03) == cap);
-  assert(st_utf8_length(T_STR_03_REP2, &cap) == 12);
-  assert(strlen(T_STR_03_REP2) == cap);
-  assert(st_utf8_length(T_STR_03_REP3, &cap) == 18);
-  assert(strlen(T_STR_03_REP3) == cap);
-  assert(st_utf8_length(T_STR_03_REP4, &cap) == 24);
-  assert(strlen(T_STR_03_REP4) == cap);
+  ASSERT(st_utf8_length(T_STR_01, &cap) == 12, "length check");
+  ASSERT(strlen(T_STR_01) == cap, "capacity check");
+  ASSERT(st_utf8_length(T_STR_02, &cap) == 33, "length check");
+  ASSERT(strlen(T_STR_02) == cap, "capacity check");
+  ASSERT(st_utf8_length(T_STR_03, &cap) == 6, "length check");
+  ASSERT(strlen(T_STR_03) == cap, "capacity check");
+  ASSERT(st_utf8_length(T_STR_03_REP2, &cap) == 12, "length check");
+  ASSERT(strlen(T_STR_03_REP2) == cap, "capacity check");
+  ASSERT(st_utf8_length(T_STR_03_REP3, &cap) == 18, "length check");
+  ASSERT(strlen(T_STR_03_REP3) == cap, "capacity check");
+  ASSERT(st_utf8_length(T_STR_03_REP4, &cap) == 24, "length check");
+  ASSERT(strlen(T_STR_03_REP4) == cap, "capacity check");
 }
 
 void test_utf8_invalid() {
@@ -502,7 +521,8 @@ void test_itr_chars() {
 
   buffer[0] = '\0';
   st_line_iterator(str, (st_char_itr_cb)char_itr_cb);
-  ASSERT(strcmp(buffer, "0123456789") == 0, "concat line iteration (remove newlines)");
+  ASSERT(strcmp(buffer, "0123456789") == 0,
+         "concat line iteration (remove newlines)");
 
   st_delete(&str);
 
@@ -717,6 +737,28 @@ void test_search() {
 
   st_delete(&ned);
   st_delete(&hay);
+
+  hay = st_newc("123", st_enc_utf8);
+  ned = st_newc("2", st_enc_utf8);
+  ASSERT(st_contains(hay, ned) == true, "123 contains 2");
+  st_delete(&hay);
+  st_delete(&ned);
+
+  hay = st_newc("ABCDEFGHIJKLMNOPQRSTUVWXYZ", st_enc_ascii);
+  ned = st_newc("m", st_enc_ascii);
+  ASSERT(st_ipos(hay, ned, 0, 0) == 12, "m position is 12");
+  ASSERT(st_irpos(hay, ned, 0, 0) == 12, "m position is 12 (rev)");
+
+  chr = st_char_at(hay, 0);
+  CHK_ALL(chr, "A", st_enc_ascii);
+  st_delete(&chr);
+
+  chr = st_char_at(hay, 12);
+  CHK_ALL(chr, "M", st_enc_ascii);
+  st_delete(&chr);
+
+  st_delete(&hay);
+  st_delete(&ned);
 }
 
 void test_ascii() {
@@ -726,18 +768,29 @@ void test_ascii() {
   assert(st_ascii_char_size_safe("z") == 1);
 }
 void test_utf8() {
-  assert(st_utf8_char_eq("☃", "☃") == true);
-  assert(st_utf8_char_eq("ñ", "ñ") == true);
-  assert(st_utf8_char_eq("☃", "a") == false);
-  assert(st_utf8_char_eq("A", "a") == false);
-  assert(st_utf8_char_eq("ñ", "☃") == false);
+  ASSERT(st_utf8_char_eq("☃", "☃") == true, "☃ == ☃?");
+  ASSERT(st_utf8_char_eq("ñ", "ñ") == true, "ñ == ñ?");
+  ASSERT(st_utf8_char_eq("☃", "a") == false, "☃ == a?");
+  ASSERT(st_utf8_char_eq("A", "a") == false, "A == a?");
+  ASSERT(st_utf8_char_eq("ñ", "☃") == false, "ñ == ☃?");
+
+  ASSERT(st_utf8_valid_codepoint(0x0000662F) == true,
+         "UTF8 cp 是 is valid"); // 是
+  ASSERT(st_utf8_valid_codepoint(0x0002A6A5) == true,
+         "UTF8 cp 龍 is valid"); // 龍×4
+  ASSERT(st_utf8_valid_codepoint(0xFFFFFFFF) == false,
+         "UTF8 cp 0xFFFFFFFF is invalid"); //
+  // TODO ASSERT(st_utf8_valid_codepoint(0x0000C080) == false, "UTF8 cp 0xC080
+  // is invalid"); // RFC 3629
+  // TODO ASSERT(st_utf8_valid_codepoint(0x0000C0AE) == false, "UTF8 cp 0xC0AE
+  // is invalid"); // RFC 3629
 }
 
 void test_encoding_go_back(int* utf32p, char* utf8) {
   string* src = st_newc(utf8, st_enc_utf8);
 
   string* go = st_to_utf32(src);
-  assert(strcmp(go->value, (const char*)utf32p) == 0);
+  assert(wcscmp((const wchar_t*)go->value, (const wchar_t*)utf32p) == 0);
 
   string* back = st_to_utf8(go);
   assert(back != 0);
@@ -758,7 +811,7 @@ void test_encoding() {
 
   // Jap/arab etc..
   test_encoding_go_back(L"AÀΑ╬豈Ａꊠ黠だ➀ጀะڰЯ0123456789",
-  "AÀΑ╬豈Ａꊠ黠だ➀ጀะڰЯ0123456789");
+                        "AÀΑ╬豈Ａꊠ黠だ➀ጀะڰЯ0123456789");
 
   assert(st_utf8_length("123456789也不是可运行的程序１２３４５６７８９", 0) ==
          27);
