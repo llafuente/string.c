@@ -62,13 +62,10 @@ format.sh
 
 ## Code-coverage
 
-Edit Makefile.am add "--coverage" to
-* libstringc_la_CFLAGS
-* libstringc_la_LDFLAGS
-
 ```bash
-sh autogen.sh && ./configure && make check
+sh autogen.sh && ./configure && make check "CFLAGS='--coverage'"
 # gcovr install
 # pip install gcovr
-gcovr -r . --html --html-details -o code-coverage.html
+mkdir -p code-coverage
+gcovr -r . --html --html-details -o code-coverage/index.html
 ```

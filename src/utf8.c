@@ -35,7 +35,7 @@ st_len_t st_utf8_length(const char* src, size_t* capacity) {
 
   while (*p != '\0') {
     // printf("%c @%p %d\n", *p, p, utf8_next(p));
-    jump = st_utf8_char_size(*p);
+    jump = st_utf8_char_size(p);
     p += jump;
     used_bytes += jump;
     // printf("%c\n", *p);
@@ -120,8 +120,12 @@ bool st_utf8_char_eq(char* a, char* b) {
   return true;
 }
 
-st_len_t st_utf8_char_size(st_uc_t byte) {
-  return 1 + (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0));
+st_len_t st_utf8_char_size(const char* input) {
+  return st_utf8_lead_size((st_uc_t)*input);
+}
+
+st_len_t st_utf8_lead_size(st_uc_t lead) {
+  return 1 + (((lead) >= 0xc0) + ((lead) >= 0xe0) + ((lead) >= 0xf0));
 }
 
 bool st_utf8_valid_codepoint(st_uc4_t uc_cp) {

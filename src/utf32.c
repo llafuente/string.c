@@ -58,7 +58,8 @@ st_uc4_t st_utf32le_codepoint(const char* input) {
          (uc_input[0]);
 }
 
-st_len_t st_utf32_char_size(st_uc_t lead_chr) { return 4; }
+st_len_t st_utf32_char_size(const char* input) { return 4; }
+st_len_t st_utf32_lead_size(st_uc_t lead_chr) { return 4; }
 
 st_len_t st_utf32le_char_size_safe(const char* input) {
   if (st_utf32_valid_codepoint(st_utf32le_codepoint(input))) {

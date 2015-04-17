@@ -38,11 +38,17 @@ st_len_t st_ascii_length(const char* src, size_t* used_bytes) {
 }
 
 st_len_t st_ascii_char_size_safe(const char* input) {
-  st_uc_t lead_chr = (st_uc_t)input;
+  st_uc_t lead_chr = (st_uc_t)*input;
 
   return lead_chr <= 127 ? 1 : -1;
 }
 
-st_len_t st_ascii_char_size(st_uc_t lead_chr) { return 1; }
+st_len_t st_ascii_char_size(const char* input) {
+  return st_ascii_lead_size((st_uc_t)*input);
+}
 
-st_uc4_t st_ascii_code_point(const char* input) { return (st_uc4_t)*input; }
+st_len_t st_ascii_lead_size(st_uc_t lead_chr) { return 1; }
+
+st_uc4_t st_ascii_codepoint(const char* input) { return (st_uc4_t)*input; }
+
+bool st_ascii_valid_codepoint(st_uc4_t codepoint) { return codepoint <= 127; }

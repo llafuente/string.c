@@ -37,6 +37,7 @@
 // working group
 //
 
+#define T_STR_ASCII " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 #define T_STR_01 "hello world!"
 #define T_STR_02 "hello my friend i'm even larger!!"
 #define T_STR_03 "niño ☃"
@@ -87,9 +88,9 @@ void print_trace(void) {
 
 #define ASSERT(comparison, name)                                               \
   if (comparison) {                                                            \
-    printf("\x1B[32mtest PASS\x1B[39m: %s\n", name);                           \
+    printf("\x1B[32mtest PASS\x1B[39m: %-32s [@%d]\n", name, __LINE__);                           \
   } else {                                                                     \
-    printf("\x1B[31mtest FAIL\x1B[39m: %s\n", name);                           \
+    printf("\x1B[31mtest FAIL\x1B[39m: %-32s [@%d]\n", name, __LINE__);                           \
     print_trace();                                                             \
     exit(1);                                                                   \
   }
@@ -100,11 +101,11 @@ void print_trace(void) {
 #define PASTE2(a, b) a##b
 #define PASTE(a, b) PASTE2(a, b)
 
+// printf("@%s:%s (%s)\n", __FILE__, STRINGIFY(__LINE__), __func__);
 #define CHK_ALL(src, dst, enc)                                                 \
-  printf("@%s:%s (%s)\n", __FILE__, STRINGIFY(__LINE__), __func__);            \
-  printf("CHECK %s = %s L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,       \
+  printf("# CHECK %s = %s L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,       \
          src->length, src->used, src->capacity);                               \
-  printf("CHECK %s = %s L[%ld]C[%lu]\n", STRINGIFY(y), dst,                    \
+  printf("# CHECK %s = %s L[%ld]C[%lu]\n", STRINGIFY(y), dst,                    \
          st_length(dst, enc), st_capacity(dst, enc));                          \
   ASSERT(0 == strcmp(src->value, dst), "value");                               \
   ASSERT(src->length == st_length(dst, enc), "length");                        \
@@ -134,12 +135,17 @@ extern void test_capitalize();
 extern void test_shuffle();
 extern void test_chr();
 extern void test_search();
+extern void test_ascii();
 extern void test_utf8();
 extern void test_encoding();
 extern void test_internal();
 extern void test_utils();
 
 int main(int argc, const char* argv[]) {
+
+  printf("    ########################\n");
+  printf("    ## string.c unit test ##\n");
+  printf("    ########################\n");
 
   RUN_TEST(alloc);
   RUN_TEST(case);
@@ -157,6 +163,7 @@ int main(int argc, const char* argv[]) {
   RUN_TEST(shuffle);
   RUN_TEST(chr);
   RUN_TEST(search);
+  RUN_TEST(ascii);
   RUN_TEST(utf8);
   RUN_TEST(encoding);
   RUN_TEST(internal);
@@ -214,7 +221,6 @@ void test_alloc() {
 void test_case() {
   string* s = st_newc("abc", st_enc_utf8);
   string* up = st_upper(s);
-  st_debug(up);
   CHK_ALL(up, "ABC", st_enc_utf8);
 
   st_delete(&s);
@@ -222,7 +228,6 @@ void test_case() {
 
   s = st_newc("áéíóú", st_enc_utf8);
   up = st_upper(s);
-  st_debug(up);
   CHK_ALL(up, "ÁÉÍÓÚ", st_enc_utf8);
 
   st_delete(&s);
@@ -240,36 +245,50 @@ void test_repeat() {
   CHK_ALL(srepeat, T_STR_03_REP3, st_enc_utf8);
   st_delete(&srepeat);
   st_delete(&s);
+
+  s = st_newc("", st_enc_ascii);
+  srepeat = st_repeat(s, 3);
+  CHK_ALL(srepeat, "", st_enc_ascii);
+  st_delete(&srepeat);
+  st_delete(&s);
+
+  s = st_newc("a", st_enc_ascii);
+  srepeat = st_repeat(s, 5);
+  CHK_ALL(srepeat, "aaaaa", st_enc_ascii);
+  st_delete(&srepeat);
+  st_delete(&s);
 }
 
 void test_compare() {
   string* s = st_newc(T_STR_CMP1, st_enc_ascii);
   string* aux = st_newc(T_STR_CMP2, st_enc_ascii);
 
-  assert(st_compare(s, s) == 0);
-  assert(st_compare(aux, aux) == 0);
-  assert(st_compare(s, aux) > 0);
+  ASSERT(st_compare(s, s) == 0, "cmp same string");
+  ASSERT(st_compare(aux, aux) == 0, "cmp same string");
+  ASSERT(st_compare(s, aux) > 0, "cmp T_STR_CMP1 vs T_STR_CMP2");
+  ASSERT(st_compare(aux, s) < 0, "cmp T_STR_CMP2 vs T_STR_CMP1");
 
   st_copyc(&aux, T_STR_CMP3, st_enc_ascii);
-  assert(st_compare(s, aux) < 0);
+  ASSERT(st_compare(s, aux) < 0, "cmp T_STR_CMP1 vs T_STR_CMP3");
+  ASSERT(st_compare(aux, s) > 0, "cmp T_STR_CMP3 vs T_STR_CMP1");
 
   st_delete(&aux);
   st_delete(&s);
 
   s = st_newc("123", st_enc_ascii);
   aux = st_newc("1", st_enc_ascii);
-  assert(st_compare(s, aux) > 0);
-  assert(st_compare(aux, s) < 0);
+  ASSERT(st_compare(s, aux) > 0, "cmp 123 vs 1");
+  ASSERT(st_compare(aux, s) < 0, "cmp 1 vs 123");
   st_delete(&aux);
   st_delete(&s);
 
   s = st_newc("ab01cd", st_enc_ascii);
   aux = st_newc("01", st_enc_ascii);
 
-  assert(st_scompare(s, aux, 2, 2) == 0);
-  assert(st_scompare(s, aux, 2, 3) == 1);
-  assert(st_scompare(s, aux, 2, 1) == -1);
-  assert(st_scompare(s, aux, 3, 2) == 1);
+  ASSERT(st_scompare(s, aux, 2, 2) == 0, "substring compare");
+  ASSERT(st_scompare(s, aux, 2, 3) == 1, "substring compare");
+  ASSERT(st_scompare(s, aux, 2, 1) == -1, "substring compare");
+  ASSERT(st_scompare(s, aux, 3, 2) == 1, "substring compare");
 
   st_delete(&aux);
   st_delete(&s);
@@ -309,6 +328,19 @@ void test_hexbinhex() {
   aux = st_hex2bin(s);
   CHK_ALL(aux, "example hex data", st_enc_ascii);
   st_delete(&aux);
+
+  st_copyc(&s, T_STR_ASCII, st_enc_ascii);
+  aux = st_bin2hex(s);
+  aux2 = st_hex2bin(aux);
+
+  CHK_ALL(aux2, T_STR_ASCII, st_enc_ascii);
+
+  st_delete(&aux);
+  st_delete(&aux2);
+
+
+
+
   st_delete(&s);
 }
 
@@ -346,10 +378,13 @@ void test_append() {
 }
 
 void test_sub() {
-  string* s = st_newc(T_STR_03_REP4, st_enc_utf8);
+  string* s;
+  string* aux;
+
+  s = st_newc(T_STR_03_REP4, st_enc_utf8);
   CHK_ALL(s, T_STR_03_REP4, st_enc_utf8);
 
-  string* aux = st_sub(s, 0, 6);
+  aux = st_sub(s, 0, 6);
   CHK_ALL(aux, T_STR_03, st_enc_utf8);
 
   st_delete(&aux);
@@ -357,6 +392,12 @@ void test_sub() {
   aux = st_sub(s, -12, 6);
   CHK_ALL(aux, T_STR_03_REP3, st_enc_utf8);
 
+  st_delete(&aux);
+  st_delete(&s);
+
+  s = st_newc(T_STR_ASCII, st_enc_ascii);
+  aux = st_sub(s, 0, 0);
+  CHK_ALL(aux, T_STR_ASCII, st_enc_ascii);
   st_delete(&aux);
   st_delete(&s);
 }
@@ -436,15 +477,21 @@ void test_itr_chars() {
   string* str;
   string* nstr;
 
+  str = st_newc(T_STR_ASCII, st_enc_ascii);
+  buffer[0] = '\0';
+  st_char_iterator(str, (st_char_itr_cb)char_itr_cb);
+  ASSERT(strcmp(buffer, T_STR_ASCII) == 0, "concat char iteration");
+  st_delete(&str);
+
   str = st_newc(T_STR_03_REP3, st_enc_utf8);
 
   buffer[0] = '\0';
   st_char_iterator(str, (st_char_itr_cb)char_itr_cb);
-  assert(strcmp(buffer, T_STR_03_REP3) == 0);
+  ASSERT(strcmp(buffer, T_STR_03_REP3) == 0, "concat char iteration");
 
   buffer[0] = '\0';
   st_byte_iterator(str, byte_itr_cb);
-  assert(strcmp(buffer, T_STR_03_REP3) == 0);
+  ASSERT(strcmp(buffer, T_STR_03_REP3) == 0, "concat char iteration");
 
   st_delete(&str);
 
@@ -455,8 +502,7 @@ void test_itr_chars() {
 
   buffer[0] = '\0';
   st_line_iterator(str, (st_char_itr_cb)char_itr_cb);
-  printf("buffer --> %s\n", buffer);
-  assert(strcmp(buffer, "0123456789") == 0);
+  ASSERT(strcmp(buffer, "0123456789") == 0, "concat line iteration (remove newlines)");
 
   st_delete(&str);
 
@@ -470,10 +516,7 @@ void test_itr_chars() {
 
   str = st_newc("abc", st_enc_utf8);
 
-  st_debug(str);
   nstr = st_char_map(str, (st_char_map_cb)char_map_cb);
-  printf("***********\n");
-  st_debug(nstr);
 
   CHK_ALL(nstr, "bcd", st_enc_utf8);
   st_delete(&str);
@@ -481,10 +524,7 @@ void test_itr_chars() {
 
   str = st_newc(T_STR_03, st_enc_utf8);
 
-  st_debug(str);
   nstr = st_char_map(str, (st_char_map_cb)char_map_cb);
-  printf("***********\n");
-  st_debug(nstr);
 
   CHK_ALL(nstr, "ojıp!㘃", st_enc_utf8);
   st_delete(&str);
@@ -495,19 +535,16 @@ void test_capitalize() {
   return;
   string* str = st_newc(T_STR_CAP_1, st_enc_ascii);
   string_capitalize(str);
-  st_debug(str);
   CHK_ALL(str, T_STR_CAP_T1, st_enc_ascii);
   st_delete(&str);
 
   str = st_newc(T_STR_CAP_2, st_enc_ascii);
   string_capitalize(str);
-  st_debug(str);
   CHK_ALL(str, T_STR_CAP_T2, st_enc_ascii);
   st_delete(&str);
 
   str = st_newc(T_STR_CAP_3, st_enc_ascii);
   string_capitalize(str);
-  st_debug(str);
   CHK_ALL(str, T_STR_CAP_T3, st_enc_ascii);
   st_delete(&str);
 }
@@ -571,8 +608,6 @@ void test_search() {
   string* ned = st_newc("5", st_enc_ascii);
 
   st_len_t i = st_pos(hay, ned, 0, 0);
-
-  printf("st_pos = %ld\n", i);
   ASSERT(i == 5, "st_pos = 5");
 
   st_delete(&hay);
@@ -592,9 +627,6 @@ void test_search() {
 
   i = st_pos(hay, ned, 0, 0);
   ASSERT(i == 8, "st_pos = 8");
-
-  st_debug(hay);
-  st_debug(ned);
 
   i = st_pos(hay, ned, 9, 0);
   ASSERT(i == 13, "st_pos = 13");
@@ -675,22 +707,24 @@ void test_search() {
   st_delete(&s);
 
   // st_rpos
-  printf("st_rpos\n");
   hay = st_newc(T_STR_03_REP4, st_enc_utf8);
   ned = st_newc("☃", st_enc_utf8);
   i = st_rpos(hay, ned, 0, hay->length);
   assert(i == 23);
 
-  printf("st_rpos\n");
   i = st_rpos(hay, ned, 0, -1);
   assert(i == 17);
-
-  st_debug(hay);
 
   st_delete(&ned);
   st_delete(&hay);
 }
 
+void test_ascii() {
+
+  assert(st_ascii_char_size_safe("\xFF") == -1);
+  assert(st_ascii_char_size_safe("x") == 1);
+  assert(st_ascii_char_size_safe("z") == 1);
+}
 void test_utf8() {
   assert(st_utf8_char_eq("☃", "☃") == true);
   assert(st_utf8_char_eq("ñ", "ñ") == true);
@@ -699,21 +733,37 @@ void test_utf8() {
   assert(st_utf8_char_eq("ñ", "☃") == false);
 }
 
-void test_encoding() {
-  int* utf32p = L"ο Δικαιοπολις εν αγρω εστιν";
-  string* src = st_newc("ο Δικαιοπολις εν αγρω εστιν", st_enc_utf8);
+void test_encoding_go_back(int* utf32p, char* utf8) {
+  string* src = st_newc(utf8, st_enc_utf8);
 
   string* go = st_to_utf32(src);
-
   assert(strcmp(go->value, (const char*)utf32p) == 0);
 
   string* back = st_to_utf8(go);
+  assert(back != 0);
 
   assert(strcmp(back->value, src->value) == 0);
 
   st_delete(&src);
   st_delete(&go);
   st_delete(&back);
+}
+
+void test_encoding() {
+  // greek
+  test_encoding_go_back(L"ο Δικαιοπολις εν αγρω εστιν",
+                        "ο Δικαιοπολις εν αγρω εστιν");
+  // misc
+  test_encoding_go_back(L"Iñtërnâtiônàlizætiøn", "Iñtërnâtiônàlizætiøn");
+
+  // Jap/arab etc..
+  test_encoding_go_back(L"AÀΑ╬豈Ａꊠ黠だ➀ጀะڰЯ0123456789",
+  "AÀΑ╬豈Ａꊠ黠だ➀ጀะڰЯ0123456789");
+
+  assert(st_utf8_length("123456789也不是可运行的程序１２３４５６７８９", 0) ==
+         27);
+  test_encoding_go_back(L"123456789也不是可运行的程序１２３４５６７８９",
+                        "123456789也不是可运行的程序１２３４５６７８９");
 }
 
 void test_internal() {
@@ -745,8 +795,15 @@ void test_internal() {
   assert(start_pos == 9);
   assert(end_pos == 12);
 
+  start_pos = -2;
+  end_pos = 2;
+  st__calc_range(21, &start_pos, &end_pos);
+  assert(start_pos == 19);
+  assert(end_pos == 21);
+
   s = st_newc("0123456789", st_enc_ascii);
 
+  assert(st__get_char_offset(s, 0) == s->value);
   assert(st__get_char_offset(s, 5) - 5 == s->value);
   assert(st__get_char_offset(s, 3) - 3 == s->value);
   assert(st__get_char_offset(s, 9) - 9 == s->value);

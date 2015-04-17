@@ -188,7 +188,7 @@ string* st_char_at(const string* src, st_len_t pos) {
     out = st_new(4, enc);
     dst = out->value;
 
-    ST_CHAR_CP_UCS4BE(dst, p, true);
+    ST_CHAR_CP_UTF32(dst, p, true);
     out->length = 1;
     out->used = 4;
     break;

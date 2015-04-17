@@ -204,7 +204,7 @@ st_uc4_t st_ord(const string* str, st_len_t offset) {
 
   case st_enc_utf8: {
     while (offset--) {
-      itr += st_utf8_char_size(*itr);
+      itr += st_utf8_char_size(itr);
     }
 
     st_uc_t out = (st_uc_t)*itr;

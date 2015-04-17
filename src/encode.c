@@ -92,6 +92,7 @@ string* st_to_utf32(const string* src) {
   }
 }
 
+// TODO bench against: https://github.com/ireader/sdk/blob/0719160348cc6d4d094fb2459e25ee687c188939/source/unicode.c
 string* st_to_utf8(const string* src) {
   // at most it will be the same, so do it
   string* out = st_new(src->length * 4, st_enc_utf8);
@@ -105,17 +106,21 @@ string* st_to_utf8(const string* src) {
     // clone
     st_copy(&out, (const string*)src);
     return out;
-  case st_enc_utf32le:
+  case st_enc_utf32le: // TODO
   case st_enc_utf32be: {
 
     st_uc4_t* p = (st_uc4_t*)src->value;
-    st_uc4_t* end = (st_uc4_t*)(p + src->used);
+    // used are bytes, length is 4bytes
+    st_uc4_t* end = (st_uc4_t*)(p + src->length);
     st_uc_t* dst = (st_uc_t*)out->value;
 
     st_uc4_t utf32;
 
+    int i = 0;
     while (p < end) {
       utf32 = *p;
+
+      ++i;
 
       if (utf32 < 128) {
 
@@ -148,6 +153,11 @@ string* st_to_utf8(const string* src) {
       }
       ++p;
     }
+
+    *dst = '\0';
+    out->used = (char*)dst - out->value;
+    out->length = src->length;
+
     return out;
   }
   }

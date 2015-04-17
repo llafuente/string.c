@@ -124,7 +124,7 @@ extern string* string_def_trim_mask;
 // moved to a function rather than macro
 // macro *str will dereference 3 times
 // this could get inlined and give better performance...
-#define ST_UTF8_FOWARD(s) s += st_utf8_char_size((st_uc_t)*s)
+#define ST_UTF8_FOWARD(s) s += st_utf8_char_size(s)
 
 extern const st_uc_t st_bom[];
 
@@ -168,7 +168,7 @@ extern const st_uc_t st_bom[];
     dst[1] = '\0';                                                             \
   }
 
-#define ST_CHAR_CP_UCS4BE(dst, src, null_end)                                  \
+#define ST_CHAR_CP_UTF32(dst, src, null_end)                                  \
   dst[0] = src[0];                                                             \
   dst[1] = src[1];                                                             \
   dst[2] = src[2];                                                             \
@@ -864,7 +864,16 @@ ST_EXTERN st_len_t st_utf8_char_size_safe(const char* input);
 * @return
 *  1-4 if success
 */
-ST_EXTERN st_len_t st_utf8_char_size(st_uc_t byte);
+ST_EXTERN st_len_t st_utf8_char_size(const char* input);
+
+/**
+* Return how many bytes contains given lead, with no error control.
+*
+* @param lead_chr
+* @return
+*  1-4 if success
+*/
+ST_EXTERN st_len_t st_utf8_lead_size(st_uc_t lead);
 
 /**
 * Return utf8 length and capacity
@@ -926,9 +935,12 @@ ST_EXTERN st_len_t st_ascii_length(const char* src, size_t* used_bytes);
 
 ST_EXTERN st_len_t st_ascii_char_size_safe(const char* input);
 
-ST_EXTERN st_len_t st_ascii_char_size(st_uc_t lead_chr);
+ST_EXTERN st_len_t st_ascii_char_size(const char* input);
 
-ST_EXTERN st_uc4_t st_ascii_code_point(const char* input);
+ST_EXTERN st_len_t st_ascii_lead_size(st_uc_t lead_chr);
+
+ST_EXTERN st_uc4_t st_ascii_codepoint(const char* input);
+ST_EXTERN bool st_ascii_valid_codepoint(st_uc4_t codepoint);
 
 //
 // utf32.c
@@ -938,9 +950,10 @@ ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
 
 ST_EXTERN st_uc4_t st_utf32le_codepoint(const char* input);
 ST_EXTERN st_uc4_t st_utf32be_codepoint(const char* input);
-ST_EXTERN bool st_utf32_valid_codepoint(st_uc4_t code_point);
+ST_EXTERN bool st_utf32_valid_codepoint(st_uc4_t codepoint);
 
-ST_EXTERN st_len_t st_utf32_char_size(st_uc_t lead_chr);
+ST_EXTERN st_len_t st_utf32_char_size(const char* input);
+ST_EXTERN st_len_t st_utf32_lead_size(st_uc_t lead_chr);
 
 ST_EXTERN st_len_t st_utf32le_char_size_safe(const char* input);
 ST_EXTERN st_len_t st_utf32be_char_size_safe(const char* input);

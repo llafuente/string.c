@@ -27,22 +27,6 @@
 
 #include "stringc.h"
 
-bool string_char(string** out, const string* str, st_len_t pos) {
-  assert(str->length > pos);
-
-  const char* src = str->value + pos;
-  char* dst = (*out)->value;
-
-  while (pos--) {
-    src += st_utf8_char_size(*src);
-  }
-
-  st_len_t jump = st_utf8_char_size(*src);
-  ST_CHAR_CP(dst, src, jump, true);
-
-  return true;
-}
-
 // unsafe!
 // same encoding
 st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
@@ -75,11 +59,11 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
   case st_enc_utf8: {
     // \0 + end
     while (start--) {
-      itr += st_utf8_char_size(*itr);
+      itr += st_utf8_char_size(itr);
     }
 
     while (*itr && todo--) {
-      int jump = st_utf8_char_size(*itr);
+      int jump = st_utf8_char_size(itr);
       done += jump;
 
       ST_CHAR_CP(dst, itr, jump, false);
@@ -129,7 +113,12 @@ string* st_sub(const string* str, int start, int end) {
     out = st_new(str->capacity, str->encoding);
   }
 
-  len = end - start;
+  if (end == 0) { // end of string!
+    len = str->length - start;        
+  } else {
+    len = end - start;
+  }
+
 
   out_byte_ptr = st_copy_usub(out, out_byte_ptr, str, start, len);
   out->used += out_byte_ptr;
