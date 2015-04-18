@@ -28,40 +28,16 @@
 #include "stringc.h"
 
 string* st_new(size_t cap, st_enc_t enc) {
-  size_t size;
-
-  switch (enc) {
-  case st_enc_binary:
-  case st_enc_ascii:
-  case st_enc_utf8:
-    size = cap + 1;
-    break;
-  case st_enc_utf32le:
-  case st_enc_utf32be: // null is also, 4 bytes!
-    size = cap + 4;
-  }
+  size_t size = cap + st__zeronull_size(enc);
 
   string* s = (string*)__STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
 
   s->length = 0;
   s->used = 0;
   s->capacity = size;
-
   s->encoding = enc;
 
-  switch (enc) {
-  case st_enc_binary:
-  case st_enc_ascii:
-  case st_enc_utf8:
-    s->value[0] = '\0';
-    break;
-  case st_enc_utf32le:
-  case st_enc_utf32be: // null is also, 4 bytes!
-    s->value[0] = '\0';
-    s->value[1] = '\0';
-    s->value[2] = '\0';
-    s->value[3] = '\0';
-  }
+  st__zeronull(s->value, 0, enc);
 
   return s;
 }
@@ -86,18 +62,7 @@ string* st_newc(const char* src, st_enc_t enc) {
   size_t used;
 
   st_get_meta(src, enc, &len, &used);
-  size_t size = used; // null terminated!
-
-  switch (enc) {
-  case st_enc_binary:
-  case st_enc_ascii:
-  case st_enc_utf8:
-    ++size;
-    break;
-  case st_enc_utf32le:
-  case st_enc_utf32be: // null is also, 4 bytes!
-    size += 4;
-  }
+  size_t size = used + st__zeronull_size(enc);
 
   // printf("%s\n",  src);
   // printf("len[%zu] used[%zu] enc[%d]", len, used, enc);
@@ -108,7 +73,7 @@ string* st_newc(const char* src, st_enc_t enc) {
   s->length = len;
   s->used = used;
   s->capacity = size;
-  memcpy(s->value, src, size);
+  memcpy(s->value, src, size); // copy null
   s->encoding = enc;
 
   return s;
@@ -117,7 +82,7 @@ string* st_newc(const char* src, st_enc_t enc) {
 void st_resize(string** src, size_t cap) {
   // printf("before st_resize %p - %lu\n", *src, cap);
 
-  size_t size = cap + 1; // null terminated!
+  size_t size = cap + st__zeronull_size((*src)->encoding); // null terminated!
 
   *src = (string*)__STRING__REALLOCATOR(*src,
                                         sizeof(string) + size * sizeof(char));
@@ -131,8 +96,9 @@ void st_grow(string** src, size_t cap, st_enc_t enc) {
   if (*src == 0) {
     *src = st_new(cap, enc);
   } else {
-    if (cap + 1 > (*src)->capacity) {
+    if (cap + st__zeronull_size(enc) > (*src)->capacity) {
       st_resize(src, cap);
+      //TODO should we set enconding here?
     }
   }
 }
@@ -142,35 +108,38 @@ string* st_clone(const string* src) {
 
   string* out = (string*)__STRING_ALLOCATOR(size);
 
-  memcpy(out, src, size);
+  memcpy(out, src, size); // copy everything
 
   return out;
 }
 
+// resize & clone
 string* st_rclone(const string* src, size_t cap) {
   assert(cap >= src->capacity);
 
-  ++cap; // null
+  cap += st__zeronull_size(src->encoding);
 
   size_t size = sizeof(string) + cap * sizeof(char);
   size_t src_size = sizeof(string) + src->capacity * sizeof(char);
 
   string* out = (string*)__STRING_ALLOCATOR(size);
 
-  memcpy(out, src, src_size); // copy null
+  memcpy(out, src, src_size); // copy everything
   out->capacity = cap;
 
   return out;
 }
 
-string* st_clone_subc(const char* src, size_t len, st_enc_t enc) {
-  assert(enc == st_enc_ascii);
+string* st_new_subc(const char* src, size_t bytes, st_enc_t enc) {
+  string* out = st_new(bytes, enc);
+  char* oval = out->value;
 
-  string* out = st_new(len, enc);
-  memcpy(out->value, src, len);
-  out->length = len;
-  out->used = len;
-  out->value[len] = '\0';
+  memcpy(oval, src, bytes);
+
+  st__zeronull(oval, bytes, enc);
+
+  out->length = st_length(oval, enc);
+  out->used = bytes;
 
   return out;
 }
@@ -190,20 +159,21 @@ string* st_clonec(const char* src, size_t len) {
 void st_copy(string** out, const string* src) {
   // printf("st_copy %p - %p\n", *out, src);
 
-  size_t src_len = src->length;
+  size_t src_used = src->used;
+  string* cache = *out;
+  st_enc_t enc = src->encoding;
 
-  if (src_len > (*out)->capacity) {
-    // st_resize(out, src_len);
-    st_resize(out, 50);
+  if (src_used > cache->capacity) {
+    st_resize(out, src_used);
+    cache = *out;
   }
 
-  string* cache = *out;
+  char* cval = cache->value;
 
-  memcpy(cache->value, src->value, src_len);
-  cache->length = src_len;
-  cache->used = src->used;
-
-  cache->value[src_len] = '\0';
+  memcpy(cval, src->value, src_used + st__zeronull_size(enc));
+  cache->length = src->length;
+  cache->encoding = enc;
+  cache->used = src_used;
 }
 
 void st_copyc(string** out, const char* src, st_enc_t enc) {
@@ -216,15 +186,15 @@ void st_copyc(string** out, const char* src, st_enc_t enc) {
   string* cache = *out;
 
   // printf("capacity check %zu - %zu\n", cache->capacity, len);
-  if (len > cache->capacity) {
-    st_resize(out, len);
+  if (used > cache->capacity) {
+    st_resize(out, used);
     cache = *out;
   }
   // printf("st_copy %p @ %p\n", cache, cache->value);
   cache->length = len;
   cache->used = used;
   cache->encoding = enc;
-  strcpy(cache->value, src);
+  memcpy(cache->value, src, used + st__zeronull_size(enc));
 }
 
 void st_delete(string** out) {
@@ -233,7 +203,7 @@ void st_delete(string** out) {
 }
 
 void st_clear(string* out) {
-  out->value[0] = '\0';
+  st__zeronull(out->value, 0, out->encoding);
   out->length = 0;
   out->used = 0;
 }

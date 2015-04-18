@@ -209,3 +209,33 @@ void st__repeat(char* dst, const char* src, size_t src_len, size_t times) {
     e += l;
   }
 }
+
+void st__zeronull(char* str, size_t bytepos, st_enc_t enc) {
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+  case st_enc_utf8:
+    str[bytepos] = '\0';
+    break;
+  case st_enc_utf32le:
+  case st_enc_utf32be: // null is also, 4 bytes!
+  // test L'\0' and cast st_uc4_t/wchar_t
+    str[bytepos] = '\0';
+    str[bytepos + 1] = '\0';
+    str[bytepos + 2] = '\0';
+    str[bytepos + 3] = '\0';
+  }
+}
+
+size_t st__zeronull_size(st_enc_t enc) {
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+  case st_enc_utf8:
+    return 1;
+  case st_enc_utf32le:
+  case st_enc_utf32be:
+    return 4;
+  }
+
+}

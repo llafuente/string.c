@@ -102,5 +102,5 @@ string* st_trim(const string* str, string* what_str, int mode) {
     return st_clone(str);
   }
 
-  return st_clone_subc(c, len, str->encoding);
+  return st_new_subc(c, len, str->encoding);
 }

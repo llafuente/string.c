@@ -61,24 +61,32 @@ typedef enum {
 
 /// string type, use value[] at the end, so only one malloc is enough
 typedef struct string_s {
-  /// length
+  /// length in characters (not printable character)
   st_len_t length;
-  /// used bytes
+  /// memory used in bytes
   st_len_t used;
-  /// memory reserved
+  /// memory reserved in bytes
   size_t capacity;
-  /// encoding used
+  /// used encoding
   st_enc_t encoding;
-  /// current string content, it's null-terminated
+  /// current string content, it's null-terminated to be 100% compatible with
+  /// any c library
   char value[];
 } string;
 
-typedef void (*st_char_itr_cb)(const string* character, st_len_t pos,
+/// iterator callback type for: st_char_iterator
+/// @see st_char_iterator
+typedef void (*st_char_itr_cb)(const string* chr, st_len_t pos,
                                const string* src);
 
+/// iterator callback type for: st_byte_iterator
+/// @see st_byte_iterator
 typedef void (*st_byte_itr_cb)(st_uc_t byte, st_len_t pos, const string* src);
 
-typedef void (*st_char_map_cb)(string* character, st_len_t pos,
+/// iterator callback type for: st_char_map
+/// chr will be mapped in the returned string
+/// @see st_char_map
+typedef void (*st_char_map_cb)(string* chr, st_len_t pos,
                                const string* src);
 
 //
@@ -87,7 +95,7 @@ typedef void (*st_char_map_cb)(string* character, st_len_t pos,
 extern string* string_def_trim_mask;
 
 //
-// MACROS
+// MACROS (user can override)
 //
 
 #define __STRING_MEM_FREE_ADDR 0
@@ -256,11 +264,6 @@ ST_EXTERN size_t st_capacity(const char* src, st_enc_t enc);
  */
 ST_EXTERN void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
                            size_t* bytes);
-
-/**
- * add '\0' at the end of the string
- */
-ST_EXTERN void st_zeronull(string* str);
 
 /**
  * print to stdout useful information to debug
@@ -543,7 +546,7 @@ ST_EXTERN void st_grow(string** out, size_t cap, st_enc_t enc);
 ST_EXTERN string* st_clone(const string* src);
 
 /**
- * Return a new string clone of src with given capacity
+ * Return a new string clone of src with given capacity (resize)
  *
  * @param src source
  * @return new string
@@ -551,9 +554,13 @@ ST_EXTERN string* st_clone(const string* src);
 ST_EXTERN string* st_rclone(const string* src, size_t cap);
 
 /**
- *
+ * Create a new string from given substring
+ * @param src
+ * @param bytes
+ * @param enc
+ * @return new string
  */
-ST_EXTERN string* st_clone_subc(const char* src, size_t len, st_enc_t enc);
+ST_EXTERN string* st_new_subc(const char* src, size_t bytes, st_enc_t enc);
 
 /**
  * Copy src into out
@@ -645,6 +652,8 @@ ST_EXTERN string* st_shuffle(string* src, size_t len);
  * Extracts the characters from a string, between two specified indices, and
  *returns the new sub string.
  *
+ * TODO review and do some comparison with PHP/Javascript usage
+ *
  * @param str
  * @param start
  *   If non-negative, the returned string will start at the start'th position in
@@ -710,6 +719,7 @@ ST_EXTERN string* st_lower(const string* src);
  * in haystack.
  * Returns -1 if the value to search never occurs.
  *
+ * @see st__calc_range to see how offset & len works
  * @param haystack
  * @param needle
  * @param offset
@@ -857,6 +867,17 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 /*
  * Normalize given range to be useable in st__get_char_range
  *
+ * @example
+ * | str_length | offset | offset_length | out_offset | out_length |
+ * |:----------:|:------:|:-------------:|:----------:|:----------:|
+ * | 10         | 0      | 0             | 0          | 10         |
+ * | 10         | -1     | 0             | 9          | 10         |
+ * | 10         | -9     | 0             | 1          | 10         |
+ * | 10         | -5     | 3             | 5          | 8          |
+ * | 10         | -5     | 1             | 5          | 7          |
+ * | 10         | -5     | -1            | 5          | 9          |
+ * | 10         | 4      | -2            | 4          | 8          |
+ *
  * @param str_length
  * @param offset
  *   < 0 ofsset from the end of the string
@@ -869,8 +890,28 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset,
                               st_len_t* offset_length);
 
+/*
+ * Repeat src given times in dst
+ *
+ * @note buffer overflow can happen, check it before.
+ *
+ * @param dst
+ * @param src
+ * @param src_len
+ * @param times
+ */
 ST_EXTERN void st__repeat(char* dst, const char* src, size_t src_len,
                           size_t times);
+/*
+ * Add zero null to given position, apropiate for each enc
+ *
+ * @param str
+ * @param bytepos
+ * @param enc
+ */
+ST_EXTERN void st__zeronull(char* str, size_t bytepos, st_enc_t enc);
+
+ST_EXTERN size_t st__zeronull_size(st_enc_t enc);
 
 //--------------------------------//
 //        encoding group          //

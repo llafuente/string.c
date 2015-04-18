@@ -78,8 +78,6 @@ void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
   }
 }
 
-void st_zeronull(string* str) { str->value[str->used] = '\0'; }
-
 void st_hexdump(const char* p, size_t size) {
   int n;
   for (n = 0; n < size; ++n) {
