@@ -28,15 +28,40 @@
 #include "stringc.h"
 
 string* st_new(size_t cap, st_enc_t enc) {
-  size_t size = cap + 1; // null terminated!
+  size_t size;
+
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+  case st_enc_utf8:
+    size = cap + 1;
+    break;
+  case st_enc_utf32le:
+  case st_enc_utf32be: // null is also, 4 bytes!
+    size = cap + 4;
+  }
 
   string* s = (string*)__STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
 
   s->length = 0;
   s->used = 0;
   s->capacity = size;
-  s->value[0] = '\0';
+
   s->encoding = enc;
+
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+  case st_enc_utf8:
+    s->value[0] = '\0';
+    break;
+  case st_enc_utf32le:
+  case st_enc_utf32be: // null is also, 4 bytes!
+    s->value[0] = '\0';
+    s->value[1] = '\0';
+    s->value[2] = '\0';
+    s->value[3] = '\0';
+  }
 
   return s;
 }
@@ -61,7 +86,18 @@ string* st_newc(const char* src, st_enc_t enc) {
   size_t used;
 
   st_get_meta(src, enc, &len, &used);
-  size_t size = used + 1; // null terminated!
+  size_t size = used; // null terminated!
+
+  switch (enc) {
+  case st_enc_binary:
+  case st_enc_ascii:
+  case st_enc_utf8:
+    ++size;
+    break;
+  case st_enc_utf32le:
+  case st_enc_utf32be: // null is also, 4 bytes!
+    size += 4;
+  }
 
   // printf("%s\n",  src);
   // printf("len[%zu] used[%zu] enc[%d]", len, used, enc);

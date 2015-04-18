@@ -73,3 +73,7 @@ st_len_t st_utf32be_char_size_safe(const char* input) {
   }
   return -1;
 }
+
+st_len_t st_utf32le_char_size(const char* input) { return 4; }
+
+st_len_t st_utf32be_char_size(const char* input) { return 4; }

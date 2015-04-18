@@ -274,3 +274,111 @@ st_len_t st_irpos(const string* haystack, const string* needle, st_len_t offset,
 
   return out;
 }
+
+string* st_remove(const string* haystack, const string* needle, st_len_t offset,
+                  st_len_t length) {
+  // caches
+  st_len_t nlen = needle->length;
+
+  // working range
+  st__calc_range(haystack->length, &offset, &length);
+
+  // caches
+  st_len_t nused = needle->used;
+  const char* nval = needle->value;
+  const char* hval = haystack->value;
+  st_enc_t enc = haystack->encoding;
+
+  char* start;
+  char* end;
+  st__get_char_range(haystack, offset, length, &start, &end);
+
+  string* out = st_new(haystack->used, enc);
+
+  st_len_t last_hay_pos = start - hval;
+  st_len_t last_out_pos = 0;
+  st_len_t chars_to_cpy = 0;
+  st_len_t need_cpy = 0;
+
+  st_len_t olen = 0;
+  st_len_t oused = 0;
+  char* oval = out->value;
+
+  printf("last_hay_pos %ld\n", last_hay_pos);
+  printf("last_out_pos %ld\n", last_out_pos);
+  printf("need_cpy %ld\n", need_cpy);
+
+  if (last_hay_pos) {
+    memcpy(oval, hval, last_hay_pos);
+    last_out_pos = last_hay_pos;
+    olen = offset;
+    oused = last_hay_pos;
+  }
+
+  // first char to comare
+
+  st_len_t needle_len_m1 = nused - 1;
+  char* pp;
+  st_uc_t first = *nval;
+  // last char to comare
+  st_uc_t last = *(nval + nused - 1);
+
+  st_len_t end_len;
+
+  st_len_t jump;
+  st_len_t itr = 0;
+
+  // printf("end - start = %ld\n", end - start);
+
+  while (start < end) {
+    // printf("****** itr %ld [%c]\n", itr, *start);
+    ++itr;
+
+    // printf("last_hay_pos %ld\n", last_hay_pos);
+    // printf("last_out_pos %ld\n", last_out_pos);
+    // printf("need_cpy %ld\n", need_cpy);
+    // printf("chars_to_cpy %ld\n", chars_to_cpy);
+
+    if (!memcmp(nval, start, nused)) {
+      // cpy and update
+      // printf("*- CPY!\n");
+      if (need_cpy) {
+        olen += chars_to_cpy;
+        oused += need_cpy;
+        memcpy(oval + last_out_pos, hval + last_hay_pos, need_cpy);
+        chars_to_cpy = 0;
+
+        last_out_pos += need_cpy;
+        last_hay_pos += need_cpy + nused;
+        need_cpy = 0;
+      } else {
+        last_hay_pos += nused;
+      }
+      start += nused;
+      continue;
+    }
+
+    jump = st_char_size(start, enc);
+    ++chars_to_cpy;
+    start += jump;
+    need_cpy += jump;
+  }
+
+  // printf("*last_hay_pos %ld\n", last_hay_pos);
+  // printf("*last_out_pos %ld\n", last_out_pos);
+  // printf("*chars_to_cpy %ld\n", chars_to_cpy);
+  // printf("*need_cpy %ld\n", need_cpy);
+
+  out->length = olen + chars_to_cpy;
+  out->used = oused + need_cpy;
+  memcpy(oval + last_out_pos, hval + last_hay_pos, need_cpy);
+  last_out_pos += need_cpy;
+
+  *(out->value + last_out_pos) = '\0';
+  if (enc == st_enc_utf32be || enc == st_enc_utf32le) {
+    *(out->value + last_out_pos + 1) = '\0';
+    *(out->value + last_out_pos + 2) = '\0';
+    *(out->value + last_out_pos + 3) = '\0';
+  }
+  return out;
+}

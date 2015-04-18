@@ -45,17 +45,16 @@ string* st_justify(const string* src, st_len_t width, const string* padstr,
   st_len_t pad_len;
   char* pad_val;
 
-  if (!padstr) {                // 0
+  if (!padstr) { // 0
     pad_val = " ";
     pad_len = 1;
   } else {
     assert(enc == padstr->encoding);
     pad_len = padstr->used;
-    pad_val = (char*) padstr->value;
+    pad_val = (char*)padstr->value;
   }
 
   string* out = st_new_max(width, enc);
-
 
   char* p = out->value;
 
@@ -63,9 +62,9 @@ string* st_justify(const string* src, st_len_t width, const string* padstr,
   st_len_t l_times = (mode == 1) ? 0 : ((mode == 2) ? n : n / 2);
   st_len_t r_times = n - l_times;
 
-  //printf("n = %ld\n", n);
-  //printf("l_times = %ld\n", l_times);
-  //printf("r_times = %ld\n", r_times);
+  // printf("n = %ld\n", n);
+  // printf("l_times = %ld\n", l_times);
+  // printf("r_times = %ld\n", r_times);
 
   st_len_t offset = 0;
   if (l_times) {
@@ -74,13 +73,13 @@ string* st_justify(const string* src, st_len_t width, const string* padstr,
   }
 
   p[offset] = '\0';
-  //printf("[%ld] %s\n", offset, p);
+  // printf("[%ld] %s\n", offset, p);
 
   memcpy(p + offset, src->value, src_used);
   offset += src_used;
 
   p[offset] = '\0';
-  //printf("[%ld] %s\n", offset, p);
+  // printf("[%ld] %s\n", offset, p);
 
   if (r_times) {
     st__repeat(p + offset, pad_val, pad_len, r_times);
@@ -88,7 +87,7 @@ string* st_justify(const string* src, st_len_t width, const string* padstr,
   }
 
   p[offset] = '\0';
-  //printf("[%ld] %s\n", offset, p);
+  // printf("[%ld] %s\n", offset, p);
 
   out->used = offset;
   out->length = r_times + l_times + len;

@@ -267,7 +267,13 @@ ST_EXTERN void st_zeronull(string* str);
  */
 ST_EXTERN void st_debug(string* str);
 
+ST_EXTERN void st_hexdump(const char* p, size_t size);
+
 ST_EXTERN bool st_validate_encoding(char* input, st_enc_t enc);
+
+ST_EXTERN st_len_t st_char_size_safe(const char* input, st_enc_t enc);
+
+ST_EXTERN st_len_t st_char_size(const char* input, st_enc_t enc);
 
 //
 // append.c
@@ -761,6 +767,9 @@ ST_EXTERN st_len_t
 ST_EXTERN st_len_t st_irpos(const string* haystack, const string* needle,
                             st_len_t offset, st_len_t length);
 
+ST_EXTERN string* st_remove(const string* haystack, const string* needle,
+                            st_len_t offset, st_len_t length);
+
 //
 // encode.c
 //
@@ -983,5 +992,8 @@ ST_EXTERN st_len_t st_utf32_lead_size(st_uc_t lead_chr);
 
 ST_EXTERN st_len_t st_utf32le_char_size_safe(const char* input);
 ST_EXTERN st_len_t st_utf32be_char_size_safe(const char* input);
+
+ST_EXTERN st_len_t st_utf32le_char_size(const char* input);
+ST_EXTERN st_len_t st_utf32be_char_size(const char* input);
 
 #endif

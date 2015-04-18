@@ -46,7 +46,7 @@ st_len_t st_length(const char* src, st_enc_t enc) {
     return st_utf8_length((const char*)src, 0);
   case st_enc_utf32be:
   case st_enc_utf32le:
-    return wcslen(src);
+    return wcslen((int*)src);
   }
 }
 
@@ -80,6 +80,17 @@ void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
 
 void st_zeronull(string* str) { str->value[str->used] = '\0'; }
 
+void st_hexdump(const char* p, size_t size) {
+  int n;
+  for (n = 0; n < size; ++n) {
+    if (n % 12 == 0) {
+      printf("\n");
+    }
+    printf("| %2.2x ", (*p) & 0xff);
+    ++p;
+  }
+}
+
 void st_debug(string* str) {
   printf("st_debug @%p, length[%zu] used[%zu] size[%zu] enc[%d]\n", str,
          str->length, str->used, str->capacity, str->encoding);
@@ -87,14 +98,12 @@ void st_debug(string* str) {
   char* p = str->value;
   size_t size = str->capacity;
   printf("\nhexadecimal\n");
-  int n;
-  for (n = 0; n < size; ++n) {
-    printf("| %2.2x ", (*p) & 0xff);
-    ++p;
-  }
+  st_hexdump(p, size);
+
   printf("\nchar by char\n");
   p = str->value;
 
+  int n;
   for (n = 0; n < str->length; ++n) {
     if (n < 10) {
       printf("| %d ", n);
@@ -169,9 +178,25 @@ st_len_t st_char_size_safe(const char* input, st_enc_t enc) {
   case st_enc_utf32le:
     return st_utf32le_char_size_safe(input);
   case st_enc_utf32be:
-    return st_utf32le_char_size_safe(input);
+    return st_utf32be_char_size_safe(input);
   }
 }
+
+st_len_t st_char_size(const char* input, st_enc_t enc) {
+  switch (enc) {
+  case st_enc_binary:
+    return 1;
+  case st_enc_ascii:
+    return st_ascii_char_size(input);
+  case st_enc_utf8:
+    return st_utf8_char_size(input);
+  case st_enc_utf32le:
+    return st_utf32le_char_size(input);
+  case st_enc_utf32be:
+    return st_utf32be_char_size(input);
+  }
+}
+
 bool st_validate_encoding(char* input, st_enc_t enc) {
   // start at the beginning
   size_t pos = 0;

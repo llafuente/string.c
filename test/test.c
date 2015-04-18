@@ -109,23 +109,27 @@ void print_trace(void) {
 #define PASTE(a, b) PASTE2(a, b)
 
 // printf("@%s:%s (%s)\n", __FILE__, STRINGIFY(__LINE__), __func__);
+// all these castings are necesary for gcc
 #define CHK_ALL(src, dst, enc)                                                 \
   if (enc == st_enc_utf32be || enc == st_enc_utf32le) {                        \
     printf("# CHECK %s = utf32 L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x),            \
            src->length, src->used, src->capacity);                             \
     printf("# CHECK %s = utf32 L[%ld]C[%lu]\n", STRINGIFY(y),                  \
-           st_length(dst, enc), st_capacity(dst, enc));                        \
+           st_length((const char*)dst, enc),                                   \
+           st_capacity((const char*)dst, enc));                                \
+    ASSERT(0 == wcscmp((const wchar_t*)src->value, (const wchar_t*)dst),       \
+           "value");                                                           \
   } else {                                                                     \
-    printf("# CHECK %s = '%s' L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value,   \
+    printf("# CHECK %s = '%s' L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value, \
            src->length, src->used, src->capacity);                             \
-    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), dst,                \
-           st_length(dst, enc), st_capacity(dst, enc));                        \
+    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), dst,              \
+           st_length((const char*)dst, enc),                                   \
+           st_capacity((const char*)dst, enc));                                \
+    ASSERT(0 == strcmp((const char*)src->value, (const char*)dst), "value");   \
   }                                                                            \
-  ASSERT(0 == strcmp(src->value, dst), "value");                               \
-  ASSERT(src->length == st_length(dst, enc), "length");                        \
-  ASSERT(src->used == st_capacity(dst, enc), "used");                          \
-  ASSERT(src->capacity >= src->used, "capacity");                              \
-  ASSERT(src->encoding == enc, "encoding");
+  ASSERT(src->length == st_length((const char*)dst, enc), "length");           \
+  ASSERT(src->used == st_capacity((const char*)dst, enc), "used");             \
+  ASSERT(src->capacity >= src->used, "capacity");
 
 #define RUN_TEST(test)                                                         \
   printf("\n\n################\n");                                            \
@@ -414,9 +418,10 @@ void test_sub() {
   st_delete(&aux);
   st_delete(&s);
 
-  const char* utf32p = (const char*)T_STR_ASCII_UTF32;
-  s = st_newc(utf32p, st_enc_utf32be);
-  CHK_ALL(s, utf32p, st_enc_utf32be);
+  s = st_newc((const char*)T_STR_ASCII_UTF32, st_enc_utf32be);
+  st_hexdump((const char*)T_STR_ASCII_UTF32, wcslen(T_STR_ASCII_UTF32) * 4);
+  st_debug(s);
+  CHK_ALL(s, T_STR_ASCII_UTF32, st_enc_utf32be);
   aux = st_sub(s, 0, 0);
   CHK_ALL(aux, (const char*)T_STR_ASCII_UTF32, st_enc_utf32be);
   st_delete(&aux);
@@ -759,6 +764,90 @@ void test_search() {
   CHK_ALL(chr, "M", st_enc_ascii);
   st_delete(&chr);
 
+  st_delete(&hay);
+  st_delete(&ned);
+
+  //
+  // delete
+  //
+  hay = st_newc("abcabc", st_enc_utf8);
+  ned = st_newc("ab", st_enc_utf8);
+  string* del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, "cc", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc("a", st_enc_utf8);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, "bcbc", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc("c", st_enc_utf8);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, "abab", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc("bc", st_enc_utf8);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, "aa", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc("abc", st_enc_utf8);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, "", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc("abca", st_enc_utf8);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, "bc", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&hay);
+  st_delete(&ned);
+
+  //
+  // delete UTF32
+  //
+  hay = st_newc((const char*)L"abcabc", st_enc_utf32be);
+  ned = st_newc((const char*)L"ab", st_enc_utf32be);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, L"cc", st_enc_utf32be);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc((const char*)L"a", st_enc_utf32be);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, L"bcbc", st_enc_utf32be);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc((const char*)L"c", st_enc_utf32be);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, L"abab", st_enc_utf32be);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc((const char*)L"bc", st_enc_utf32be);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, L"aa", st_enc_utf32be);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc((const char*)L"abc", st_enc_utf32be);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, L"", st_enc_utf32be);
+
+  st_delete(&del);
+  st_delete(&ned);
+  ned = st_newc((const char*)L"abca", st_enc_utf32be);
+  del = st_remove(hay, ned, 0, 0);
+  CHK_ALL(del, L"bc", st_enc_utf32be);
+
+  st_delete(&del);
   st_delete(&hay);
   st_delete(&ned);
 }
