@@ -85,7 +85,10 @@ st_len_t st_copy_usub(string* out, st_len_t initial_byte, const string* src,
       itr += 4;
       done += 4;
     }
-    *dst = '\0';
+    *dst++ = '\0';
+    *dst++ = '\0';
+    *dst++ = '\0';
+    *dst++ = '\0';
   } break;
   }
 
