@@ -136,3 +136,68 @@ bool st_utf8_valid_codepoint(st_uc4_t uc_cp) {
   }
   return true;
 }
+
+st_uc4_t st_utf8_codepoint(const char* utf8) {
+  st_uc_t* p = (st_uc_t*)utf8;
+  st_uc_t c = *p;
+
+  if ((c < (st_uc_t)'\200')) {
+    return c;
+  }
+
+  if ((c >= (st_uc_t)'\370')) {
+    return 0;
+  }
+
+  if ((c >= (st_uc_t)'\360')) {
+    return ((((262144 * (c % 8)) + (4096 * (p[1] % 64))) + (64 * (p[2] % 64))) +
+            (p[3] % 64));
+  }
+
+  if ((c >= (st_uc_t)'\340')) {
+    return (((4096 * (c % 16)) + (64 * (p[1] % 64))) + (p[2] % 64));
+  }
+
+  if ((c >= (st_uc_t)'\300')) {
+    return ((64 * (c % 32)) + (p[1] % 64));
+  }
+
+  return 0;
+}
+
+// utf32 code point to utf8 chars
+st_len_t st_utf8_from_codepoint(char* utf8, st_uc4_t codepoint) {
+  st_uc_t* p = (st_uc_t*)utf8;
+  if (codepoint < 128) {
+    p[0] = codepoint;
+    return 1;
+  }
+
+  if (codepoint < 2048) {
+    p[1] = (128 + (codepoint % 64));
+    codepoint = (codepoint / 64);
+    p[0] = (192 + (codepoint % 32));
+    return 2;
+  }
+
+  if (codepoint < 65536) {
+    p[2] = (128 + (codepoint % 64));
+    codepoint = (codepoint / 64);
+    p[1] = (128 + (codepoint % 64));
+    codepoint = (codepoint / 64);
+    p[0] = (224 + codepoint);
+    return 3;
+  }
+
+  if (codepoint < 1048576) {
+    p[3] = (128 + (codepoint % 64));
+    codepoint = (codepoint / 64);
+    p[2] = (128 + (codepoint % 64));
+    codepoint = (codepoint / 64);
+    p[1] = (128 + (codepoint % 64));
+    codepoint = (codepoint / 64);
+    p[0] = (240 + codepoint);
+    return 4;
+  }
+  return 0; // err
+}

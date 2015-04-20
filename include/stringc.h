@@ -86,8 +86,7 @@ typedef void (*st_byte_itr_cb)(st_uc_t byte, st_len_t pos, const string* src);
 /// iterator callback type for: st_char_map
 /// chr will be mapped in the returned string
 /// @see st_char_map
-typedef void (*st_char_map_cb)(string* chr, st_len_t pos,
-                               const string* src);
+typedef void (*st_char_map_cb)(string* chr, st_len_t pos, const string* src);
 
 //
 // shared globals
@@ -704,8 +703,14 @@ ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 //
 // case.c
 //
-
-ST_EXTERN void string_capitalize(string* str);
+/**
+ * Returns a copy of str with the first character converted to uppercase and the
+ * remainder to lowercase.
+ *
+ * @param str
+ * @return new string
+ */
+ST_EXTERN string* st_capitalize(const string* str);
 
 ST_EXTERN string* st_upper(const string* src);
 ST_EXTERN string* st_lower(const string* src);
@@ -848,13 +853,6 @@ ST_EXTERN char* st__get_char_offset(const string* str, st_len_t offset);
  */
 ST_EXTERN void st__get_char_range(const string* str, st_len_t offset,
                                   st_len_t length, char** start, char** end);
-
-/**
- * utf8 string to utf32 code point
- *
- * @param utf8
- */
-ST_EXTERN st_uc4_t st__utf8c_to_utf32cp(st_uc_t* utf8);
 
 /**
  * utf32 code point to utf8 string
@@ -1001,6 +999,13 @@ ST_EXTERN bool st_utf8_char_eq(char* a, char* b);
 * @return
 */
 ST_EXTERN bool st_utf8_valid_codepoint(st_uc4_t cp);
+
+/**
+* utf8 string to utf32 code point
+*
+* @param utf8
+*/
+ST_EXTERN st_uc4_t st_utf8_codepoint(const char* utf8);
 
 //
 // ascii.c

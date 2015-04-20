@@ -36,39 +36,12 @@
 #define STRING_IS_UP_ASCII(c) (c > 64) && (c < 97)
 #define STRING_UP_ASCCI(c) c -= 32;
 
-// ascii
-void string_char_up(string* str, st_len_t pos) {
-  assert(str->length > pos);
-
-  char* val = str->value;
-  char c = val[pos];
-
-  if ((c > 96) && (c < 123)) {
-    val[pos] -= 32;
-  }
-}
-
-void string_char_low(string* str, st_len_t pos) {
-  assert(str->length > pos);
-
-  char* val = str->value;
-  char c = val[pos];
-
-  if ((c > 64) && (c < 97)) {
-    val[pos] += 32;
-  }
-}
-
-// http://pastebin.com/fuw4Uizk
-void string_capitalize(string* str) { assert(str->encoding == st_enc_ascii); }
-
-string* string_ucfirst(string* src) { return 0; }
-
 void st_upper_cb(string* character, st_len_t pos, const string* src) {
   st_uc_t uc = *character->value;
+  st_enc_t enc = src->encoding;
 
-  // ascci do direct translation
-  if (uc < 127) {
+  // ascci? do direct translation
+  if ((enc == st_enc_ascii || enc == st_enc_utf8) && uc < 127) {
     if ((uc > 96) && (uc < 123)) {
       *character->value -= 32;
     }
@@ -76,22 +49,23 @@ void st_upper_cb(string* character, st_len_t pos, const string* src) {
   }
 
   // utf8 -> utf32
-  st_uc4_t cp = st__utf8c_to_utf32cp((st_uc_t*)character->value);
+  st_uc4_t cp = st_utf8_codepoint(character->value);
   cp = st_utf32_uppercase(cp);
-  st_len_t zero_null_pos = st__utf32cp_to_utf8c(cp, (st_uc_t*)character->value);
-  character->value[zero_null_pos] = '\0';
+  st_len_t zero_null_pos = st_utf8_from_codepoint(character->value, cp);
+  st__zeronull(character->value, zero_null_pos, enc);
 }
 
 // TODO improve performance
 string* st_upper(const string* src) { return st_char_map(src, st_upper_cb); }
 
-string* string_lcfirst(string* src) { return 0; }
+void st_upper_char(char* str, char* buffer, st_enc_t enc) {}
 
 void st_lower_cb(string* character, st_len_t pos, const string* src) {
   st_uc_t uc = *character->value;
+  st_enc_t enc = src->encoding;
 
-  // ascci do direct translation
-  if (uc < 127) {
+  // ascci? do direct translation
+  if ((enc == st_enc_ascii || enc == st_enc_utf8) && uc < 127) {
     if ((uc > 64) && (uc < 97)) {
       *character->value += 32;
     }
@@ -99,13 +73,77 @@ void st_lower_cb(string* character, st_len_t pos, const string* src) {
   }
 
   // utf8 -> utf32
-  st_uc4_t cp = st__utf8c_to_utf32cp((st_uc_t*)character->value);
+  st_uc4_t cp = st_utf8_codepoint(character->value);
   cp = st_utf32_lowercase(cp);
-  st_len_t zero_null_pos = st__utf32cp_to_utf8c(cp, (st_uc_t*)character->value);
-  character->value[zero_null_pos] = '\0';
+  st_len_t zero_null_pos = st_utf8_from_codepoint(character->value, cp);
+  st__zeronull(character->value, zero_null_pos, enc);
 }
 
 // TODO improve performance
 string* st_lower(const string* src) { return st_char_map(src, st_lower_cb); }
 
+// http://pastebin.com/fuw4Uizk
+/*
+"hello".capitalize    #=> "Hello"
+"HELLO".capitalize    #=> "Hello"
+"123ABC".capitalize   #=> "123abc"
+*/
+string* st_capitalize(const string* str) {
+  const char* itr = str->value;
+  char* end = itr + str->used;
+  st_enc_t enc = str->encoding;
+
+  string* out = st_new_max(str->used, enc);
+  char* oval = out->value;
+
+  // fist UP
+  st_len_t jump = st_char_size(itr, enc);
+  st_uc4_t cp = st_codepoint(itr, enc);
+  st_uc4_t cp2 = st_utf32_uppercase(cp);
+  st_len_t cp_size;
+
+  if (cp != cp2) {
+    // printf("change 1\n");
+    cp_size = st_from_codepoint(oval, cp2, enc);
+    oval += cp_size;
+  } else {
+    // printf("copy 1\n");
+    memcpy(oval, itr, jump);
+    oval += jump;
+  }
+
+  itr += jump;
+
+  // then down
+  while (itr < end) {
+    // printf("-- itr [%p] oval [%p]\n", itr, oval);
+
+    jump = st_char_size(itr, enc);
+    cp = st_codepoint(itr, enc);
+    cp2 = st_utf32_lowercase(cp);
+
+    if (cp != cp2) {
+      // printf("change\n");
+      cp_size = st_from_codepoint(oval, cp2, enc);
+      oval += cp_size;
+    } else {
+      // printf("copy\n");
+      memcpy(oval, itr, jump);
+      oval += jump;
+    }
+
+    itr += jump;
+  }
+
+  out->used = oval - out->value;
+  st__zeronull(oval, 0, enc);
+  out->length = str->length;
+
+  return out;
+}
+
+string* string_ucfirst(string* src) { return 0; }
+
 string* string_swapcase(string* src) { return 0; }
+
+string* string_lcfirst(string* src) { return 0; }

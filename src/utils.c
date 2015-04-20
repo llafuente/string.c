@@ -212,3 +212,37 @@ bool st_validate_encoding(char* input, st_enc_t enc) {
   // if we didn't fail yet, return success
   return true;
 }
+
+st_uc4_t st_codepoint(const char* str, st_enc_t enc) {
+  switch (enc) {
+  case st_enc_binary:
+    return (st_uc4_t)*str;
+  case st_enc_ascii:
+    return st_ascii_codepoint(str);
+  case st_enc_utf8:
+    return st_utf8_codepoint(str);
+  case st_enc_utf32le:
+    return st_utf32le_codepoint(str);
+  case st_enc_utf32be:
+    return st_utf32be_codepoint(str);
+  }
+
+  return 0;
+}
+
+st_len_t st_from_codepoint(char* out, st_uc4_t codepoint, st_enc_t enc) {
+  switch (enc) {
+  case st_enc_binary:
+    assert(false); // TODO how to handle this? as ascii? as 4 bytes?
+  case st_enc_ascii:
+    return st_ascii_from_codepoint(out, codepoint);
+  case st_enc_utf8:
+    return st_utf8_from_codepoint(out, codepoint);
+  case st_enc_utf32le:
+    return st_utf32le_from_codepoint(out, codepoint);
+  case st_enc_utf32be:
+    return st_utf32be_from_codepoint(out, codepoint);
+  }
+
+  return 0;
+}

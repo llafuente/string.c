@@ -62,3 +62,28 @@ bool st_is_ascii(const char* input) {
   }
   return true;
 }
+
+void st_ascii_upper(char* str, st_len_t pos) {
+  char c = str[pos];
+
+  if ((c > 96) && (c < 123)) {
+    str[pos] -= 32;
+  }
+}
+
+void st_ascii_lower(char* str, st_len_t pos) {
+  char c = str[pos];
+
+  if ((c > 64) && (c < 97)) {
+    str[pos] += 32;
+  }
+}
+
+st_len_t st_ascii_from_codepoint(char* out, st_uc_t codepoint) {
+  if (codepoint < 127) {
+    st_uc_t* p = (st_uc_t*)out;
+    *p = (st_uc_t)codepoint;
+  }
+
+  return 0;
+}

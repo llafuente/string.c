@@ -1,0 +1,15 @@
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+install:
+  - sudo pip install cpp-coveralls
+
+before_script:
+  - sh autogen.sh
+  - ./configure
+  - make
+
+script: make check

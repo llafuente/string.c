@@ -98,7 +98,7 @@ void st_grow(string** src, size_t cap, st_enc_t enc) {
   } else {
     if (cap + st__zeronull_size(enc) > (*src)->capacity) {
       st_resize(src, cap);
-      //TODO should we set enconding here?
+      // TODO should we set enconding here?
     }
   }
 }
