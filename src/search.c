@@ -105,6 +105,11 @@ st_len_t st_pos(const string* haystack, const string* needle, st_len_t offset,
   }
 }
 
+st_len_t st_index_of(const string* haystack, const string* needle,
+                     st_len_t offset, st_len_t length) {
+  return st_pos(haystack, needle, offset, length);
+}
+
 bool st_start_with(const string* haystack, const string* needle) {
   return st_pos(haystack, needle, 0, 0) == 0;
 }

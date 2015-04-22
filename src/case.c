@@ -82,12 +82,6 @@ void st_lower_cb(string* character, st_len_t pos, const string* src) {
 // TODO improve performance
 string* st_lower(const string* src) { return st_char_map(src, st_lower_cb); }
 
-// http://pastebin.com/fuw4Uizk
-/*
-"hello".capitalize    #=> "Hello"
-"HELLO".capitalize    #=> "Hello"
-"123ABC".capitalize   #=> "123abc"
-*/
 string* st_capitalize(const string* str) {
   const char* itr = str->value;
   char* end = itr + str->used;

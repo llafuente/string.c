@@ -47,8 +47,10 @@ int st_compare(const string* a, const string* b) {
   return *(const unsigned char*)pa - *(const unsigned char*)pb;
 }
 
-int st_scompare(const string* a, const string* b, st_len_t offset,
-                st_len_t length) {
+int st_cmp(const string* a, const string* b) { return st_compare(a, b); }
+
+int st_subcompare(const string* a, const string* b, st_len_t offset,
+                  st_len_t length) {
 
   // working range
   st__calc_range(a->length, &offset, &length);
@@ -85,4 +87,9 @@ int st_scompare(const string* a, const string* b, st_len_t offset,
   }
 
   return *(const unsigned char*)start - *(const unsigned char*)pb;
+}
+
+int st_scmp(const string* a, const string* b, st_len_t offset,
+            st_len_t length) {
+  return st_subcompare(a, b, offset, length);
 }

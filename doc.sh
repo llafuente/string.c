@@ -3,26 +3,9 @@
 # execute with bash not sh!
 
 reset
-
-
-doxygen Doxyfile
-rm -rf ./doc/
-mkdir -p ./doc/
-
-for file in $(find ./src/ -iname '*.c'); do
-  echo "markdown-ing file ${file}"
-  cfile=${file##*/}
-  xmlfile="${cfile//./_8}.xml"
-  mdfile="${cfile}.md"
-
-  echo "markdown-ing file ${xmlfile} -> ${mdfile}"
-
-  node doxy2md.js doxygen/xml/${xmlfile}
-  # > doc/${mdfile}
-  exit 1
-done
-
-rm -rf doxygen
-
-#ln -sf ../include/stringc.h ./src/stringc.h
-#/home/luis/.local/bin/cldoc generate -- --output docs/ --language c src/*
+rm -rf doc/
+cldoc generate -- --output doc/ --report include/stringc.h
+#cldoc generate -- --output doc/ --report include/test.h
+node cldoc2md.js doc/xml/*.xml > doc.md
+#cat doc.md
+#cat doc/xml/string.xml

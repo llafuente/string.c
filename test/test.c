@@ -316,10 +316,10 @@ void test_compare() {
   s = st_newc("ab01cd", st_enc_ascii);
   aux = st_newc("01", st_enc_ascii);
 
-  ASSERT(st_scompare(s, aux, 2, 2) == 0, "substring compare");
-  ASSERT(st_scompare(s, aux, 2, 3) == 1, "substring compare");
-  ASSERT(st_scompare(s, aux, 2, 1) == -1, "substring compare");
-  ASSERT(st_scompare(s, aux, 3, 2) == 1, "substring compare");
+  ASSERT(st_subcompare(s, aux, 2, 2) == 0, "substring compare");
+  ASSERT(st_subcompare(s, aux, 2, 3) == 1, "substring compare");
+  ASSERT(st_subcompare(s, aux, 2, 1) == -1, "substring compare");
+  ASSERT(st_subcompare(s, aux, 3, 2) == 1, "substring compare");
 
   st_delete(&aux);
   st_delete(&s);

@@ -104,3 +104,15 @@ string* st_trim(const string* str, string* what_str, int mode) {
 
   return st_new_subc(c, len, str->encoding);
 }
+
+string* st_chop(const string* str, string* character_mask) {
+  return st_trim(str, character_mask, 2);
+}
+
+string* st_rtrim(const string* str, string* character_mask) {
+  return st_trim(str, character_mask, 2);
+}
+
+string* st_ltrim(const string* str, string* character_mask) {
+  return st_trim(str, character_mask, 1);
+}

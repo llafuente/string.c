@@ -23,7 +23,7 @@
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// common headers
+//-common headers
 #include <assert.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1600
@@ -42,60 +42,75 @@
 #ifndef __STRINGC_TYPE__
 #define __STRINGC_TYPE__
 
-// TODO add static-dynamic link suppor
+//-TODO add static-dynamic link suppor
 #define ST_EXTERN extern
 
-/// string length type.
+/* cldoc:begin-category(stringc.h) */
+
+// string length type.
 typedef long int st_len_t;
+// uchar
 typedef uint8_t st_uc_t;
+// uchar (wide)
 typedef uint32_t st_uc4_t;
 
-/// supported encodings
-typedef enum {
-  st_enc_binary,  ///< Binary encoding for abuse in user land
-  st_enc_ascii,   ///< ASCII
-  st_enc_utf8,    ///< UTF-8
-  st_enc_utf32be, ///< UCS-4BE, UCS-4 big endian
-  st_enc_utf32le  ///< UCS-4LE, UCS-4 little endian
+// supported encodings
+typedef enum st_enc_t {
+  // Binary encoding for abuse in user land
+  st_enc_binary,
+  // ASCII
+  st_enc_ascii,
+  // UTF-8
+  st_enc_utf8,
+  // UCS-4BE, UCS-4 big endian
+  st_enc_utf32be,
+  // UCS-4LE, UCS-4 little endian
+  st_enc_utf32le
 } st_enc_t;
 
-/// string type, use value[] at the end, so only one malloc is enough
+// string type, use value[] at the end, so only one malloc is enough
 typedef struct string_s {
-  /// length in characters (not printable character)
+  // length in characters (not printable character)
   st_len_t length;
-  /// memory used in bytes
+  // memory used in bytes
   st_len_t used;
-  /// memory reserved in bytes
+  // memory reserved in bytes
   size_t capacity;
-  /// used encoding
+  // used encoding
   st_enc_t encoding;
-  /// current string content, it's null-terminated to be 100% compatible with
-  /// any c library
+  // current string content, it's null-terminated to be 100% compatible with
+  // any c library
   char value[];
 } string;
 
-/// iterator callback type for: st_char_iterator
-/// @see st_char_iterator
+/* iterator callback type for: st_char_iterator
+ *
+ * [st_char_iterator](#st_char_iterator)
+ */
 typedef void (*st_char_itr_cb)(const string* chr, st_len_t pos,
                                const string* src);
 
-/// iterator callback type for: st_byte_iterator
-/// @see st_byte_iterator
+/* iterator callback type for: st_byte_iterator
+ *
+ * [st_byte_iterator](#st_byte_iterator)
+ */
 typedef void (*st_byte_itr_cb)(st_uc_t byte, st_len_t pos, const string* src);
 
-/// iterator callback type for: st_char_map
-/// chr will be mapped in the returned string
-/// @see st_char_map
+/* iterator callback type for: st_char_map
+ * chr will be mapped in the returned string
+ *
+ * [st_char_map](#st_char_map)
+ */
 typedef void (*st_char_map_cb)(string* chr, st_len_t pos, const string* src);
 
-//
-// shared globals
-//
+//-
+//- shared globals
+//-
 extern string* string_def_trim_mask;
 
-//
-// MACROS (user can override)
-//
+//-
+//- MACROS (user can override)
+//-
 
 #define __STRING_MEM_FREE_ADDR 0
 
@@ -111,9 +126,9 @@ extern string* string_def_trim_mask;
 #define __STRING_DEALLOCATOR free
 #endif
 
-//
-// MACROS (good ones)
-//
+//-
+//- MACROS (good ones)
+//-
 
 #define ST_UTF8_COUNT_TRAIL(byte)                                              \
   (((byte) >= 0xc0) + ((byte) >= 0xe0) + ((byte) >= 0xf0))
@@ -138,10 +153,10 @@ extern const st_uc_t st_bom[];
 #define ST_UTF8_HAS_BOM(s)                                                     \
   *s == st_bom[0] && *(s + 1) == st_bom[1] && *(s + 2) == st_bom[2]
 
-/// advance pointer to amount positions ASCII
+// advance pointer to amount positions ASCII
 #define ST_ADVANCE_ASCII(s, amount) s += amount
 
-/// advance pointer to amount positions UTF8
+// advance pointer to amount positions UTF8
 #define ST_ADVANCE_UTF8(s, amount)                                             \
   {                                                                            \
     st_len_t tmp = amount;                                                     \
@@ -150,10 +165,10 @@ extern const st_uc_t st_bom[];
     }                                                                          \
   }
 
-/// advance pointer to amount positions UCS4BE
+// advance pointer to amount positions UCS4BE
 #define ST_ADVANCE_UTF32(s, amount) s += amount * 4
 
-/// advance pointer to amount positions
+// advance pointer to amount positions
 #define ST_ADVANCE(s, amount, enc)                                             \
   switch (enc) {                                                               \
   case st_enc_binary:                                                          \
@@ -222,650 +237,816 @@ extern const st_uc_t st_bom[];
     }                                                                          \
   }
 
-//
-// utils.c
-//
+/* cldoc:end-category() */
+//-
+//- utils.c
+//-
+/* cldoc:begin-category(utils.c) */
 
-/**
- * Create an ascii map
+/* Create an ascii map
  *
- * @param input chars to map
- * @param len length of the input
- * @param mask char[256]
+ * @input Chars to map
+ * @len Length of the input
+ * @mask char[256] pre-allocated by user
  */
-ST_EXTERN void st_charmask(st_uc_t* input, size_t len, char* mask);
-/**
- * get plain string (null terminated) length in given encoding
+ST_EXTERN void st_charmask(const char* input, size_t len, char* mask);
+
+/* Get plain string (null terminated) length in given encoding
  *
- * @param src
- * @param enc
  * @return string length
+ * @src Null terminated string
+ * @enc Encoding
  */
 ST_EXTERN st_len_t st_length(const char* src, st_enc_t enc);
-/**
- * Get plain string (null terminated) capacity in given encoding
- * it's just strlen alias atm.
+
+/* Get plain string (null terminated) capacity in given encoding
  *
- * @param src
- * @param enc
- * @return string length
+ * @return string length (do not include null terminated space)
+ * @src Null terminated string
+ * @enc Encoding
  */
 ST_EXTERN size_t st_capacity(const char* src, st_enc_t enc);
 
-/**
- * Get capacity and length of given string in given encoding
+/* Get capacity and length of given string in given encoding
  *
- * @param src
- * @param enc
- * @param len length
- * @param bytes capacity needed to store the string (+1 if you want null
- * terminated)
+ * @src Null terminated string
+ * @enc Encoding
+ * @len Length
+ * @capacity (do not include null terminated space)
  */
 ST_EXTERN void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
-                           size_t* bytes);
-
-/**
- * print to stdout useful information to debug
+                           size_t* capacity);
+/* Print to stdout useful information to debug
+ *
+ * @str A string
  */
 ST_EXTERN void st_debug(string* str);
 
+/* Print to stdout hex data for given plain string
+ *
+ * @p
+ * @size
+ */
 ST_EXTERN void st_hexdump(const char* p, size_t size);
 
+/* Validate input string.
+ *
+ * @return
+ *    true if is valid
+ *    false if not
+ * @input
+ * @enc
+ */
 ST_EXTERN bool st_validate_encoding(char* input, st_enc_t enc);
 
+/* Returns plain string character size
+ *
+ * @TODO handle invalid surrogates
+ *
+ * @return
+ *   -1, invalid lead byte
+ *   1-4 character length
+ * @input
+ *        pointer to first char in the character (lead)
+ * @enc
+ */
 ST_EXTERN st_len_t st_char_size_safe(const char* input, st_enc_t enc);
 
+/* Returns plain string character size (unsafe, no error check)
+ *
+ * @return
+ *   1-4 character length
+ * @input
+ *        pointer to first char in the character (lead)
+ * @enc
+ */
 ST_EXTERN st_len_t st_char_size(const char* input, st_enc_t enc);
 
-//
-// append.c
-//
+/* cldoc:end-category() */
+//-
+//- append.c
+//-
+/* cldoc:begin-category(append.c) */
 
-/**
- * Append src to out
+/* Append input to out
  *
- * @see st_concat
- * @param out
+ * [st_concat](#st_concat)
+ *
+ * @out
  *  out could be resized
- * @param src
+ * @src
  *  string to append
  */
 ST_EXTERN void st_append(string** out, string* src);
-/**
- * Concatenate two string and return a new one.
+
+/* Concatenate two string and return a new one.
  *
- * @see st_append
- * @param first
- * @param second
+ * [st_append](#st_append)
+ *
+ * @return new string
+ * @first
+ * @second
  */
 ST_EXTERN string* st_concat(string* first, string* second);
 
-//
-// bin2hex.c
-//
+/* cldoc:end-category() */
+//-
+//- bin2hex.c
+//-
+/* cldoc:begin-category(bin2hex.c) */
 
-/**
- * @brief
- * Returns a new string result of converting binary data
- * into hexadecimal representation
+/* Returns an ASCII string containing the hexadecimal representation of str. The
+ * conversion is done byte-wise with the high-nibble first.
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
- * @see st_hex2bin
- * @return Returns an ASCII string containing the hexadecimal representation of
- *str
+ *
+ * see [st_hex2bin](#st_hex2bin)
+ *
+ * @return new string with the hexadecimal representation of the given string.
+ * @src A string
  */
 ST_EXTERN string* st_bin2hex(const string* src);
 
-//
-// compare.c
-//
+/* cldoc:end-category() */
+//-
+//- compare.c
+//-
+/* cldoc:begin-category(compare.c) */
 
-/**
- * Compare two strings byte-to-byte.
+/* Compare two strings byte-to-byte.
  *
- * @param a
- * @param b
  * @return
- *   <0 a < b (length or content)
- *   =0 Both strings has same content & length.
- *   >0 a > b (length or content)
+ * * <0 a < b (length or content)
+ * * =0 Both strings has same content & length.
+ * * \>0 a > b (length or content)
+ * @a
+ * @b
  */
 ST_EXTERN int st_compare(const string* a, const string* b);
-/**
- * Compare a substring against a string
- *
- * @param a
- * @param b
- * @param offset
- * @param length
- * @return
- *   <0 a < b (length or content)
- *   =0 Both strings has same content & length.
- *   >0 a > b (length or content)
+
+/* @alias st_compare
  */
-int st_scompare(const string* a, const string* b, st_len_t offset,
-                st_len_t length);
+ST_EXTERN int st_cmp(const string* a, const string* b);
 
-/// alias
-/// @see st_compare
-#define st_cmp st_compare
-
-//
-// encode.c
-//
-
-/**
- * TODO
- * encode a string to given encoding
+/* Compare a substring against b string
+ * [st__calc_range](#st__calc_range)
  *
- * @param src
- * @param to_enc
+ * @return abc
+ *   * <0 a < b (length or content)
+ *   * =0 Both strings has same content & length.
+ *   * >0 a > b (length or content)
+ * @a
+ * @b
+ * @offset see st__calc_range
+ * @length see st__calc_range
+ */
+int st_subcompare(const string* a, const string* b, st_len_t offset,
+                  st_len_t length);
+
+/* @alias st_compare
+ */
+ST_EXTERN int st_scmp(const string* a, const string* b, st_len_t offset,
+                      st_len_t length);
+
+/* cldoc:end-category() */
+//-
+//- encode.c
+//-
+/* cldoc:begin-category(encode.c) */
+
+/* > TODO encode a string to given encoding
+ *
  * @return new string
+ * @src
+ * @to_enc
  */
 ST_EXTERN string* string_encode(string* src, st_enc_t to_enc);
 
-//
-// to.c
-//
+/* cldoc:end-category() */
+//-
+//- to.c
+//-
+/* cldoc:begin-category(to.c) */
 
-/**
- * Convert a string replesentation of a number in a given base to number.
+/* Convert a string replesentation of a number in a given base to number.
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  *
- * @param src
- * @param base
  * @return number
+ * @src
+ * @base
  */
 ST_EXTERN double st_base2number(string* src, int base);
 
-/// binary to decimal
+// binary to decimal
 #define st_bin2dec(value) st_number2base(value, 2)
 
-/// octal to decimal
+// octal to decimal
 #define st_oct2dec(value) st_number2base(value, 8)
 
-/// hexadecimal to decimal
+// hexadecimal to decimal
 #define st_hex2dec(value) st_number2base(value, 16)
 
-/**
- * Returns a new string containing the representation of the given number
+/* Returns a new string containing the representation of the given number
  * argument in given base.
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  *
- * @param value
- * @param base
+ * @value
+ * @base
  * @return new string
  */
 ST_EXTERN string* st_number2base(size_t value, int base);
 
-/// decimal to binary
+// decimal to binary
 #define st_dec2bin(value) st_number2base(value, 2)
 
-/// decimal to octal
+// decimal to octal
 #define st_dec2oct(value) st_number2base(value, 8)
 
-/// decimal to hexadecimal
+// decimal to hexadecimal
 #define st_dec2hex(value) st_number2base(value, 16)
 
-/**
- * Returns a new one-character string containing the character specified
+/* Returns a new one-character string containing the character specified
  *
- * @param value
- * @param enc
+ * @value
+ * @enc
  * @return new string
  */
 ST_EXTERN string* st_chr(st_uc4_t value, st_enc_t enc);
 
-/**
-* Return the code point at specified offset
-*
-* @param str
-* @param offset
-* @return code point
-*/
+/* Return the code point at specified offset
+ *
+ * @str
+ * @offset
+ * @return code point
+ */
 st_uc4_t st_ord(const string* str, st_len_t offset);
 
 #define st_char_code_at st_ord
 
-//
-// hex2bin.c
-//
+/* cldoc:end-category() */
+//-
+//- hex2bin.c
+//-
+/* cldoc:begin-category(hex2bin.c) */
 
-/**
- * Returns a new string result of decoding a hexadecimally encoded
+/* Returns a new string result of decoding a hexadecimally encoded
  * binary string
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  *
- * @param src
  * @return new string
+ * @src
  */
 ST_EXTERN string* st_hex2bin(string* src);
 
-//
-// iterators.c
-//
+/* cldoc:end-category() */
+//-
+//- iterators.c
+//-
+/* cldoc:begin-category(iterators.c) */
 
+/* Passes each character in str to the given function
+ *
+ * @str
+ * @itr_cb
+ */
 ST_EXTERN void st_char_iterator(const string* str, st_char_itr_cb itr_cb);
-
+/* Create a new string with the results of calling a provided
+ * function on every character in the string.
+ *
+ *
+ * @return new string
+ * @str
+ * @map_cb
+ *    first paramater will be used as return the modified character
+ */
 ST_EXTERN string* st_char_map(const string* str, st_char_map_cb map_cb);
-
+/* Passes each bytes in str to the given function
+ *
+ * @str
+ * @itr_cb
+ */
 ST_EXTERN void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb);
 
-/**
- * Iterate the string and call given callback with any line found
- * Line separator is '\n' and it's not include in the callback
+/* Split given string by newline and passes each substring (newline won't be
+ * included).
  *
- * @param str
- * @param itr_cb
+ * @str
+ * @itr_cb
  */
 ST_EXTERN void st_line_iterator(const string* str, st_char_itr_cb itr_cb);
 
-//
-// justify.c
-//
+/* cldoc:end-category() */
+//-
+//- justify.c
+//-
+/* cldoc:begin-category(justify.c) */
 
+/* Justify src and padded with padstr, if width is greater than src length.
+ *
+ * @return new string
+ * @src
+ * @width
+ * @padstr must be only one character
+ * @mode
+ *   1 left align
+ *   2 right align
+ *   3 center align
+ */
 ST_EXTERN string* st_justify(const string* src, st_len_t width,
                              const string* padstr, char mode);
+/* Center align src and padded with padstr, if width is greater than src length.
+ *
+ * @src
+ * @width
+ * @padstr must be only one character
+ * @return new string
+ */
 ST_EXTERN string* st_center(const string* src, size_t width,
                             const string* padstr);
+/* Right align src and padded with padstr, if width is greater than src length.
+ *
+ * @return new string
+ * @src
+ * @width
+ * @padstr must be only one character
+ */
 ST_EXTERN string* st_right(const string* src, size_t width,
                            const string* padstr);
+/* Left align src and padded with padstr, if width is greater than src length.
+ *
+ * @return new string
+ * @src
+ * @width
+ * @padstr must be only one character
+ */
 ST_EXTERN string* st_left(const string* src, size_t width,
                           const string* padstr);
 
-//
-// alloc.c
-//
+/* cldoc:end-category() */
+//-
+//- alloc.c
+//-
+/* cldoc:begin-category(alloc.c) */
 
-/**
- * Allocate a new empty string
+/* Allocate a new empty string
+ * > To edit allocator define: __STRING_ALLOCATOR
  *
- * @note To edit allocator define: __STRING_ALLOCATOR
- *
- * @param cap
- * @param enc
  * @return new string
+ * @cap
+ * @enc
  */
 ST_EXTERN string* st_new(size_t cap, st_enc_t enc);
 
-/**
-* Allocate a new empty with the maximum capacity needed to store given len
-*
-* @note To edit allocator define: __STRING_ALLOCATOR
-*
-* @param len
-* @param enc
-* @return new string
-*/
+/* Allocate a new empty with the maximum capacity needed to store given len
+ * > To edit allocator define: __STRING_ALLOCATOR
+ *
+ * @return new string
+ * @len
+ * @enc
+ */
 ST_EXTERN string* st_new_max(st_len_t len, st_enc_t enc);
 
-/**
- * Allocate a new string and copy src into it.
+/* Allocate a new string and copy src into it.
  * The string capacity will be the minimal necessary to store src
+ * > To edit allocator define: __STRING_ALLOCATOR
  *
- * @note To edit allocator define: __STRING_ALLOCATOR
- * @param src
- * @param enc
  * @return new string
+ * @src
+ * @enc
  */
 ST_EXTERN string* st_newc(const char* src, st_enc_t enc);
 
-/**
- * Reallocate src with given len
+/* Reallocate src with given len
+ * > to edit allocator define: __STRING_REALLOCATOR
  *
- * @note to edit allocator define: __STRING_REALLOCATOR
- *
- * @param src source
- * @param cap new capacity
  * @return new string
+ * @src source
+ * @cap new capacity
  */
 ST_EXTERN void st_resize(string** src, size_t cap);
 
-/**
- * Grow given string.
+/* Grow given string.
  * If string point to 0 -> st_new
  * if string has less capacity that needed -> st_resize
  *
  *
- * @param src src
- * @param cap new capacity
- * @param enc
+ * @src src
+ * @cap new capacity
+ * @enc
  */
 ST_EXTERN void st_grow(string** out, size_t cap, st_enc_t enc);
 
-/**
- * Return a new string clone of src (same capacity)
+/* Return a new string clone of src (same capacity)
  *
- * @param src source
  * @return new string
+ * @src source
  */
 ST_EXTERN string* st_clone(const string* src);
 
-/**
- * Return a new string clone of src with given capacity (resize)
+/* Return a new string clone of src with given capacity (resize)
  *
- * @param src source
  * @return new string
+ * @src source
  */
 ST_EXTERN string* st_rclone(const string* src, size_t cap);
 
-/**
- * Create a new string from given substring
- * @param src
- * @param bytes
- * @param enc
+/* Create a new string from given substring
+ *
  * @return new string
+ * @src
+ * @bytes
+ * @enc
  */
 ST_EXTERN string* st_new_subc(const char* src, size_t bytes, st_enc_t enc);
 
-/**
- * Copy src into out
+/* Copy src into out
+ * > out will be resized if needed
  *
- * @note out will be resized if needed
- *
- * @param out
- * @param src
+ * @out
+ * @src
  */
 ST_EXTERN void st_copy(string** out, const string* src);
 
-/// alias of st_copyc
+// alias of st_copyc
 #define st_cp st_copy
 
-/**
- * Copy src into out
+/* Copy src into out
+ * > out will be resized if needed
  *
- * @note out will be resized if needed
- * @param out
- * @param src
- * @param enc
+ * @out
+ * @src
+ * @enc
  */
 ST_EXTERN void st_copyc(string** out, const char* src, st_enc_t enc);
 
-/// alias of st_copyc
+// alias of st_copyc
 #define st_cpc st_copyc
 
-/**
- * Free given string
+/* Free given string
  *
- * @note pointer will be modified and pointer to 0 (no dangling)
- * @note To edit deallocator define: __STRING_DEALLOCATOR
- * @param out
+ * > `out` will be modified and pointed to 0 (no dangling)
+ * >
+ * > To edit deallocator define: __STRING_DEALLOCATOR
+ *
+ * @out
  */
 ST_EXTERN void st_delete(string** out);
 
-/**
- * Remove data, do no deallocate anything, just clean.
- * @param out
+/* Remove data, do no deallocate anything, just clean.
+ *
+ * @out
  */
 ST_EXTERN void st_clear(string* out);
 
-/**
- * Clean up operation, call this before exit.
+/* Clean up operation, call this before exit.
  * Some operation require intermediate/costly objects
  * st_cleanup take care of them and free that memory
- *
- * @note can be called more than once to free memory
+ * > can be called more than once to free memory
  */
 ST_EXTERN void st_cleanup();
 
-//
-// repeat.c
-//
+/* cldoc:end-category() */
+//-
+//- repeat.c
+//-
+/* cldoc:begin-category(repeat.c) */
 
-/**
- * Returns a new string result of repeating src x times.
+/* Returns a new string result of repeating src x times.
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  *
- * @param src
- * @param x
+ * @src
+ * @x
  * @return new string
  */
 ST_EXTERN string* st_repeat(const string* src, size_t times);
 
-/// alias of st_repeat
-/// @see st_repeat
+// alias of st_repeat
+// [st_repeat](#st_repeat)
 #define st_times st_repeat
 
-//
-// shuffle.c
-//
+/* cldoc:end-category() */
+//-
+//- shuffle.c
+//-
+/* cldoc:begin-category(shuffle.c) */
 
-/**
- * Shuffle (randomize) given string
+/* Shuffle (randomize) given string
  *
- * @param src
- * @param len How many iteration do
  * @return new string
+ * @src
+ * @len How many iteration do
  */
 ST_EXTERN string* st_shuffle(string* src, size_t len);
 
-//
-// substring.c
-//
+/* cldoc:end-category() */
+//-
+//- substring.c
+//-
+/* cldoc:begin-category(substring.c) */
 
-/**
- * Extracts the characters from a string, between two specified indices, and
- *returns the new sub string.
- *
+/* Extracts the characters from a string, between two specified indices, and
+ * returns the new sub string.
  * TODO review and do some comparison with PHP/Javascript usage
  *
- * @param str
- * @param start
- *   If non-negative, the returned string will start at the start'th position in
- *string, counting from zero
- *   If negative, the returned string will start at the start'th character from
- *the end of string.
- * @param end [-length, +length]
- *   If positive, the string returned will contain at most length characters
- *beginning from start (depending on the length of string).
- *   If is negative, then that many characters will be omitted from the end of
- *string (after the start position has been calculated when a start is
- *negative). If start denotes the position of this truncation or beyond.
- *   If length is 0 the substring starting from start until the end of the
- *string will be returned.
  * @return new string
+ * @str
+ * @start
+ *   * If non-negative, the returned string will start at the start'th position
+ *in
+ * string, counting from zero
+ *   * If negative, the returned string will start at the start'th character
+ *from
+ * the end of string.
+ * @end [-length, +length]
+ *   * If positive, the string returned will contain at most length characters
+ * beginning from start (depending on the length of string).
+ *   * If is negative, then that many characters will be omitted from the end of
+ * string (after the start position has been calculated when a start is
+ * negative). If start denotes the position of this truncation or beyond.
+ *   * If length is 0 the substring starting from start until the end of the
+ * string will be returned.
  */
 ST_EXTERN string* st_sub(const string* str, int start, int end);
 
-//
-// trim.c
-//
+/* cldoc:end-category() */
+//-
+//- trim.c
+//-
+/* cldoc:begin-category(trim.c) */
 
-/**
- * Strip whitespace (or given mask) from the beginning and/or end of a string
+/* Strip whitespace (or given mask) from the beginning and/or end of a string
  *
- * @param str
+ * @return new string
+ * @str
  *   String that will be trimmed.
- * @param character_mask
+ * @character_mask
  *   if character_mask = 0 " \t\n\r\0\x0B" will be used
  *   String containing the list all characters that you want to be stripped.
- * @param mode
+ * @mode
  *    1 trim left
  *    2 trim right
  *    3 trim both
- * @return new string
  */
 ST_EXTERN string* st_trim(const string* str, string* character_mask, int mode);
 
-/// alias st_trim (right only)
-#define st_chop(str, character_mask) st_trim(str, character_mask, 2)
+/* shortcut to st_trim(x, x, 2)
+ *
+ * @return new string
+ * @str
+ * @character_mask
+ */
+ST_EXTERN string* st_chop(const string* str, string* character_mask);
 
-/// alias st_trim (right only)
-#define st_rtrim(str, character_mask) st_trim(str, character_mask, 2)
+/* shortcut to st_trim(x, x, 2)
+ *
+ * @return new string
+ * @str
+ * @character_mask
+ */
+ST_EXTERN string* st_rtrim(const string* str, string* character_mask);
 
-/// alias st_trim (left only)
-#define st_ltrim(str, character_mask) st_trim(str, character_mask, 1)
+/* shortcut to st_trim(x, x, 2)
+ *
+ * @return new string
+ * @str
+ * @character_mask
+ */
+ST_EXTERN string* st_ltrim(const string* str, string* character_mask);
 
-//
-// case.c
-//
-/**
- * Returns a copy of str with the first character converted to uppercase and the
+/* cldoc:end-category() */
+//-
+//- case.c
+//-
+/* cldoc:begin-category(case.c) */
+
+/* Returns a copy of str with the first character converted to uppercase and the
  * remainder to lowercase.
  *
- * @param str
  * @return new string
+ * @str The input string
  */
-ST_EXTERN string* st_capitalize(const string* str);
+ST_EXTERN string* st_capitalize(const string* input);
 
-ST_EXTERN string* st_upper(const string* src);
-ST_EXTERN string* st_lower(const string* src);
-
-//
-// search.c
-//
-
-/**
- * Returns the position of the first occurrence of needle
- * in haystack.
- * Returns -1 if the value to search never occurs.
+/* Make a string uppercase
  *
- * @see st__calc_range to see how offset & len works
- * @param haystack
- * @param needle
- * @param offset
- * @param len
+ * @return new string
+ * @input The input string
+ */
+ST_EXTERN string* st_upper(const string* input);
+
+/* Make a string lowercase
+ *
+ * @return new string
+ * @input The input string
+ */
+ST_EXTERN string* st_lower(const string* input);
+
+/* cldoc:end-category() */
+//-
+//- search.c
+//-
+/* cldoc:begin-category(search.c) */
+
+/* Find the numeric position of the first occurrence of needle in the haystack
+ *string.
+ * Returns -1 if the value to search never occurs.
+ * [st__calc_range](#st__calc_range) to see how offset & length works
+ *
  * @return
- *  > 0 position of the first occurrence if found
- *  -1 if not found
+ * * \> 0 position of the first occurrence if found
+ * * -1 if not found
+ * @haystack
+ * @needle
+ * @offset
+ * @length
  */
 ST_EXTERN st_len_t st_pos(const string* haystack, const string* needle,
-                          st_len_t offset, st_len_t len);
+                          st_len_t offset, st_len_t length);
+/* alias of [st_pos](#st_pos)
+ *
+ * @return
+ * * \> 0 position of the first occurrence if found
+ * * -1 if not found
+ * @haystack
+ * @needle
+ * @offset
+ * @length
+ */
+ST_EXTERN st_len_t st_index_of(const string* haystack, const string* needle,
+                               st_len_t offset, st_len_t length);
 
-/// alias of st_pos
-/// @see st_pos
-#define st_index_of st_pos
-
+/* Shortcut of [st_pos](#st_pos) that only check if it's found
+ *
+ * @return true if found, false otherwise
+ * @haystack
+ * @needle
+ */
 ST_EXTERN bool st_contains(const string* haystack, const string* needle);
 
-/// alias of st_contains
-/// @see st_contains
+// alias of st_contains
+// [st_contains](#st_contains)
 #define st_include st_contains
 
-/**
- * Returns if haystack starts with needle
+/* Returns if haystack starts with needle
  *
- * @param haystack
- * @param needle
  * @return
+ * @haystack
+ * @needle
  */
 ST_EXTERN bool st_start_with(const string* haystack, const string* needle);
 
-/**
- * Returns if haystack ends with needle
+/* Returns if haystack ends with needle
  *
- * @param haystack
- * @param needle
  * @return
+ * true if ends, false otherwise
+ * @haystack
+ * @needle
  */
 ST_EXTERN bool st_end_with(const string* haystack, const string* needle);
 
+/* returns the position of the last occurrence of a specified value in a string.
+ *
+ * @return
+ * * -1 if not found
+ * * \> -1 if found, position
+ * @haystack
+ * @needle
+ * @offset
+ * @length
+ */
 ST_EXTERN st_len_t st_ipos(const string* haystack, const string* needle,
                            st_len_t offset, st_len_t length);
 
-/**
- * Return a string with the char at given position
+/* Return a string with the char at given position
  *
- * @param src
- * @param pos
  * @return new string
+ * @src
+ * @pos
  */
 ST_EXTERN string* st_char_at(const string* src, st_len_t pos);
 
 ST_EXTERN st_len_t
     st_rpos(string* haystack, string* needle, st_len_t offset, st_len_t len);
 
+/* [st_pos](#st_pos) but case insensitive
+ *
+ * @return new string
+ * @haystack
+ * @needle
+ * @offset
+ * @length
+ */
 ST_EXTERN st_len_t st_irpos(const string* haystack, const string* needle,
                             st_len_t offset, st_len_t length);
-
+/* Remove any occurrence of needle in haystack
+ *
+ * @return new string
+ * @haystack
+ * @needle
+ * @offset
+ * @length
+ */
 ST_EXTERN string* st_remove(const string* haystack, const string* needle,
                             st_len_t offset, st_len_t length);
 
-//
-// encode.c
-//
+/* cldoc:end-category() */
+//-
+//- encode.c
+//-
+/* cldoc:begin-category(encode.c) */
 
-/**
- * enconde a string into utf32
+/* Enconde a string into utf32
  *
- * @param src
+ * @src
  * @return new string
  */
 ST_EXTERN string* st_to_utf32(const string* src);
 
-/**
- * enconde a string into utf8
+/* Enconde a string into utf8
  *
- * @param src
+ * @src
  * @return new string
  */
 ST_EXTERN string* st_to_utf8(const string* src);
 
-//
-// picobase.c
-//
+/* cldoc:end-category() */
+//-
+//- picobase.c
+//-
+/* cldoc:begin-category(picobase.c) */
 
+/* Uppercase unicode codepoint
+ *
+ * @return uppercased unicode codepoint
+ * @utf32 unicode codepoint
+ */
 ST_EXTERN st_uc4_t st_utf32_uppercase(st_uc4_t utf32);
+/* Lowercase unicode codepoint
+ *
+ * @return lowercased unicode codepoint
+ * @utf32 unicode codepoint
+ */
 ST_EXTERN st_uc4_t st_utf32_lowercase(st_uc4_t utf32);
 
-//
-// internal.c
-//
+/* cldoc:end-category() */
+//-
+//- internal.c
+//-
+/* cldoc:begin-category(internal.c) */
 
-/**
- * binary search to find the start position of needle inside haystack.
+/* Binary search to find the start position of needle inside haystack.
  *
- * @param s
- * @param c
- * @param n
+ * @return
+ * @s
+ * @c
+ * @n
  */
 ST_EXTERN char* st__memchr(const char* s, st_uc_t c, size_t n);
 
 ST_EXTERN char* st__mempbrk(const char* s1, const char* s2);
 
-/**
- * Return a pointer to given string offset
- *
- * @example
+/* Return a pointer to given string offset
+ * ```c
  * string[10] - offset[0] --> 0
  * string[10] - offset[5] --> 5
  * string[10] - offset[-5] --> 5
  * string[10] - offset[-2] --> 8
  * string[10] - offset[2] --> 2
+ * ```
  *
- * @param str
- * @param offset
  * @return offset position
+ * @str
+ * @offset
  */
 ST_EXTERN char* st__get_char_offset(const string* str, st_len_t offset);
 
-/**
- * Find given range in the string.
+/* Find given range in the string.
+ *
  * Ranges (offset+length) won't be normalized, call st__calc_range before.
  *
- * @param str
- * @param offset
- * @param len
+ * @str
+ * @offset
+ * @len
  */
 ST_EXTERN void st__get_char_range(const string* str, st_len_t offset,
                                   st_len_t length, char** start, char** end);
 
-/**
- * utf32 code point to utf8 string
+/* utf32 code point to utf8 string
  *
- * @param utf32
- * @param utf8
+ * @utf32
+ * @utf8
  */
 ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 
-/*
- * Normalize given range to be useable in st__get_char_range
+/* Normalize given range to be useable in
+ *[st__get_char_range](#st__get_char_range)
  *
- * @example
+ * Example:
+ *
  * | str_length | offset | offset_length | out_offset | out_length |
  * |:----------:|:------:|:-------------:|:----------:|:----------:|
  * | 10         | 0      | 0             | 0          | 10         |
@@ -876,11 +1057,11 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
  * | 10         | -5     | -1            | 5          | 9          |
  * | 10         | 4      | -2            | 4          | 8          |
  *
- * @param str_length
- * @param offset
+ * @str_length
+ * @offset
  *   < 0 ofsset from the end of the string
  *   >= 0 ofsset from the begining of the string
- * @param length
+ * @length
  *   = 0 end of string
  *   < 0 from the end of the string
  *   > 0 length from offset
@@ -888,128 +1069,131 @@ ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
 ST_EXTERN void st__calc_range(st_len_t str_length, st_len_t* offset,
                               st_len_t* offset_length);
 
-/*
- * Repeat src given times in dst
+/* Repeat src given times in dst
  *
- * @note buffer overflow can happen, check it before.
+ * > buffer overflow can happen, check it before.
  *
- * @param dst
- * @param src
- * @param src_len
- * @param times
+ * @dst
+ * @src
+ * @src_len
+ * @times
  */
 ST_EXTERN void st__repeat(char* dst, const char* src, size_t src_len,
                           size_t times);
-/*
- * Add zero null to given position, apropiate for each enc
+/* Add zero null to given position, apropiate for each enc
  *
- * @param str
- * @param bytepos
- * @param enc
+ * @str
+ * @bytepos
+ * @enc
  */
 ST_EXTERN void st__zeronull(char* str, size_t bytepos, st_enc_t enc);
 
 ST_EXTERN size_t st__zeronull_size(st_enc_t enc);
 
 //--------------------------------//
-//        encoding group          //
+//-        encoding group        -//
 //--------------------------------//
 
-//
-// utf8.c
-//
+/* cldoc:end-category() */
+//-
+//- utf8.c
+//-
+/* cldoc:begin-category(utf8.c) */
 
-/**
-* Return how many bytes contains given lead and -1 if it's invalid.
-*
-* @param input
-* @return
-*  -1 on error
-*  1-4 if success
-*/
+/* Return how many bytes contains given lead and -1 if it's invalid.
+ *
+ * @return
+ * * -1 on error
+ * * 1-4 if success
+ * @input
+ */
 ST_EXTERN st_len_t st_utf8_char_size_safe(const char* input);
 
-/**
-* Return how many bytes contains given lead, with no error control.
-*
-* @param lead_chr
-* @return
-*  1-4 if success
-*/
+/* Return how many bytes contains given lead, with no error control.
+ *
+ * @return
+ * * 1-4 if success
+ * @lead_chr
+ */
 ST_EXTERN st_len_t st_utf8_char_size(const char* input);
 
-/**
-* Return how many bytes contains given lead, with no error control.
-*
-* @param lead_chr
-* @return
-*  1-4 if success
-*/
+/* Return how many bytes contains given lead, with no error control.
+ *
+ * @return
+ * * 1-4 if success
+ * @lead_chr
+ */
 ST_EXTERN st_len_t st_utf8_lead_size(st_uc_t lead);
 
-/**
-* Return utf8 length and capacity
-* based on glib_utf8_offset_to_pointer
-*
-* @param src
-* @param capacity
-*   Optional, 0 means you don't want the value
-* @return string length utf-8 encoded
-*/
+/* Return utf8 length and capacity
+ * based on glib_utf8_offset_to_pointer
+ *
+ * @return string length utf-8 encoded
+ * @src
+ * @capacity
+ *   Optional, 0 means you don't want the value
+ */
 ST_EXTERN st_len_t st_utf8_length(const char* src, size_t* capacity);
 
-/**
-* Check if the given uchar* is a valid utf-8 sequence.
-* Return value :
-* If the string is valid utf-8, 0 is returned.
-* Else the position, starting from 1, is returned.
-*
-* Valid utf-8 sequences look like this :
-* 0xxxxxxx
-* 110xxxxx 10xxxxxx
-* 1110xxxx 10xxxxxx 10xxxxxx
-* 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-* 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-* 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-*
-* Based on is_utf8 by JulienPalard, heavily modified by llafuente
-* to archieve great performance.
-*
-* based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
-*
-* @param str
-* @param len
-* @return
-*   first invalid position found or 0 if success
-*/
+/* Check if the given uchar* is a valid utf-8 sequence.
+ * Return value :
+ * If the string is valid utf-8, 0 is returned.
+ * Else the position, starting from 1, is returned.
+ *
+ * Valid utf-8 sequences look like this :
+ *
+ * 0xxxxxxx
+ *
+ * 110xxxxx 10xxxxxx
+ *
+ * 1110xxxx 10xxxxxx 10xxxxxx
+ *
+ * 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+ *
+ * 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+ *
+ * 1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+ *
+ * Based on is_utf8 by JulienPalard, heavily modified by llafuente
+ * to archieve great performance.
+ *
+ * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
+ *
+ * @return
+ *   first invalid position found or 0 if success
+ * @str
+ * @len
+ */
 ST_EXTERN char* st_utf8_invalid(const st_uc_t* str, size_t len);
 
-/**
-* Returns if two utf8 are the same. Comparison is multibyte.
-*
-* @param a
-* @param b
-* @return true if are the same
-*/
+/* Returns if two utf8 are the same. Comparison is multibyte.
+ *
+ * @return true if are the same
+ * @a
+ * @b
+ */
 ST_EXTERN bool st_utf8_char_eq(char* a, char* b);
 
-/*
-* Returns if the given unicode code-point is valid
-* @param uc_cp unicode codepoint
-* @return
-*/
+/* Returns if the given unicode code-point is valid
+ *
+ * @return
+ * @cp unicode codepoint
+ */
 ST_EXTERN bool st_utf8_valid_codepoint(st_uc4_t cp);
 
-/**
-* utf8 string to utf32 code point
-*
-* @param utf8
-*/
+/* utf8 string to utf32 code point
+ *
+ * @return
+ * @utf8
+ */
 ST_EXTERN st_uc4_t st_utf8_codepoint(const char* utf8);
 
-//
-// ascii.c
-//
+/* cldoc:end-category() */
+//-
+//- ascii.c
+//-
+/* cldoc:begin-category(ascii.c) */
+
 ST_EXTERN st_len_t st_ascii_length(const char* src, size_t* used_bytes);
 
 ST_EXTERN st_len_t st_ascii_char_size_safe(const char* input);
@@ -1023,9 +1207,11 @@ ST_EXTERN bool st_ascii_valid_codepoint(st_uc4_t codepoint);
 
 ST_EXTERN bool st_is_ascii(const char* input);
 
-//
-// utf32.c
-//
+/* cldoc:end-category() */
+//-
+//- utf32.c
+//-
+/* cldoc:begin-category(utf32.c) */
 
 ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
 
@@ -1041,5 +1227,7 @@ ST_EXTERN st_len_t st_utf32be_char_size_safe(const char* input);
 
 ST_EXTERN st_len_t st_utf32le_char_size(const char* input);
 ST_EXTERN st_len_t st_utf32be_char_size(const char* input);
+
+/* cldoc:end-category() */
 
 #endif

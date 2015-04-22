@@ -27,7 +27,8 @@
 
 #include "stringc.h"
 
-void st_charmask(st_uc_t* input, size_t len, char* mask) {
+void st_charmask(const char* input, size_t len, char* mask) {
+  st_uc_t* p = input;
   st_uc_t* end;
 
   memset(mask, 0, 256);
