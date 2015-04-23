@@ -122,7 +122,7 @@ void print_trace(void) {
   } else {                                                                     \
     printf("# CHECK %s = '%s' L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value, \
            src->length, src->used, src->capacity);                             \
-    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), dst,              \
+    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), (char*) dst,              \
            st_length((const char*)dst, enc),                                   \
            st_capacity((const char*)dst, enc));                                \
     ASSERT(0 == strcmp((const char*)src->value, (const char*)dst), "value");   \
@@ -149,7 +149,6 @@ extern void test_hexbinhex();
 extern void test_from();
 extern void test_append();
 extern void test_sub();
-extern void test_capitalize();
 extern void test_shuffle();
 extern void test_chr();
 extern void test_search();
@@ -178,7 +177,6 @@ int main(int argc, const char* argv[]) {
   RUN_TEST(from);
   RUN_TEST(append);
   RUN_TEST(sub);
-  RUN_TEST(capitalize);
   RUN_TEST(shuffle);
   RUN_TEST(chr);
   RUN_TEST(search);
@@ -268,20 +266,20 @@ void test_case() {
   st__char_upper("a", buffer, st_enc_ascii);
   ASSERT(strcmp(buffer, "A") == 0, "a uppercased");
 
-  st__char_lower(L"A", buffer, st_enc_utf32be);
-  ASSERT(wcscmp(buffer, L"a") == 0, "a utf32 uppercased");
+  st__char_lower((char*) L"A", buffer, st_enc_utf32be);
+  ASSERT(wcscmp((wchar_t *)buffer, L"a") == 0, "a utf32 uppercased");
 
-  st__char_lower(L"Â", buffer, st_enc_utf32be);
-  ASSERT(wcscmp(buffer, L"â") == 0, "ä utf32 uppercased");
+  st__char_lower((char*)L"Â", buffer, st_enc_utf32be);
+  ASSERT(wcscmp((wchar_t *)buffer, L"â") == 0, "ä utf32 uppercased");
 
-  st__char_lower(L"亜", buffer, st_enc_utf32be);
-  ASSERT(wcscmp(buffer, L"亜") == 0, "? utf32 uppercased");
+  st__char_lower((char*)L"亜", buffer, st_enc_utf32be);
+  ASSERT(wcscmp((wchar_t *)buffer, L"亜") == 0, "? utf32 uppercased");
 
-  st__char_upper(L"ｅ", buffer, st_enc_utf32be);
-  ASSERT(wcscmp(buffer, L"Ｅ") == 0, "? utf32 uppercased");
+  st__char_upper((char*)L"ｅ", buffer, st_enc_utf32be);
+  ASSERT(wcscmp((wchar_t *)buffer, L"Ｅ") == 0, "? utf32 uppercased");
 
-  st__char_lower(L"Ｅ", buffer, st_enc_utf32be);
-  ASSERT(wcscmp(buffer, L"ｅ") == 0, "? utf32 uppercased");
+  st__char_lower((char*)L"Ｅ", buffer, st_enc_utf32be);
+  ASSERT(wcscmp((wchar_t *) buffer, L"ｅ") == 0, "? utf32 uppercased");
 }
 
 void test_repeat() {
@@ -449,9 +447,9 @@ void test_sub() {
   st_delete(&s);
 
   s = st_newc((const char*)T_STR_ASCII_UTF32, st_enc_utf32be);
-  st_debug(s);
   CHK_ALL(s, T_STR_ASCII_UTF32, st_enc_utf32be);
   aux = st_sub(s, 0, 0);
+
   CHK_ALL(aux, (const char*)T_STR_ASCII_UTF32, st_enc_utf32be);
   st_delete(&aux);
   st_delete(&s);
@@ -602,24 +600,6 @@ void test_itr_chars() {
   CHK_ALL(nstr, "ojıp!㘃", st_enc_utf8);
   st_delete(&str);
   st_delete(&nstr);
-}
-
-void test_capitalize() {
-  return;
-  string* str = st_newc(T_STR_CAP_1, st_enc_ascii);
-  string_capitalize(str);
-  CHK_ALL(str, T_STR_CAP_T1, st_enc_ascii);
-  st_delete(&str);
-
-  str = st_newc(T_STR_CAP_2, st_enc_ascii);
-  string_capitalize(str);
-  CHK_ALL(str, T_STR_CAP_T2, st_enc_ascii);
-  st_delete(&str);
-
-  str = st_newc(T_STR_CAP_3, st_enc_ascii);
-  string_capitalize(str);
-  CHK_ALL(str, T_STR_CAP_T3, st_enc_ascii);
-  st_delete(&str);
 }
 
 // this not an actual test/assert just to be sure memory is ok
@@ -786,11 +766,9 @@ void test_search() {
   st_delete(&s);
 
   // utf32
-  s = st_newc(L"abc☃", st_enc_utf32be);
+  s = st_newc((char*) L"abc☃", st_enc_utf32be);
 
-  st_hexdump(s, 5 * 4);
   chr = st_char_at(s, 3);
-  st_hexdump(chr, 8);
   CHK_ALL(chr, L"☃", st_enc_utf32be);
   st_delete(&chr);
 
@@ -926,6 +904,18 @@ void test_search() {
   st_delete(&del);
   st_delete(&hay);
   st_delete(&ned);
+
+  //
+  // delete example docs
+  //
+  string* haystack = st_newc("abcabcabc", st_enc_utf8);
+  string* needle = st_newc("abc", st_enc_utf8);
+  string* result = st_remove(haystack, needle, 2, -2);
+  CHK_ALL(result, "abcabc", st_enc_utf8);
+  st_delete(&haystack);
+  st_delete(&needle);
+  st_delete(&result);
+
 }
 
 void test_ascii() {
@@ -1001,13 +991,13 @@ void test_internal() {
   end_pos = -1;
   st__calc_range(10, &start_pos, &end_pos);
   assert(start_pos == 1);
-  assert(end_pos == 9);
+  assert(end_pos == 8);
 
   start_pos = 5;
   end_pos = 5;
   st__calc_range(10, &start_pos, &end_pos);
   assert(start_pos == 5);
-  assert(end_pos == 10);
+  assert(end_pos == 5);
 
   start_pos = 9;
   end_pos = 0;
@@ -1019,7 +1009,7 @@ void test_internal() {
   end_pos = 2;
   st__calc_range(21, &start_pos, &end_pos);
   assert(start_pos == 19);
-  assert(end_pos == 21);
+  assert(end_pos == 2);
 
   s = st_newc("0123456789", st_enc_ascii);
 

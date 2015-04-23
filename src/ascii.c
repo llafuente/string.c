@@ -55,10 +55,11 @@ bool st_ascii_valid_codepoint(st_uc4_t codepoint) { return codepoint <= 127; }
 
 bool st_is_ascii(const char* input) {
   char c;
-  while (c = *input) {
+  while ((c = *input)) {
     if (c > 127) {
       return false;
     }
+    ++input;
   }
   return true;
 }

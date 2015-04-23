@@ -72,7 +72,7 @@ string* st_trim(const string* str, string* what_str, int mode) {
     }
   } else {
     char mask[256];
-    st_charmask((st_uc_t*)what, what_len, mask);
+    st_charmask(what, what_len, mask);
     if (mode & 1) {
       for (i = 0; i < len; i++) {
         if (mask[(unsigned char)c[i]]) {

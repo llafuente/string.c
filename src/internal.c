@@ -92,13 +92,11 @@ void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* length) {
   if (off_len == 0) {
     *length = str_length - *offset;
   } else if (off_len < 0) {
-    *length = (str_length + off_len);
-  } else {
-    *length = *offset + off_len;
+    *length = (str_length + off_len - *offset);
   }
 
   // overflow?
-  assert(*length <= str_length);
+  assert(*offset + *length <= str_length);
 }
 
 void st__get_char_range(const string* str, st_len_t offset, st_len_t length,

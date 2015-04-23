@@ -211,15 +211,9 @@ st_len_t st_rpos(string* haystack, string* needle, st_len_t offset,
   char* end;
   st__get_char_range(haystack, start_pos, end_pos, &start, &end);
 
-  // printf("start [%p] end [%p] \n", start, end);
-  // printf("diff [%ld] \n", end - start);
-
   size_t bytes = needle->used;
 
   char* nval = needle->value;
-
-  // printf("start [%p] end2 [%p] \n", start, end);
-  // printf("diff [%ld] \n", end - start);
 
   // loop backwards
   switch (haystack->encoding) {
@@ -287,7 +281,6 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
 
   // working range
   st__calc_range(haystack->length, &offset, &length);
-
   // caches
   st_len_t nused = needle->used;
   st_len_t hused = haystack->used;
@@ -310,10 +303,6 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
   st_len_t oused = 0;
   char* oval = out->value;
 
-  printf("last_hay_pos %ld\n", last_hay_pos);
-  printf("last_out_pos %ld\n", last_out_pos);
-  printf("need_cpy %ld\n", need_cpy);
-
   if (last_hay_pos) {
     memcpy(oval, hval, last_hay_pos);
     last_out_pos = last_hay_pos;
@@ -329,21 +318,12 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
   st_len_t jump;
   st_len_t itr = 0;
 
-  // printf("end - start = %ld\n", end - start);
-
   end -= nused; // avoid memcmp overflow
   while (start <= end) {
-    // printf("****** itr %ld [%c]\n", itr, *start);
     ++itr;
-
-    // printf("last_hay_pos %ld\n", last_hay_pos);
-    // printf("last_out_pos %ld\n", last_out_pos);
-    // printf("need_cpy %ld\n", need_cpy);
-    // printf("chars_to_cpy %ld\n", chars_to_cpy);
 
     if (!memcmp(nval, start, nused)) {
       // cpy and update
-      // printf("*- CPY!\n");
       if (need_cpy) {
         olen += chars_to_cpy;
         oused += need_cpy;
@@ -366,18 +346,13 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
     need_cpy += jump;
   }
 
-  end = hval + hused; // now reach the real end
+  end = (char*) hval + hused; // now reach the real end
   while (start < end) {
     jump = st_char_size(start, enc);
     ++chars_to_cpy;
     start += jump;
     need_cpy += jump;
   }
-
-  // printf("*last_hay_pos %ld\n", last_hay_pos);
-  // printf("*last_out_pos %ld\n", last_out_pos);
-  // printf("*chars_to_cpy %ld\n", chars_to_cpy);
-  // printf("*need_cpy %ld\n", need_cpy);
 
   out->length = olen + chars_to_cpy;
   out->used = oused + need_cpy;

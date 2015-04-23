@@ -28,7 +28,6 @@
 #include "stringc.h"
 
 int st_compare(const string* a, const string* b) {
-  printf("%ld, %ld", a->length, b->length);
   if (a->length > b->length) {
     return 1;
   }
@@ -55,15 +54,13 @@ int st_subcompare(const string* a, const string* b, st_len_t offset,
   // working range
   st__calc_range(a->length, &offset, &length);
 
-  st_len_t diff = length - offset;
-
   // length check
-  if (diff > b->length) {
+  if (length > b->length) {
     // printf("length [%ld] > b->length\n", diff);
     return 1;
   }
 
-  if (diff < b->length) {
+  if (length < b->length) {
     // printf("length [%ld] < b->length\n", diff);
     return -1;
   }

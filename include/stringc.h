@@ -1065,17 +1065,19 @@ ST_EXTERN char* st__mempbrk(const char* s1, const char* s2);
  */
 ST_EXTERN char* st__get_char_offset(const string* str, st_len_t offset);
 
-/* Find given range in the string.
+/* Return pointer to given positions.
  *
  * Ranges (offset+length) won't be normalized, call
  *[st__calc_range](#st__calc_range) before.
  *
  * @str
- * @offset
- * @len
+ * @start_pos
+ * @end_pos
+ * @start
+ * @end
  */
-ST_EXTERN void st__get_char_range(const string* str, st_len_t offset,
-                                  st_len_t length, char** start, char** end);
+ST_EXTERN void st__get_char_range(const string* str, st_len_t start_pos,
+                                  st_len_t end_pos, char** start, char** end);
 
 /* utf32 code point to utf8 string
  *
@@ -1231,6 +1233,14 @@ ST_EXTERN bool st_utf8_valid_codepoint(st_uc4_t cp);
  */
 ST_EXTERN st_uc4_t st_utf8_codepoint(const char* utf8);
 
+/* parse codepoint into utf8 (NOT null terminated)
+ *
+ * @return bytes used by given codepoint
+ * @utf8 buffer
+ * @codepoint
+ */
+ST_EXTERN st_len_t st_utf8_from_codepoint(char* utf8, st_uc4_t codepoint);
+
 /* cldoc:end-category() */
 //-
 //- ascii.c
@@ -1247,6 +1257,7 @@ ST_EXTERN st_len_t st_ascii_lead_size(st_uc_t lead_chr);
 
 ST_EXTERN st_uc4_t st_ascii_codepoint(const char* input);
 ST_EXTERN bool st_ascii_valid_codepoint(st_uc4_t codepoint);
+ST_EXTERN st_len_t st_ascii_from_codepoint(char* out, st_uc_t codepoint);
 
 ST_EXTERN bool st_is_ascii(const char* input);
 
@@ -1261,6 +1272,8 @@ ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
 ST_EXTERN st_uc4_t st_utf32le_codepoint(const char* input);
 ST_EXTERN st_uc4_t st_utf32be_codepoint(const char* input);
 ST_EXTERN bool st_utf32_valid_codepoint(st_uc4_t codepoint);
+ST_EXTERN st_len_t st_utf32be_from_codepoint(const char* input, st_uc4_t codepoint);
+ST_EXTERN st_len_t st_utf32le_from_codepoint(const char* input, st_uc4_t codepoint);
 
 ST_EXTERN st_len_t st_utf32_char_size(const char* input);
 ST_EXTERN st_len_t st_utf32_lead_size(st_uc_t lead_chr);
