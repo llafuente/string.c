@@ -113,6 +113,7 @@
 
 ## Types
 
+<a name="st_byte_itr_cb"></a>
 ### typedef st\_byte\_itr\_cb void (unsigned char, long, const string_s *) *
 
 iterator callback type for: st_byte_iterator
@@ -121,6 +122,7 @@ iterator callback type for: st_byte_iterator
 
 ---
 
+<a name="st_char_itr_cb"></a>
 ### typedef st\_char\_itr\_cb void (const string_s *, long, const string_s *) *
 
 iterator callback type for: st_char_iterator
@@ -129,6 +131,7 @@ iterator callback type for: st_char_iterator
 
 ---
 
+<a name="st_char_map_cb"></a>
 ### typedef st\_char\_map\_cb void (string_s *, long, const string_s *) *
 
 iterator callback type for: st_char_map
@@ -139,6 +142,7 @@ chr will be mapped in the returned string
 
 ---
 
+<a name="st_enc_t"></a>
 ### typedef st\_enc\_t st_enc_t
 
 supported encodings
@@ -146,6 +150,7 @@ supported encodings
 
 ---
 
+<a name="st_len_t"></a>
 ### typedef st\_len\_t long
 
 string length type.
@@ -153,6 +158,7 @@ string length type.
 
 ---
 
+<a name="st_uc4_t"></a>
 ### typedef st\_uc4\_t uint32_t
 
 uchar (wide)
@@ -160,6 +166,7 @@ uchar (wide)
 
 ---
 
+<a name="st_uc_t"></a>
 ### typedef st\_uc\_t uint8_t
 
 uchar
@@ -170,6 +177,7 @@ uchar
 
 ## Enums
 
+<a name="st_enc_t"></a>
 ### enum st\_enc\_t
 
 
@@ -202,6 +210,7 @@ uchar
 
 ## Structs
 
+<a name="string"></a>
 ### struct string
 
 string type, use value[] at the end, so only one malloc is enough
@@ -270,12 +279,14 @@ Example:
 ### char \* st\_\_get\_char\_offset(const string\* str, st\_len\_t offset)
 
 Return a pointer to given string offset
-```c
-string[10] - offset[0] --> 0
-string[10] - offset[5] --> 5
-string[10] - offset[-5] --> 5
-string[10] - offset[-2] --> 8
-string[10] - offset[2] --> 2
+ascii example
+| str->length | offset | return |
+|:-----------:|:------:|:------:|
+| 10          | 0      | str    |
+| 10          | 5      | str + 5|
+| 10          | -5     | str + 5|
+| 10          | -2     | str + 8|
+| 10          | 2      | str + 2|
 ```
 
 
@@ -297,7 +308,8 @@ offset position
 ### void st\_\_get\_char\_range(const string\* str, st\_len\_t offset, st\_len\_t length, char \*\* start, char \*\* end)
 
 Find given range in the string.
-Ranges (offset+length) won't be normalized, call st__calc_range before.
+Ranges (offset+length) won't be normalized, call
+[st__calc_range](#st__calc_range) before.
 
 
 
@@ -319,12 +331,15 @@ Ranges (offset+length) won't be normalized, call st__calc_range before.
 <a name="st__memchr"></a>
 ### char \* st\_\_memchr(const char\* s, st\_uc\_t c, size\_t n)
 
-Binary search to find the start position of needle inside haystack.
+Searches within the first `n` bytes of the block of memory pointed by `s` for
+the first occurrence of `c`
+
 
 
 ##### Return: char \*
 
-@s
+* pointer to the first occurrent
+* 0 if not found
 
 ##### Arguments (3)
 
@@ -340,7 +355,18 @@ Binary search to find the start position of needle inside haystack.
 <a name="st__mempbrk"></a>
 ### char \* st\_\_mempbrk(const char\* s1, const char\* s2)
 
+Returns a pointer to the first occurrence in `s1` of any of the characters
+that are part of `s2`, or a null pointer if there are no matches.
+The search does not include the terminating null-characters of either
+strings, but ends there.
+Check is done at byte level, do not use utf8 here
 
+
+
+##### Return: char \*
+
+* pointer to the first occurrent
+* 0 if not found
 
 ##### Arguments (2)
 
@@ -1590,7 +1616,7 @@ Returns if haystack starts with needle
 
 ##### Return: bool
 
-@haystack
+true if start, false otherwise
 
 ##### Arguments (2)
 
@@ -1935,7 +1961,7 @@ utf8 string to utf32 code point
 
 ##### Return: st\_uc4\_t
 
-@utf8
+codepoint
 
 ##### Arguments (1)
 
@@ -2032,7 +2058,7 @@ Returns if the given unicode code-point is valid
 
 ##### Return: bool
 
-@cp unicode codepoint
+true if valid, false otherwise
 
 ##### Arguments (1)
 

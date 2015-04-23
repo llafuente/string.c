@@ -27,6 +27,18 @@ include a single header
 
 include .libs/ and link against libstringc.la
 
+After usage you need to
+ [st_cleanup](https://github.com/llafuente/string.c/blob/master/doc.md#st_cleanup)
+ some cache variable:
+
+```c
+// cleaning caches
+st_cleanup();
+```
+
+## API
+
+[stringc api](https://github.com/llafuente/string.c/blob/master/doc.md)
 
 ## Compilation
 
@@ -47,13 +59,13 @@ make
 ## Tests
 
 ```bash
-make check
+sh test.sh
 ```
 
 ## Style / format
 
 We use clang-format
-To keep coding style sanity, before PR use:
+To keep an uniform coding style, before PR **always** use:
 
 ```bash
 format.sh
@@ -63,14 +75,10 @@ format.sh
 ## Code-coverage
 
 ```bash
-sh autogen.sh && ./configure && make check "CFLAGS='--coverage'"
-rm -rf code-coverage
-mkdir code-coverage
-gcovr -r . --html --html-details -o code-coverage/index.html
+sh code-coverage.sh
 ```
 
-
-# install pip & gcovr
+### install pip & gcovr
 
 install phyton...
 

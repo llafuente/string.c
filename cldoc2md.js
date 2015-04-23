@@ -63,6 +63,7 @@ function doc_enum(en) {
   //console.error(inspect(en));
 
   var d = [
+  "<a name=\"" + en.$.name + "\"></a>",
   "### enum " + name(en),
   "",
   brief(en)
@@ -86,6 +87,7 @@ function doc_struct(st) {
   //console.error(inspect(st));
 
   var d = [
+    "<a name=\"" + st.$.name + "\"></a>",
     "### struct " + name(st),
     "",
     brief(st),
@@ -169,6 +171,7 @@ function doc_typedef(tp) {
   //console.log(inspect(tp));
 
   var d = [
+  "<a name=\"" + tp.$.name + "\"></a>",
   "### typedef " + name(tp) + " " + type(tp.type),
   "",
   brief(tp)

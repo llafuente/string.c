@@ -894,6 +894,7 @@ ST_EXTERN bool st_contains(const string* haystack, const string* needle);
 /* Returns if haystack starts with needle
  *
  * @return
+ * true if start, false otherwise
  * @haystack
  * @needle
  */
@@ -998,24 +999,41 @@ ST_EXTERN st_uc4_t st_utf32_lowercase(st_uc4_t utf32);
 //-
 /* cldoc:begin-category(internal.c) */
 
-/* Binary search to find the start position of needle inside haystack.
+/* Searches within the first `n` bytes of the block of memory pointed by `s` for
+ *the first occurrence of `c`
  *
  * @return
+ * * pointer to the first occurrent
+ * * 0 if not found
  * @s
  * @c
  * @n
  */
 ST_EXTERN char* st__memchr(const char* s, st_uc_t c, size_t n);
-
+/* Returns a pointer to the first occurrence in `s1` of any of the characters
+ * that are part of `s2`, or a null pointer if there are no matches.
+ * The search does not include the terminating null-characters of either
+ * strings, but ends there.
+ * Check is done at byte level, do not use utf8 here
+ *
+ * @return
+ * * pointer to the first occurrent
+ * * 0 if not found
+ * @s1 haystack
+ * @s2 character list to search
+ */
 ST_EXTERN char* st__mempbrk(const char* s1, const char* s2);
 
 /* Return a pointer to given string offset
- * ```c
- * string[10] - offset[0] --> 0
- * string[10] - offset[5] --> 5
- * string[10] - offset[-5] --> 5
- * string[10] - offset[-2] --> 8
- * string[10] - offset[2] --> 2
+ *
+ * ascii example
+ * | str->length | offset | return |
+ * |:-----------:|:------:|:------:|
+ * | 10          | 0      | str    |
+ * | 10          | 5      | str + 5|
+ * | 10          | -5     | str + 5|
+ * | 10          | -2     | str + 8|
+ * | 10          | 2      | str + 2|
  * ```
  *
  * @return offset position
@@ -1026,7 +1044,8 @@ ST_EXTERN char* st__get_char_offset(const string* str, st_len_t offset);
 
 /* Find given range in the string.
  *
- * Ranges (offset+length) won't be normalized, call st__calc_range before.
+ * Ranges (offset+length) won't be normalized, call
+ *[st__calc_range](#st__calc_range) before.
  *
  * @str
  * @offset
@@ -1177,13 +1196,14 @@ ST_EXTERN bool st_utf8_char_eq(char* a, char* b);
 /* Returns if the given unicode code-point is valid
  *
  * @return
+ * true if valid, false otherwise
  * @cp unicode codepoint
  */
 ST_EXTERN bool st_utf8_valid_codepoint(st_uc4_t cp);
 
 /* utf8 string to utf32 code point
  *
- * @return
+ * @return codepoint
  * @utf8
  */
 ST_EXTERN st_uc4_t st_utf8_codepoint(const char* utf8);
