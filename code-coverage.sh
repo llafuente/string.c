@@ -5,11 +5,12 @@ mkdir build
 cd build
 
 make clean
+make distclean
 rm -rf *.gcno *.gcda *.gcov
 
 sh ../autogen.sh
 ../configure
-make check "CFLAGS=--coverage"
+make check "CFLAGS=-fprofile-arcs -ftest-coverage"
 
 rm -rf code-coverage
 mkdir code-coverage

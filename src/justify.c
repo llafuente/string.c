@@ -93,64 +93,6 @@ string* st_justify(const string* src, st_len_t width, const string* padstr,
   out->length = r_times + l_times + len;
 
   return out;
-  /*
-      cr = ENC_CODERANGE(str);
-      if (flen > 1) {
-         llen2 = str_offset(f, f + flen, llen % fclen, enc, singlebyte);
-         rlen2 = str_offset(f, f + flen, rlen % fclen, enc, singlebyte);
-      }
-      size = RSTRING_LEN(str);
-      if ((len = llen / fclen + rlen / fclen) >= LONG_MAX / flen ||
-         (len *= flen) >= LONG_MAX - llen2 - rlen2 ||
-         (len += llen2 + rlen2) >= LONG_MAX - size) {
-         rb_raise(rb_eArgError, "argument too big");
-      }
-      len += size;
-      res = rb_str_new_with_class(str, 0, len);
-      p = RSTRING_PTR(res);
-      if (flen <= 1) {
-         memset(p, *f, llen);
-         p += llen;
-      }
-      else {
-         while (llen >= fclen) {
-          memcpy(p,f,flen);
-          p += flen;
-          llen -= fclen;
-      }
-         if (llen > 0) {
-             memcpy(p, f, llen2);
-             p += llen2;
-      }
-      }
-      memcpy(p, RSTRING_PTR(str), size);
-      p += size;
-      if (flen <= 1) {
-         memset(p, *f, rlen);
-         p += rlen;
-      }
-      else {
-         while (rlen >= fclen) {
-          memcpy(p,f,flen);
-          p += flen;
-          rlen -= fclen;
-      }
-         if (rlen > 0) {
-             memcpy(p, f, rlen2);
-             p += rlen2;
-      }
-      }
-      TERM_FILL(p, rb_enc_mbminlen(enc));
-      STR_SET_LEN(res, p-RSTRING_PTR(res));
-      OBJ_INFECT(res, str);
-      if (!NIL_P(pad)) OBJ_INFECT(res, pad);
-      rb_enc_associate(res, enc);
-      if (argc == 2)
-      cr = ENC_CODERANGE_AND(cr, ENC_CODERANGE(pad));
-      if (cr != ENC_CODERANGE_BROKEN)
-      ENC_CODERANGE_SET(res, cr);
-      return res;
-  */
 }
 
 string* st_center(const string* src, size_t width, const string* padstr) {

@@ -197,6 +197,9 @@ extern const st_uc_t st_bom[];
   dst[3] = src[3];                                                             \
   if (null_end) {                                                              \
     dst[4] = '\0';                                                             \
+    dst[5] = '\0';                                                             \
+    dst[6] = '\0';                                                             \
+    dst[7] = '\0';                                                             \
   }
 
 #define ST_CHAR_CP_UTF8(dst, src, null_end)                                    \
@@ -831,12 +834,32 @@ ST_EXTERN string* st_ltrim(const string* str, string* character_mask);
  */
 ST_EXTERN string* st_capitalize(const string* input);
 
+/* Uppercase `str` and return it into `buffer` (null-terminated)
+ *
+ * > buffer overflow can happen, check it before
+ *
+ * @str
+ * @buffer
+ * @enc
+ */
+ST_EXTERN void st__char_upper(char* str, char* buffer, st_enc_t enc);
+
 /* Make a string uppercase
  *
  * @return new string
  * @input The input string
  */
 ST_EXTERN string* st_upper(const string* input);
+
+/* Lowercase `str` and return it into `buffer` (null-terminated)
+ *
+ * > buffer overflow can happen, check it before
+ *
+ * @str
+ * @buffer
+ * @enc
+ */
+ST_EXTERN void st__char_lower(char* str, char* buffer, st_enc_t enc);
 
 /* Make a string lowercase
  *

@@ -10,6 +10,8 @@
 * [st\_enc\_t](#st_enc_t)
 * [string](#string)
 * [st\_\_calc\_range](#st__calc_range)
+* [st\_\_char\_lower](#st__char_lower)
+* [st\_\_char\_upper](#st__char_upper)
 * [st\_\_get\_char\_offset](#st__get_char_offset)
 * [st\_\_get\_char\_range](#st__get_char_range)
 * [st\_\_memchr](#st__memchr)
@@ -271,6 +273,44 @@ Example:
 * `st_len_t *` *offset*
 
 * `st_len_t *` *offset\_length*
+
+
+---
+
+<a name="st__char_lower"></a>
+### void st\_\_char\_lower(char \* str, char \* buffer, st\_enc\_t enc)
+
+Lowercase `str` and return it into `buffer` (null-terminated)
+> buffer overflow can happen, check it before
+
+
+
+##### Arguments (3)
+
+* `char *` *str*
+
+* `char *` *buffer*
+
+* `st_enc_t` *enc*
+
+
+---
+
+<a name="st__char_upper"></a>
+### void st\_\_char\_upper(char \* str, char \* buffer, st\_enc\_t enc)
+
+Uppercase `str` and return it into `buffer` (null-terminated)
+> buffer overflow can happen, check it before
+
+
+
+##### Arguments (3)
+
+* `char *` *str*
+
+* `char *` *buffer*
+
+* `st_enc_t` *enc*
 
 
 ---

@@ -85,5 +85,5 @@ st_len_t st_ascii_from_codepoint(char* out, st_uc_t codepoint) {
     *p = (st_uc_t)codepoint;
   }
 
-  return 0;
+  return 1;
 }

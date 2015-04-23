@@ -290,6 +290,7 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
 
   // caches
   st_len_t nused = needle->used;
+  st_len_t hused = haystack->used;
   const char* nval = needle->value;
   const char* hval = haystack->value;
   st_enc_t enc = haystack->encoding;
@@ -298,7 +299,7 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
   char* end;
   st__get_char_range(haystack, offset, length, &start, &end);
 
-  string* out = st_new(haystack->used, enc);
+  string* out = st_new(hused, enc);
 
   st_len_t last_hay_pos = start - hval;
   st_len_t last_out_pos = 0;
@@ -364,7 +365,8 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
     start += jump;
     need_cpy += jump;
   }
-  end += nused; // now reach the end
+
+  end = hval + hused; // now reach the real end
   while (start < end) {
     jump = st_char_size(start, enc);
     ++chars_to_cpy;

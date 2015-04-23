@@ -58,8 +58,6 @@ void st_upper_cb(string* character, st_len_t pos, const string* src) {
 // TODO improve performance
 string* st_upper(const string* src) { return st_char_map(src, st_upper_cb); }
 
-void st_upper_char(char* str, char* buffer, st_enc_t enc) {}
-
 void st_lower_cb(string* character, st_len_t pos, const string* src) {
   st_uc_t uc = *character->value;
   st_enc_t enc = src->encoding;
@@ -134,6 +132,24 @@ string* st_capitalize(const string* str) {
   out->length = str->length;
 
   return out;
+}
+
+void st__char_upper(char* str, char* buffer, st_enc_t enc) {
+  st_uc4_t cp = st_codepoint(str, enc);
+  cp = st_utf32_uppercase(cp);
+  st_len_t cp_size = st_from_codepoint(buffer, cp, enc);
+
+  st__zeronull(buffer, cp_size, enc);
+}
+
+void st__char_lower(char* str, char* buffer, st_enc_t enc) {
+  st_uc4_t cp = st_codepoint(str, enc);
+  printf("-> %ld\n", cp);
+  cp = st_utf32_lowercase(cp);
+  printf("low -> %ld\n", cp);
+  st_len_t cp_size = st_from_codepoint(buffer, cp, enc);
+
+  st__zeronull(buffer, cp_size, enc);
 }
 
 string* string_ucfirst(string* src) { return 0; }

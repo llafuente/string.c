@@ -263,6 +263,25 @@ void test_case() {
 
   st_delete(&s);
   st_delete(&up);
+
+  char buffer[12];
+  st__char_upper("a", buffer, st_enc_ascii);
+  ASSERT(strcmp(buffer, "A") == 0, "a uppercased");
+
+  st__char_lower(L"A", buffer, st_enc_utf32be);
+  ASSERT(wcscmp(buffer, L"a") == 0, "a utf32 uppercased");
+
+  st__char_lower(L"Â", buffer, st_enc_utf32be);
+  ASSERT(wcscmp(buffer, L"â") == 0, "ä utf32 uppercased");
+
+  st__char_lower(L"亜", buffer, st_enc_utf32be);
+  ASSERT(wcscmp(buffer, L"亜") == 0, "? utf32 uppercased");
+
+  st__char_upper(L"ｅ", buffer, st_enc_utf32be);
+  ASSERT(wcscmp(buffer, L"Ｅ") == 0, "? utf32 uppercased");
+
+  st__char_lower(L"Ｅ", buffer, st_enc_utf32be);
+  ASSERT(wcscmp(buffer, L"ｅ") == 0, "? utf32 uppercased");
 }
 
 void test_repeat() {
@@ -430,7 +449,6 @@ void test_sub() {
   st_delete(&s);
 
   s = st_newc((const char*)T_STR_ASCII_UTF32, st_enc_utf32be);
-  st_hexdump((const char*)T_STR_ASCII_UTF32, wcslen(T_STR_ASCII_UTF32) * 4);
   st_debug(s);
   CHK_ALL(s, T_STR_ASCII_UTF32, st_enc_utf32be);
   aux = st_sub(s, 0, 0);
@@ -440,25 +458,42 @@ void test_sub() {
 }
 
 void test_trim() {
-  string* s = st_new(10, st_enc_ascii);
-  st_copyc(&s, "   123  ", st_enc_ascii);
-  string* aux = st_trim(s, 0, 3);
+  string* s;
+  string* result;
+  string* mask;
 
-  CHK_ALL(aux, "123", st_enc_ascii);
+  s = st_newc("   123  ", st_enc_ascii);
+  result = st_trim(s, 0, 3);
+
+  CHK_ALL(result, "123", st_enc_ascii);
 
   st_delete(&s);
-  st_delete(&aux);
+  st_delete(&result);
 
-  s = st_new(10, st_enc_ascii);
-  string* mask = st_newc("0", st_enc_ascii);
-  st_copyc(&s, "000123x0", st_enc_ascii);
-  aux = st_trim(s, mask, 3);
+  mask = st_newc("0", st_enc_ascii);
+  s = st_newc("000123x0", st_enc_ascii);
 
-  ASSERT(strcmp(aux->value, "123x") == 0, "trim('000123x0') = '123x'");
+  result = st_trim(s, mask, 3);
+  ASSERT(strcmp(result->value, "123x") == 0, "trim('000123x0') = '123x'");
+  st_delete(&result);
+
+  result = st_chop(s, mask);
+  ASSERT(strcmp(result->value, "000123x") == 0, "chop('000123x0') = '000123x'");
+  st_delete(&result);
+
+  result = st_ltrim(s, mask);
+  ASSERT(strcmp(result->value, "123x0") == 0, "ltrim('000123x0') = '123x0'");
+  st_delete(&result);
+  st_delete(&mask);
+
+  mask = st_newc("9", st_enc_ascii);
+  result = st_rtrim(s, mask);
+  ASSERT(strcmp(result->value, "000123x0") == 0,
+         "rtrim('000123x0') = '000123x0'");
+  st_delete(&result);
 
   st_delete(&mask);
   st_delete(&s);
-  st_delete(&aux);
 }
 
 void test_utf8_lenc() {
@@ -648,6 +683,9 @@ void test_search() {
   st_len_t i = st_pos(hay, ned, 0, 0);
   ASSERT(i == 5, "st_pos = 5");
 
+  i = st_pos(hay, ned, 0, 3);
+  ASSERT(i == -1, "st_pos = -1");
+
   st_delete(&hay);
   st_delete(&ned);
 
@@ -702,6 +740,9 @@ void test_search() {
   i = st_pos(hay, ned, 18, 0);
   ASSERT(i == 23, "st_pos = 23");
 
+  i = st_index_of(hay, ned, 1, 2);
+  ASSERT(i == -1, "st_pos = -1");
+
   // st_start_with / st_end_with
   assert(st_start_with(hay, ned) == false);
   assert(st_end_with(hay, ned) == true);
@@ -740,6 +781,21 @@ void test_search() {
 
   chr = st_char_at(s, 5);
   CHK_ALL(chr, "☃", st_enc_utf8);
+  st_delete(&chr);
+
+  st_delete(&s);
+
+  // utf32
+  s = st_newc(L"abc☃", st_enc_utf32be);
+
+  st_hexdump(s, 5 * 4);
+  chr = st_char_at(s, 3);
+  st_hexdump(chr, 8);
+  CHK_ALL(chr, L"☃", st_enc_utf32be);
+  st_delete(&chr);
+
+  chr = st_char_at(s, 1);
+  CHK_ALL(chr, L"b", st_enc_utf32be);
   st_delete(&chr);
 
   st_delete(&s);
@@ -815,6 +871,15 @@ void test_search() {
   ned = st_newc("abca", st_enc_utf8);
   del = st_remove(hay, ned, 0, 0);
   CHK_ALL(del, "bc", st_enc_utf8);
+
+  st_delete(&del);
+  st_delete(&hay);
+  st_delete(&ned);
+
+  hay = st_newc("1001000001", st_enc_utf8);
+  ned = st_newc("1", st_enc_utf8);
+  del = st_remove(hay, ned, 2, 2);
+  CHK_ALL(del, "100000001", st_enc_utf8);
 
   st_delete(&del);
   st_delete(&hay);
@@ -1065,5 +1130,23 @@ extern void test_justify() {
   CHK_ALL(z, "   abc", st_enc_ascii);
   st_delete(&z);
 
+  z = st_right(x, 2, 0);
+  CHK_ALL(z, "abc", st_enc_ascii);
+  st_delete(&z);
+
+  string* padstr = st_newc("x", st_enc_ascii);
+  z = st_right(x, 6, padstr);
+  CHK_ALL(z, "xxxabc", st_enc_ascii);
+  st_delete(&z);
+  st_delete(&padstr);
+  st_delete(&x);
+
+  x = st_newc("是龍", st_enc_utf8);
+  padstr = st_newc("☃", st_enc_utf8);
+
+  z = st_right(x, 10, padstr);
+  CHK_ALL(z, "☃☃☃☃☃☃☃☃是龍", st_enc_utf8);
+  st_delete(&z);
+  st_delete(&padstr);
   st_delete(&x);
 }
