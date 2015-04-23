@@ -324,18 +324,14 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
 
   st_len_t needle_len_m1 = nused - 1;
   char* pp;
-  st_uc_t first = *nval;
-  // last char to comare
-  st_uc_t last = *(nval + nused - 1);
-
   st_len_t end_len;
-
   st_len_t jump;
   st_len_t itr = 0;
 
   // printf("end - start = %ld\n", end - start);
 
-  while (start < end) {
+  end -= nused; // avoid memcmp overflow
+  while (start <= end) {
     // printf("****** itr %ld [%c]\n", itr, *start);
     ++itr;
 
@@ -363,6 +359,13 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
       continue;
     }
 
+    jump = st_char_size(start, enc);
+    ++chars_to_cpy;
+    start += jump;
+    need_cpy += jump;
+  }
+  end += nused; // now reach the end
+  while (start < end) {
     jump = st_char_size(start, enc);
     ++chars_to_cpy;
     start += jump;
