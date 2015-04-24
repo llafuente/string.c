@@ -122,7 +122,7 @@ void print_trace(void) {
   } else {                                                                     \
     printf("# CHECK %s = '%s' L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value, \
            src->length, src->used, src->capacity);                             \
-    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), (char*) dst,              \
+    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), (char*)dst,       \
            st_length((const char*)dst, enc),                                   \
            st_capacity((const char*)dst, enc));                                \
     ASSERT(0 == strcmp((const char*)src->value, (const char*)dst), "value");   \
@@ -266,20 +266,20 @@ void test_case() {
   st__char_upper("a", buffer, st_enc_ascii);
   ASSERT(strcmp(buffer, "A") == 0, "a uppercased");
 
-  st__char_lower((char*) L"A", buffer, st_enc_utf32be);
-  ASSERT(wcscmp((wchar_t *)buffer, L"a") == 0, "a utf32 uppercased");
+  st__char_lower((char*)L"A", buffer, st_enc_utf32be);
+  ASSERT(wcscmp((wchar_t*)buffer, L"a") == 0, "a utf32 uppercased");
 
   st__char_lower((char*)L"Â", buffer, st_enc_utf32be);
-  ASSERT(wcscmp((wchar_t *)buffer, L"â") == 0, "ä utf32 uppercased");
+  ASSERT(wcscmp((wchar_t*)buffer, L"â") == 0, "ä utf32 uppercased");
 
   st__char_lower((char*)L"亜", buffer, st_enc_utf32be);
-  ASSERT(wcscmp((wchar_t *)buffer, L"亜") == 0, "? utf32 uppercased");
+  ASSERT(wcscmp((wchar_t*)buffer, L"亜") == 0, "? utf32 uppercased");
 
   st__char_upper((char*)L"ｅ", buffer, st_enc_utf32be);
-  ASSERT(wcscmp((wchar_t *)buffer, L"Ｅ") == 0, "? utf32 uppercased");
+  ASSERT(wcscmp((wchar_t*)buffer, L"Ｅ") == 0, "? utf32 uppercased");
 
   st__char_lower((char*)L"Ｅ", buffer, st_enc_utf32be);
-  ASSERT(wcscmp((wchar_t *) buffer, L"ｅ") == 0, "? utf32 uppercased");
+  ASSERT(wcscmp((wchar_t*)buffer, L"ｅ") == 0, "? utf32 uppercased");
 }
 
 void test_repeat() {
@@ -766,7 +766,7 @@ void test_search() {
   st_delete(&s);
 
   // utf32
-  s = st_newc((char*) L"abc☃", st_enc_utf32be);
+  s = st_newc((char*)L"abc☃", st_enc_utf32be);
 
   chr = st_char_at(s, 3);
   CHK_ALL(chr, L"☃", st_enc_utf32be);
@@ -915,7 +915,6 @@ void test_search() {
   st_delete(&haystack);
   st_delete(&needle);
   st_delete(&result);
-
 }
 
 void test_ascii() {

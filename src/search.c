@@ -346,7 +346,7 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
     need_cpy += jump;
   }
 
-  end = (char*) hval + hused; // now reach the real end
+  end = (char*)hval + hused; // now reach the real end
   while (start < end) {
     jump = st_char_size(start, enc);
     ++chars_to_cpy;

@@ -58,7 +58,7 @@ size_t st_capacity(const char* src, st_enc_t enc) {
     return strlen(src);
   case st_enc_utf32be:
   case st_enc_utf32le:
-    return wcslen((int*) src) * 4;
+    return wcslen((int*)src) * 4;
   }
 }
 
@@ -73,7 +73,7 @@ void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
     return;
   case st_enc_utf32be:
   case st_enc_utf32le:
-    *len = wcslen((int*) src);
+    *len = wcslen((int*)src);
     *bytes = *len * 4;
   }
 }

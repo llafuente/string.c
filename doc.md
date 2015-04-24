@@ -24,6 +24,7 @@
 * [st\_ascii\_char\_size](#st_ascii_char_size)
 * [st\_ascii\_char\_size\_safe](#st_ascii_char_size_safe)
 * [st\_ascii\_codepoint](#st_ascii_codepoint)
+* [st\_ascii\_from\_codepoint](#st_ascii_from_codepoint)
 * [st\_ascii\_lead\_size](#st_ascii_lead_size)
 * [st\_ascii\_length](#st_ascii_length)
 * [st\_ascii\_valid\_codepoint](#st_ascii_valid_codepoint)
@@ -99,13 +100,16 @@
 * [st\_utf32be\_char\_size](#st_utf32be_char_size)
 * [st\_utf32be\_char\_size\_safe](#st_utf32be_char_size_safe)
 * [st\_utf32be\_codepoint](#st_utf32be_codepoint)
+* [st\_utf32be\_from\_codepoint](#st_utf32be_from_codepoint)
 * [st\_utf32le\_char\_size](#st_utf32le_char_size)
 * [st\_utf32le\_char\_size\_safe](#st_utf32le_char_size_safe)
 * [st\_utf32le\_codepoint](#st_utf32le_codepoint)
+* [st\_utf32le\_from\_codepoint](#st_utf32le_from_codepoint)
 * [st\_utf8\_char\_eq](#st_utf8_char_eq)
 * [st\_utf8\_char\_size](#st_utf8_char_size)
 * [st\_utf8\_char\_size\_safe](#st_utf8_char_size_safe)
 * [st\_utf8\_codepoint](#st_utf8_codepoint)
+* [st\_utf8\_from\_codepoint](#st_utf8_from_codepoint)
 * [st\_utf8\_invalid](#st_utf8_invalid)
 * [st\_utf8\_lead\_size](#st_utf8_lead_size)
 * [st\_utf8\_length](#st_utf8_length)
@@ -327,7 +331,6 @@ ascii example
 | 10          | -5     | str + 5|
 | 10          | -2     | str + 8|
 | 10          | 2      | str + 2|
-```
 
 
 
@@ -345,9 +348,9 @@ offset position
 ---
 
 <a name="st__get_char_range"></a>
-### void st\_\_get\_char\_range(const string\* str, st\_len\_t offset, st\_len\_t length, char \*\* start, char \*\* end)
+### void st\_\_get\_char\_range(const string\* str, st\_len\_t start_pos, st\_len\_t end_pos, char \*\* start, char \*\* end)
 
-Find given range in the string.
+Return pointer to given positions.
 Ranges (offset+length) won't be normalized, call
 [st__calc_range](#st__calc_range) before.
 
@@ -357,9 +360,9 @@ Ranges (offset+length) won't be normalized, call
 
 * `const string*` *str*
 
-* `st_len_t` *offset*
+* `st_len_t` *start\_pos*
 
-* `st_len_t` *length*
+* `st_len_t` *end\_pos*
 
 * `char **` *start*
 
@@ -531,6 +534,20 @@ Append input to out
 ##### Arguments (1)
 
 * `const char*` *input*
+
+
+---
+
+<a name="st_ascii_from_codepoint"></a>
+### st\_len\_t st\_ascii\_from\_codepoint(char \* out, st\_uc\_t codepoint)
+
+
+
+##### Arguments (2)
+
+* `char *` *out*
+
+* `st_uc_t` *codepoint*
 
 
 ---
@@ -1903,6 +1920,20 @@ uppercased unicode codepoint
 
 ---
 
+<a name="st_utf32be_from_codepoint"></a>
+### st\_len\_t st\_utf32be\_from\_codepoint(const char\* input, st\_uc4\_t codepoint)
+
+
+
+##### Arguments (2)
+
+* `const char*` *input*
+
+* `st_uc4_t` *codepoint*
+
+
+---
+
 <a name="st_utf32le_char_size"></a>
 ### st\_len\_t st\_utf32le\_char\_size(const char\* input)
 
@@ -1935,6 +1966,20 @@ uppercased unicode codepoint
 ##### Arguments (1)
 
 * `const char*` *input*
+
+
+---
+
+<a name="st_utf32le_from_codepoint"></a>
+### st\_len\_t st\_utf32le\_from\_codepoint(const char\* input, st\_uc4\_t codepoint)
+
+
+
+##### Arguments (2)
+
+* `const char*` *input*
+
+* `st_uc4_t` *codepoint*
 
 
 ---
@@ -2006,6 +2051,25 @@ codepoint
 ##### Arguments (1)
 
 * `const char*` *utf8*
+
+
+---
+
+<a name="st_utf8_from_codepoint"></a>
+### st\_len\_t st\_utf8\_from\_codepoint(char \* utf8, st\_uc4\_t codepoint)
+
+parse codepoint into utf8 (NOT null terminated)
+
+
+##### Return: st\_len\_t
+
+bytes used by given codepoint
+
+##### Arguments (2)
+
+* `char *` *utf8*
+
+* `st_uc4_t` *codepoint*
 
 
 ---

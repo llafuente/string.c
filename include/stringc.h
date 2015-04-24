@@ -1057,7 +1057,6 @@ ST_EXTERN char* st__mempbrk(const char* s1, const char* s2);
  * | 10          | -5     | str + 5|
  * | 10          | -2     | str + 8|
  * | 10          | 2      | str + 2|
- * ```
  *
  * @return offset position
  * @str
@@ -1272,8 +1271,10 @@ ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
 ST_EXTERN st_uc4_t st_utf32le_codepoint(const char* input);
 ST_EXTERN st_uc4_t st_utf32be_codepoint(const char* input);
 ST_EXTERN bool st_utf32_valid_codepoint(st_uc4_t codepoint);
-ST_EXTERN st_len_t st_utf32be_from_codepoint(const char* input, st_uc4_t codepoint);
-ST_EXTERN st_len_t st_utf32le_from_codepoint(const char* input, st_uc4_t codepoint);
+ST_EXTERN st_len_t
+    st_utf32be_from_codepoint(const char* input, st_uc4_t codepoint);
+ST_EXTERN st_len_t
+    st_utf32le_from_codepoint(const char* input, st_uc4_t codepoint);
 
 ST_EXTERN st_len_t st_utf32_char_size(const char* input);
 ST_EXTERN st_len_t st_utf32_lead_size(st_uc_t lead_chr);
