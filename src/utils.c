@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-void st_charmask(const char* input, size_t len, char* mask) {
+void st_charmask(const char* input, st_size_t len, char* mask) {
   const char* end;
 
   memset(mask, 0, 256);
@@ -50,7 +50,7 @@ st_len_t st_length(const char* src, st_enc_t enc) {
   }
 }
 
-size_t st_capacity(const char* src, st_enc_t enc) {
+st_size_t st_capacity(const char* src, st_enc_t enc) {
   switch (enc) {
   case st_enc_ascii:
   case st_enc_binary:
@@ -62,7 +62,8 @@ size_t st_capacity(const char* src, st_enc_t enc) {
   }
 }
 
-void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
+void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
+                 st_size_t* bytes) {
   switch (enc) {
   case st_enc_ascii:
   case st_enc_binary:
@@ -78,7 +79,7 @@ void st_get_meta(const char* src, st_enc_t enc, st_len_t* len, size_t* bytes) {
   }
 }
 
-void st_hexdump(const char* p, size_t size) {
+void st_hexdump(const char* p, st_size_t size) {
   int n;
   for (n = 0; n < size; ++n) {
     if (n % 12 == 0) {
@@ -90,7 +91,7 @@ void st_hexdump(const char* p, size_t size) {
 }
 
 void st_debug(string* str) {
-  printf("st_debug @%p, length[%zu] used[%zu] size[%zu] enc[%d]\n", str,
+  printf("st_debug @%p, length[%d] used[%d] size[%u] enc[%d]\n", str,
          str->length, str->used, str->capacity, str->encoding);
 
   char* p = str->value;

@@ -27,11 +27,11 @@
 
 #include "stringc.h"
 
-st_len_t st_utf8_length(const char* src, size_t* capacity) {
+st_len_t st_utf8_length(const char* src, st_size_t* capacity) {
   st_len_t len = 0;
   const char* p = src;
   char jump;
-  size_t used_bytes = 0;
+  st_size_t used_bytes = 0;
 
   while (*p != '\0') {
     // printf("%c @%p %d\n", *p, p, utf8_next(p));

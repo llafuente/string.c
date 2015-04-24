@@ -27,8 +27,8 @@
 
 #include "stringc.h"
 
-string* st_new(size_t cap, st_enc_t enc) {
-  size_t size = cap + st__zeronull_size(enc);
+string* st_new(st_size_t cap, st_enc_t enc) {
+  st_size_t size = cap + st__zeronull_size(enc);
 
   string* s = (string*)__STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
 
@@ -59,10 +59,10 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
 // TODO use utf8_len()
 string* st_newc(const char* src, st_enc_t enc) {
   st_len_t len;
-  size_t used;
+  st_size_t used;
 
   st_get_meta(src, enc, &len, &used);
-  size_t size = used + st__zeronull_size(enc);
+  st_size_t size = used + st__zeronull_size(enc);
 
   // printf("%s\n",  src);
   // printf("len[%zu] used[%zu] enc[%d]", len, used, enc);
@@ -79,10 +79,11 @@ string* st_newc(const char* src, st_enc_t enc) {
   return s;
 }
 
-void st_resize(string** src, size_t cap) {
+void st_resize(string** src, st_size_t cap) {
   // printf("before st_resize %p - %lu\n", *src, cap);
 
-  size_t size = cap + st__zeronull_size((*src)->encoding); // null terminated!
+  st_size_t size =
+      cap + st__zeronull_size((*src)->encoding); // null terminated!
 
   *src = (string*)__STRING__REALLOCATOR(*src,
                                         sizeof(string) + size * sizeof(char));
@@ -92,7 +93,7 @@ void st_resize(string** src, size_t cap) {
   // printf("after st_resize %p\n", *src);
 }
 
-void st_grow(string** src, size_t cap, st_enc_t enc) {
+void st_grow(string** src, st_size_t cap, st_enc_t enc) {
   if (*src == 0) {
     *src = st_new(cap, enc);
   } else {
@@ -114,7 +115,7 @@ string* st_clone(const string* src) {
 }
 
 // resize & clone
-string* st_rclone(const string* src, size_t cap) {
+string* st_rclone(const string* src, st_size_t cap) {
   assert(cap >= src->capacity);
 
   cap += st__zeronull_size(src->encoding);
@@ -130,7 +131,7 @@ string* st_rclone(const string* src, size_t cap) {
   return out;
 }
 
-string* st_new_subc(const char* src, size_t bytes, st_enc_t enc) {
+string* st_new_subc(const char* src, st_size_t bytes, st_enc_t enc) {
   string* out = st_new(bytes, enc);
   char* oval = out->value;
 
@@ -179,7 +180,7 @@ void st_copy(string** out, const string* src) {
 void st_copyc(string** out, const char* src, st_enc_t enc) {
   // printf("st_copy %p - chars* %p\n", *out, src);
   st_len_t len;
-  size_t used;
+  st_size_t used;
 
   st_get_meta(src, enc, &len, &used);
 
@@ -212,4 +213,21 @@ void st_cleanup() {
   if (string_def_trim_mask) {
     st_delete(&string_def_trim_mask);
   }
+}
+
+char* st_dump(string* s) {
+  size_t len = sizeof(string) + s->capacity;
+  printf("len %lu\n", len);
+  char* out = malloc(len);
+  char* p = (char*)s; // dump values on by one
+  printf("p [%p] s[%p]\n", p, s);
+  char* pp = out;
+  while (--len) {
+    printf("len [%lu] char[%c | %2.2x]\n", len, *p, (*p) & 0xff);
+    *pp = *p;
+    ++p;
+    ++pp;
+  }
+
+  return out;
 }

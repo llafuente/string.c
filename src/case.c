@@ -82,7 +82,7 @@ string* st_lower(const string* src) { return st_char_map(src, st_lower_cb); }
 
 string* st_capitalize(const string* str) {
   const char* itr = str->value;
-  char* end = itr + str->used;
+  const char* end = itr + str->used;
   st_enc_t enc = str->encoding;
 
   string* out = st_new_max(str->used, enc);
@@ -144,9 +144,7 @@ void st__char_upper(char* str, char* buffer, st_enc_t enc) {
 
 void st__char_lower(char* str, char* buffer, st_enc_t enc) {
   st_uc4_t cp = st_codepoint(str, enc);
-  printf("-> %ld\n", cp);
   cp = st_utf32_lowercase(cp);
-  printf("low -> %ld\n", cp);
   st_len_t cp_size = st_from_codepoint(buffer, cp, enc);
 
   st__zeronull(buffer, cp_size, enc);

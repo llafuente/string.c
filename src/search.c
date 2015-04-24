@@ -316,12 +316,9 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
   char* pp;
   st_len_t end_len;
   st_len_t jump;
-  st_len_t itr = 0;
 
   end -= nused; // avoid memcmp overflow
   while (start <= end) {
-    ++itr;
-
     if (!memcmp(nval, start, nused)) {
       // cpy and update
       if (need_cpy) {
@@ -365,5 +362,78 @@ string* st_remove(const string* haystack, const string* needle, st_len_t offset,
     *(out->value + last_out_pos + 2) = '\0';
     *(out->value + last_out_pos + 3) = '\0';
   }
+  return out;
+}
+
+string* st_replace(const string* haystack, const string* needle,
+                   const string* replacement, st_len_t* count) {
+  st_enc_t enc = haystack->encoding;
+  st_len_t hused = haystack->used;
+  st_len_t replacements = 0;
+  if (!hused) { // no haystack, do nothing!
+    return st_new(0, enc);
+  }
+
+  string* out = st_new_max(hused, enc);
+
+  st_len_t nused = needle->used;
+  st_len_t rused = replacement->used;
+  const char* nval = needle->value;
+  const char* hval = haystack->value;
+  const char* rval = replacement->value;
+  char* oval = out->value;
+
+  const char* start = hval;
+  const char* end = hval + hused;
+  st_len_t need_cpy = 0;
+  st_len_t jump;
+  st_len_t olen = 0;
+  st_len_t rlen = replacement->length;
+
+  while (start < end) {
+    // printf("** current: [%c]\n", *start);
+
+    if (!memcmp(nval, start, nused)) {
+      ++replacements;
+      // needle found -> replace
+      if (need_cpy) {
+        // copy previous
+        memcpy(oval, start - need_cpy, need_cpy);
+        oval += need_cpy;
+        need_cpy = 0;
+      }
+
+      // copy replacement and advance
+      memcpy(oval, rval, rused);
+      oval += rused;
+
+      olen += rlen;
+      start += nused;
+      continue;
+    }
+    // next char
+
+    jump = st_char_size(start, enc);
+    ++olen;
+    start += jump;
+    need_cpy += jump;
+  }
+
+  if (need_cpy) {
+    // copy the rest
+    memcpy(oval, start - need_cpy, need_cpy);
+    oval += need_cpy;
+    need_cpy = 0;
+  }
+  // zeronull, length and usage
+  st__zeronull(oval, 0, enc);
+
+  out->length = olen;
+  out->used = oval - out->value;
+
+  if (count) {
+    *count = replacements;
+  }
+
   return out;
 }

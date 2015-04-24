@@ -5,6 +5,7 @@
 * [st\_char\_map\_cb](#st_char_map_cb)
 * [st\_enc\_t](#st_enc_t)
 * [st\_len\_t](#st_len_t)
+* [st\_size\_t](#st_size_t)
 * [st\_uc4\_t](#st_uc4_t)
 * [st\_uc\_t](#st_uc_t)
 * [st\_enc\_t](#st_enc_t)
@@ -46,6 +47,7 @@
 * [st\_clear](#st_clear)
 * [st\_clone](#st_clone)
 * [st\_cmp](#st_cmp)
+* [st\_codepoint](#st_codepoint)
 * [st\_compare](#st_compare)
 * [st\_concat](#st_concat)
 * [st\_contains](#st_contains)
@@ -53,7 +55,9 @@
 * [st\_copyc](#st_copyc)
 * [st\_debug](#st_debug)
 * [st\_delete](#st_delete)
+* [st\_dump](#st_dump)
 * [st\_end\_with](#st_end_with)
+* [st\_from\_codepoint](#st_from_codepoint)
 * [st\_get\_meta](#st_get_meta)
 * [st\_grow](#st_grow)
 * [st\_hex2bin](#st_hex2bin)
@@ -78,6 +82,7 @@
 * [st\_rclone](#st_rclone)
 * [st\_remove](#st_remove)
 * [st\_repeat](#st_repeat)
+* [st\_replace](#st_replace)
 * [st\_resize](#st_resize)
 * [st\_right](#st_right)
 * [st\_rpos](#st_rpos)
@@ -120,7 +125,7 @@
 ## Types
 
 <a name="st_byte_itr_cb"></a>
-### typedef st\_byte\_itr\_cb void (unsigned char, long, const string_s *) *
+### typedef st\_byte\_itr\_cb void (unsigned char, int, const string_s *) *
 
 iterator callback type for: st_byte_iterator
 [st_byte_iterator](#st_byte_iterator)
@@ -129,7 +134,7 @@ iterator callback type for: st_byte_iterator
 ---
 
 <a name="st_char_itr_cb"></a>
-### typedef st\_char\_itr\_cb void (const string_s *, long, const string_s *) *
+### typedef st\_char\_itr\_cb void (const string_s *, int, const string_s *) *
 
 iterator callback type for: st_char_iterator
 [st_char_iterator](#st_char_iterator)
@@ -138,7 +143,7 @@ iterator callback type for: st_char_iterator
 ---
 
 <a name="st_char_map_cb"></a>
-### typedef st\_char\_map\_cb void (string_s *, long, const string_s *) *
+### typedef st\_char\_map\_cb void (string_s *, int, const string_s *) *
 
 iterator callback type for: st_char_map
 chr will be mapped in the returned string
@@ -157,9 +162,17 @@ supported encodings
 ---
 
 <a name="st_len_t"></a>
-### typedef st\_len\_t long
+### typedef st\_len\_t int32_t
 
 string length type.
+
+
+---
+
+<a name="st_size_t"></a>
+### typedef st\_size\_t uint32_t
+
+string capacity/size type.
 
 
 ---
@@ -232,7 +245,7 @@ string type, use value[] at the end, so only one malloc is enough
 
   memory used in bytes
   
-* `size_t` *capacity*
+* `st_size_t` *capacity*
 
   memory reserved in bytes
   
@@ -476,6 +489,7 @@ Add zero null to given position, apropiate for each enc
 <a name="st__zeronull_size"></a>
 ### size\_t st\_\_zeronull\_size(st\_enc\_t enc)
 
+Return the size of zeronull "char" in given `enc`
 
 
 ##### Arguments (1)
@@ -650,12 +664,12 @@ Passes each bytes in str to the given function
 ---
 
 <a name="st_capacity"></a>
-### size\_t st\_capacity(const char\* src, st\_enc\_t enc)
+### st\_size\_t st\_capacity(const char\* src, st\_enc\_t enc)
 
 Get plain string (null terminated) capacity in given encoding
 
 
-##### Return: size\_t
+##### Return: st\_size\_t
 
 string length (do not include null terminated space)
 
@@ -799,7 +813,7 @@ Returns plain string character size
 ---
 
 <a name="st_charmask"></a>
-### void st\_charmask(const char\* input, size\_t len, char \* mask)
+### void st\_charmask(const char\* input, st\_size\_t len, char \* mask)
 
 Create an ascii map
 
@@ -808,7 +822,7 @@ Create an ascii map
 
 * `const char*` *input*
 
-* `size_t` *len*
+* `st_size_t` *len*
 
 * `char *` *mask*
 
@@ -905,6 +919,21 @@ new string
 * `const string*` *a*
 
 * `const string*` *b*
+
+
+---
+
+<a name="st_codepoint"></a>
+### st\_uc4\_t st\_codepoint(const char\* str, st\_enc\_t enc)
+
+Return codepoint in given `enc`
+
+
+##### Arguments (2)
+
+* `const char*` *str*
+@enc encoding
+* `st_enc_t` *enc*
 
 
 ---
@@ -1036,6 +1065,19 @@ Free given string
 
 ---
 
+<a name="st_dump"></a>
+### char \* st\_dump(string \* s)
+
+wip
+
+
+##### Arguments (1)
+
+* `string *` *s*
+
+
+---
+
 <a name="st_end_with"></a>
 ### bool st\_end\_with(const string\* haystack, const string\* needle)
 
@@ -1055,8 +1097,29 @@ true if ends, false otherwise
 
 ---
 
+<a name="st_from_codepoint"></a>
+### st\_len\_t st\_from\_codepoint(char \* out, st\_uc4\_t codepoint, st\_enc\_t enc)
+
+Return length of `codepoint` stored in `out` in given encoding.
+
+
+##### Return: st\_len\_t
+
+length of given encoding
+
+##### Arguments (3)
+
+* `char *` *out*
+
+* `st_uc4_t` *codepoint*
+
+* `st_enc_t` *enc*
+
+
+---
+
 <a name="st_get_meta"></a>
-### void st\_get\_meta(const char\* src, st\_enc\_t enc, st\_len\_t \* len, size\_t \* capacity)
+### void st\_get\_meta(const char\* src, st\_enc\_t enc, st\_len\_t \* len, st\_size\_t \* capacity)
 
 Get capacity and length of given string in given encoding
 
@@ -1069,13 +1132,13 @@ Get capacity and length of given string in given encoding
 
 * `st_len_t *` *len*
 
-* `size_t *` *capacity*
+* `st_size_t *` *capacity*
 
 
 ---
 
 <a name="st_grow"></a>
-### void st\_grow(string \*\* out, size\_t cap, st\_enc\_t enc)
+### void st\_grow(string \*\* out, st\_size\_t cap, st\_enc\_t enc)
 
 Grow given string.
 If string point to 0 -> st_new
@@ -1088,7 +1151,7 @@ if string has less capacity that needed -> st_resize
 
 * `string **` *out*
 
-* `size_t` *cap*
+* `st_size_t` *cap*
 
 * `st_enc_t` *enc*
 
@@ -1117,7 +1180,7 @@ new string
 ---
 
 <a name="st_hexdump"></a>
-### void st\_hexdump(const char\* p, size\_t size)
+### void st\_hexdump(const char\* p, st\_size\_t size)
 
 Print to stdout hex data for given plain string
 
@@ -1126,7 +1189,7 @@ Print to stdout hex data for given plain string
 
 * `const char*` *p*
 
-* `size_t` *size*
+* `st_size_t` *size*
 
 
 ---
@@ -1331,7 +1394,7 @@ new string
 ---
 
 <a name="st_new"></a>
-### string \* st\_new(size\_t cap, st\_enc\_t enc)
+### string \* st\_new(st\_size\_t cap, st\_enc\_t enc)
 
 Allocate a new empty string
 > To edit allocator define: __STRING_ALLOCATOR
@@ -1344,7 +1407,7 @@ new string
 
 ##### Arguments (2)
 
-* `size_t` *cap*
+* `st_size_t` *cap*
 
 * `st_enc_t` *enc*
 
@@ -1373,7 +1436,7 @@ new string
 ---
 
 <a name="st_new_subc"></a>
-### string \* st\_new\_subc(const char\* src, size\_t bytes, st\_enc\_t enc)
+### string \* st\_new\_subc(const char\* src, st\_size\_t len, st\_enc\_t enc)
 
 Create a new string from given substring
 
@@ -1386,7 +1449,7 @@ new string
 
 * `const char*` *src*
 
-* `size_t` *bytes*
+* `st_size_t` *len*
 
 * `st_enc_t` *enc*
 
@@ -1418,8 +1481,8 @@ new string
 <a name="st_number2base"></a>
 ### string \* st\_number2base(size\_t value, int base)
 
-Returns a new string containing the representation of the given number
-argument in given base.
+Returns a new string containing the representation of the given (unsigned)
+number argument in given base.
 
 based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
 
@@ -1486,7 +1549,7 @@ Returns -1 if the value to search never occurs.
 ---
 
 <a name="st_rclone"></a>
-### string \* st\_rclone(const string\* src, size\_t cap)
+### string \* st\_rclone(const string\* src, st\_size\_t cap)
 
 Return a new string clone of src with given capacity (resize)
 
@@ -1499,7 +1562,7 @@ new string
 
 * `const string*` *src*
 
-* `size_t` *cap*
+* `st_size_t` *cap*
 
 
 ---
@@ -1548,8 +1611,37 @@ new string
 
 ---
 
+<a name="st_replace"></a>
+### string \* st\_replace(const string\* haystack, const string\* needle, const string\* replacement, st\_len\_t \* count)
+
+Replace all occurrences of the search string with the replacement string
+Caveats
+It will replace left to right always reading haystack.
+That means replacement wont be included in needle test ever, avoid possible
+infinite loop.
+st_replace("abcd", "bc", "abc")
+
+
+
+##### Return: string \*
+
+new string
+
+##### Arguments (4)
+
+* `const string*` *haystack*
+
+* `const string*` *needle*
+
+* `const string*` *replacement*
+
+* `st_len_t *` *count*
+
+
+---
+
 <a name="st_resize"></a>
-### void st\_resize(string \*\* src, size\_t cap)
+### void st\_resize(string \*\* src, st\_size\_t cap)
 
 Reallocate src with given len
 > to edit allocator define: __STRING_REALLOCATOR
@@ -1564,7 +1656,7 @@ new string
 
 * `string **` *src*
 
-* `size_t` *cap*
+* `st_size_t` *cap*
 
 
 ---
@@ -2134,7 +2226,7 @@ Return how many bytes contains given lead, with no error control.
 ---
 
 <a name="st_utf8_length"></a>
-### st\_len\_t st\_utf8\_length(const char\* src, size\_t \* capacity)
+### st\_len\_t st\_utf8\_length(const char\* src, st\_size\_t \* capacity)
 
 Return utf8 length and capacity
 based on glib_utf8_offset_to_pointer
@@ -2149,7 +2241,7 @@ string length utf-8 encoded
 
 * `const char*` *src*
 
-* `size_t *` *capacity*
+* `st_size_t *` *capacity*
 
 
 ---

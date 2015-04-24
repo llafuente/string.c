@@ -38,6 +38,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <wchar.h>
 
 #ifndef __STRINGC_TYPE__
 #define __STRINGC_TYPE__
@@ -48,7 +49,9 @@
 /* cldoc:begin-category(stringc.h) */
 
 // string length type.
-typedef long int st_len_t;
+typedef int32_t st_len_t;
+// string capacity/size type.
+typedef uint32_t st_size_t;
 // uchar
 typedef uint8_t st_uc_t;
 // uchar (wide)
@@ -75,7 +78,7 @@ typedef struct string_s {
   // memory used in bytes
   st_len_t used;
   // memory reserved in bytes
-  size_t capacity;
+  st_size_t capacity;
   // used encoding
   st_enc_t encoding;
   // current string content, it's null-terminated to be 100% compatible with
@@ -252,7 +255,7 @@ extern const st_uc_t st_bom[];
  * @len Length of the input
  * @mask char[256] pre-allocated by user
  */
-ST_EXTERN void st_charmask(const char* input, size_t len, char* mask);
+ST_EXTERN void st_charmask(const char* input, st_size_t len, char* mask);
 
 /* Get plain string (null terminated) length in given encoding
  *
@@ -268,7 +271,7 @@ ST_EXTERN st_len_t st_length(const char* src, st_enc_t enc);
  * @src Null terminated string
  * @enc Encoding
  */
-ST_EXTERN size_t st_capacity(const char* src, st_enc_t enc);
+ST_EXTERN st_size_t st_capacity(const char* src, st_enc_t enc);
 
 /* Get capacity and length of given string in given encoding
  *
@@ -278,7 +281,7 @@ ST_EXTERN size_t st_capacity(const char* src, st_enc_t enc);
  * @capacity (do not include null terminated space)
  */
 ST_EXTERN void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
-                           size_t* capacity);
+                           st_size_t* capacity);
 /* Print to stdout useful information to debug
  *
  * @str A string
@@ -290,7 +293,7 @@ ST_EXTERN void st_debug(string* str);
  * @p
  * @size
  */
-ST_EXTERN void st_hexdump(const char* p, size_t size);
+ST_EXTERN void st_hexdump(const char* p, st_size_t size);
 
 /* Validate input string.
  *
@@ -324,6 +327,22 @@ ST_EXTERN st_len_t st_char_size_safe(const char* input, st_enc_t enc);
  * @enc
  */
 ST_EXTERN st_len_t st_char_size(const char* input, st_enc_t enc);
+/* Return codepoint in given `enc`
+ * @return codepoint
+ * @str
+ * @enc encoding
+ */
+ST_EXTERN st_uc4_t st_codepoint(const char* str, st_enc_t enc);
+
+/* Return length of `codepoint` stored in `out` in given encoding.
+ *
+ * @return length of given encoding
+ * @out buffer to store codepoint
+ * @codepoint
+ * @enc encoding
+ */
+ST_EXTERN st_len_t
+    st_from_codepoint(char* out, st_uc4_t codepoint, st_enc_t enc);
 
 /* cldoc:end-category() */
 //-
@@ -450,8 +469,8 @@ ST_EXTERN double st_base2number(string* src, int base);
 // hexadecimal to decimal
 #define st_hex2dec(value) st_number2base(value, 16)
 
-/* Returns a new string containing the representation of the given number
- * argument in given base.
+/* Returns a new string containing the representation of the given (unsigned)
+ * number argument in given base.
  *
  * based on PHP (https://github.com/php/php-src/blob/master/LICENSE)
  *
@@ -601,7 +620,7 @@ ST_EXTERN string* st_left(const string* src, size_t width,
  * @cap
  * @enc
  */
-ST_EXTERN string* st_new(size_t cap, st_enc_t enc);
+ST_EXTERN string* st_new(st_size_t cap, st_enc_t enc);
 
 /* Allocate a new empty with the maximum capacity needed to store given len
  * > To edit allocator define: __STRING_ALLOCATOR
@@ -629,7 +648,7 @@ ST_EXTERN string* st_newc(const char* src, st_enc_t enc);
  * @src source
  * @cap new capacity
  */
-ST_EXTERN void st_resize(string** src, size_t cap);
+ST_EXTERN void st_resize(string** src, st_size_t cap);
 
 /* Grow given string.
  * If string point to 0 -> st_new
@@ -640,7 +659,7 @@ ST_EXTERN void st_resize(string** src, size_t cap);
  * @cap new capacity
  * @enc
  */
-ST_EXTERN void st_grow(string** out, size_t cap, st_enc_t enc);
+ST_EXTERN void st_grow(string** out, st_size_t cap, st_enc_t enc);
 
 /* Return a new string clone of src (same capacity)
  *
@@ -654,16 +673,16 @@ ST_EXTERN string* st_clone(const string* src);
  * @return new string
  * @src source
  */
-ST_EXTERN string* st_rclone(const string* src, size_t cap);
+ST_EXTERN string* st_rclone(const string* src, st_size_t cap);
 
 /* Create a new string from given substring
  *
  * @return new string
  * @src
- * @bytes
+ * @len length in bytes
  * @enc
  */
-ST_EXTERN string* st_new_subc(const char* src, size_t bytes, st_enc_t enc);
+ST_EXTERN string* st_new_subc(const char* src, st_size_t len, st_enc_t enc);
 
 /* Copy src into out
  * > out will be resized if needed
@@ -710,6 +729,11 @@ ST_EXTERN void st_clear(string* out);
  * > can be called more than once to free memory
  */
 ST_EXTERN void st_cleanup();
+
+/* wip
+ *
+ */
+ST_EXTERN char* st_dump(string* s);
 
 /* cldoc:end-category() */
 //-
@@ -977,6 +1001,23 @@ ST_EXTERN st_len_t st_irpos(const string* haystack, const string* needle,
 ST_EXTERN string* st_remove(const string* haystack, const string* needle,
                             st_len_t offset, st_len_t length);
 
+/* Replace all occurrences of the search string with the replacement string
+ *
+ * Caveats
+ * It will replace left to right always reading haystack.
+ * That means replacement wont be included in needle test ever, avoid possible
+ * infinite loop.
+ * st_replace("abcd", "bc", "abc")
+ *
+ * @return new string
+ * @haystack
+ * @needle
+ * @replacement
+ * @count
+ */
+ST_EXTERN string* st_replace(const string* haystack, const string* needle,
+                             const string* replacement, st_len_t* count);
+
 /* cldoc:end-category() */
 //-
 //- encode.c
@@ -1131,6 +1172,10 @@ ST_EXTERN void st__repeat(char* dst, const char* src, size_t src_len,
  */
 ST_EXTERN void st__zeronull(char* str, size_t bytepos, st_enc_t enc);
 
+/* Return the size of zeronull "char" in given `enc`
+ *
+ * @enc
+ */
 ST_EXTERN size_t st__zeronull_size(st_enc_t enc);
 
 //--------------------------------//
@@ -1176,7 +1221,7 @@ ST_EXTERN st_len_t st_utf8_lead_size(st_uc_t lead);
  * @capacity
  *   Optional, 0 means you don't want the value
  */
-ST_EXTERN st_len_t st_utf8_length(const char* src, size_t* capacity);
+ST_EXTERN st_len_t st_utf8_length(const char* src, st_size_t* capacity);
 
 /* Check if the given uchar* is a valid utf-8 sequence.
  * Return value :

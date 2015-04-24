@@ -62,13 +62,25 @@ make
 sh test.sh
 ```
 
-## Style / format
+## Contibution
+
+Just send a PR.
+
+### Style / format
 
 We use clang-format
-To keep an uniform coding style, before PR **always** use:
+to keep an uniform coding style, before PR **always** use:
 
 ```bash
-format.sh
+sh format.sh
+```
+
+### Documentation
+
+We use cldoc + our formatter to output markdown.
+
+```bash
+sh doc.sh
 ```
 
 

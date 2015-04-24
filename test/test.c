@@ -112,17 +112,17 @@ void print_trace(void) {
 // all these castings are necesary for gcc
 #define CHK_ALL(src, dst, enc)                                                 \
   if (enc == st_enc_utf32be || enc == st_enc_utf32le) {                        \
-    printf("# CHECK %s = utf32 L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x),            \
-           src->length, src->used, src->capacity);                             \
-    printf("# CHECK %s = utf32 L[%ld]C[%lu]\n", STRINGIFY(y),                  \
+    printf("# CHECK %s = utf32 L[%d]U[%d]C[%u]\n", STRINGIFY(x), src->length,  \
+           src->used, src->capacity);                                          \
+    printf("# CHECK %s = utf32 L[%d]C[%u]\n", STRINGIFY(y),                    \
            st_length((const char*)dst, enc),                                   \
            st_capacity((const char*)dst, enc));                                \
     ASSERT(0 == wcscmp((const wchar_t*)src->value, (const wchar_t*)dst),       \
            "value");                                                           \
   } else {                                                                     \
-    printf("# CHECK %s = '%s' L[%ld]U[%ld]C[%lu]\n", STRINGIFY(x), src->value, \
+    printf("# CHECK %s = '%s' L[%d]U[%d]C[%u]\n", STRINGIFY(x), src->value,    \
            src->length, src->used, src->capacity);                             \
-    printf("# CHECK %s = '%s' L[%ld]C[%lu]\n", STRINGIFY(y), (char*)dst,       \
+    printf("# CHECK %s = '%s' L[%d]C[%u]\n", STRINGIFY(y), (char*)dst,         \
            st_length((const char*)dst, enc),                                   \
            st_capacity((const char*)dst, enc));                                \
     ASSERT(0 == strcmp((const char*)src->value, (const char*)dst), "value");   \
@@ -160,6 +160,15 @@ extern void test_utils();
 extern void test_justify();
 
 int main(int argc, const char* argv[]) {
+  /*
+  string* s = st_newc("chiwaka", st_enc_ascii);
+  char* d = st_dump(s);
+  printf("%s", d);
+  st_delete(&s);
+  free(d);
+
+  return 1;
+  */
 
   printf("    ########################\n");
   printf("    ## string.c unit test ##\n");
@@ -495,7 +504,7 @@ void test_trim() {
 }
 
 void test_utf8_lenc() {
-  size_t cap;
+  st_size_t cap;
   ASSERT(st_utf8_length(T_STR_01, &cap) == 12, "length check");
   ASSERT(strlen(T_STR_01) == cap, "capacity check");
   ASSERT(st_utf8_length(T_STR_02, &cap) == 33, "length check");
@@ -914,6 +923,19 @@ void test_search() {
   CHK_ALL(result, "abcabc", st_enc_utf8);
   st_delete(&haystack);
   st_delete(&needle);
+  st_delete(&result);
+
+  //
+  // st_replace
+  //
+  haystack = st_newc("test", st_enc_utf8);
+  needle = st_newc("e", st_enc_utf8);
+  string* replacement = st_newc("b", st_enc_utf8);
+  result = st_replace(haystack, needle, replacement, 0);
+  CHK_ALL(result, "tbst", st_enc_utf8);
+  st_delete(&haystack);
+  st_delete(&needle);
+  st_delete(&replacement);
   st_delete(&result);
 }
 
