@@ -96,11 +96,13 @@ void st_resize(string** src, st_size_t cap) {
 void st_grow(string** src, st_size_t cap, st_enc_t enc) {
   if (*src == 0) {
     *src = st_new(cap, enc);
-  } else {
-    if (cap + st__zeronull_size(enc) > (*src)->capacity) {
-      st_resize(src, cap);
-      // TODO should we set enconding here?
-    }
+    return;
+  }
+
+  if (cap + st__zeronull_size(enc) > (*src)->capacity) {
+    printf("resize\n");
+    (*src)->encoding = enc;
+    st_resize(src, cap);
   }
 }
 

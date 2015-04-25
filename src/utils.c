@@ -135,6 +135,10 @@ void st_debug(string* str) {
     printf("utf32 output TODO\n");
     break;
   }
+  // write a null at the end, to no overflow
+  // this modify the string... but it's for debug only!
+  str->value[str->capacity] = '\0';
+
   printf("\nprintf %s\n", str->value);
 }
 

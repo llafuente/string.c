@@ -283,6 +283,7 @@ ST_EXTERN st_size_t st_capacity(const char* src, st_enc_t enc);
 ST_EXTERN void st_get_meta(const char* src, st_enc_t enc, st_len_t* len,
                            st_size_t* capacity);
 /* Print to stdout useful information to debug
+ * It add zeronull at the end of the string to not overflow when printf
  *
  * @str A string
  */

@@ -382,6 +382,7 @@ string* st_replace(const string* haystack, const string* needle,
   const char* hval = haystack->value;
   const char* rval = replacement->value;
   char* oval = out->value;
+  char* ofval = oval; // cache first
 
   const char* start = hval;
   const char* end = hval + hused;
@@ -390,10 +391,19 @@ string* st_replace(const string* haystack, const string* needle,
   st_len_t olen = 0;
   st_len_t rlen = replacement->length;
 
-  while (start < end) {
-    // printf("** current: [%c]\n", *start);
+  st_len_t oval_pos;
 
+  while (start < end) {
     if (!memcmp(nval, start, nused)) {
+      oval_pos = (oval - ofval);
+
+      // this formula is very conservative, maybe we can increased
+      // TODO performance check
+      st_grow(&out, oval_pos + need_cpy + rused + rused + (end - start), enc);
+      // redo caches
+      ofval = out->value;
+      oval = ofval + oval_pos;
+
       ++replacements;
       // needle found -> replace
       if (need_cpy) {
@@ -420,6 +430,7 @@ string* st_replace(const string* haystack, const string* needle,
   }
 
   if (need_cpy) {
+    st_grow(&out, (oval - ofval) + need_cpy, enc);
     // copy the rest
     memcpy(oval, start - need_cpy, need_cpy);
     oval += need_cpy;

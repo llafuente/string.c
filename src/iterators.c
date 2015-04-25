@@ -43,7 +43,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   case st_enc_binary:
   case st_enc_ascii:
     while (*itr && itr < end) {
-      ST_CHAR_CP(dst, itr, 1, true);
+      ST_CHAR_CP_ASCII(dst, itr, true);
 
       itr_cb(buffer, pos, str);
       ++itr;
@@ -64,7 +64,7 @@ void st_char_iterator(const string* str, st_char_itr_cb itr_cb) {
   case st_enc_utf32le:
   case st_enc_utf32be:
     while (*itr && itr < end) {
-      ST_CHAR_CP(dst, itr, 4, true);
+      ST_CHAR_CP_UTF32(dst, itr, true);
 
       itr_cb(buffer, pos, str);
       itr += 4;
@@ -81,14 +81,14 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
   // maximum char size is 5 bytes
   // 4 utf-8/ucs4be + null
   st_enc_t enc = str->encoding;
-  string* buffer = st_new(5, enc);
+  string* buffer = st_new(4, enc);
   buffer->length = 1;
   char* bufp = buffer->value;
 
   st_len_t pos = 0;
   const char* itr = str->value;
   char* dst;
-  const char* end = itr + str->capacity - 1;
+  const char* end = itr + str->used;
 
   switch (enc) {
   case st_enc_binary:
@@ -98,7 +98,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     out->used = str->used;
     dst = out->value;
 
-    while (*itr && itr < end) {
+    while (itr < end) {
 
       ST_CHAR_CP_ASCII(bufp, itr, true);
 
@@ -109,7 +109,6 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
       ++dst;
       ++pos;
     }
-    *dst = '\0';
     break;
   case st_enc_utf8:
     // as always be conservative and allocate maximum possible
@@ -120,7 +119,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     size_t used = 0;
     int jump;
 
-    while (*itr && itr < end) {
+    while (itr < end) {
       jump = st_utf8_char_size(itr);
 
       ST_CHAR_CP(bufp, itr, jump, true);
@@ -137,7 +136,6 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
 
       ++pos;
     }
-    *dst = '\0';
     out->used = used;
     break;
   case st_enc_utf32le:
@@ -147,7 +145,7 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
     out->used = str->used;
     dst = out->value;
 
-    while (*itr && itr < end) {
+    while (itr < end) {
 
       ST_CHAR_CP_UTF32(bufp, itr, true);
 
@@ -158,10 +156,10 @@ string* st_char_map(const string* str, st_char_map_cb map_cb) {
       dst += 4;
       ++pos;
     }
-    *dst = '\0';
     break;
   }
 
+  st__zeronull(dst, 0, enc);
   st_delete(&buffer);
 
   return out;
@@ -192,7 +190,7 @@ void st_line_iterator(const string* str, st_char_itr_cb itr_cb) {
   st_len_t pos = 0;
   st_enc_t enc = str->encoding;
 
-  while (*itr && itr < end) {
+  while (itr < end && *itr) {
     found = st__memchr(itr, '\n', end - itr);
     if (found) {
       len = found - itr;
@@ -201,16 +199,11 @@ void st_line_iterator(const string* str, st_char_itr_cb itr_cb) {
       len = found - itr;
     }
 
-    // printf("found %p @ %ld\n", found, found - str->value);
-    // printf("st_grow %ld\n", len);
-
     st_grow(&buffer, len, enc);
     strncpy(buffer->value, itr, len);
     buffer->value[len] = '\0';
     buffer->used = len;
     buffer->length = st_length(buffer->value, enc); // TODO optimize
-
-    // printf("ITR[%d] %s\n", pos, buffer->value);
 
     itr_cb(buffer, pos, str);
 
