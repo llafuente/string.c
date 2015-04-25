@@ -52,8 +52,6 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
   case st_enc_utf32be:
     return st_new(len * 4, enc);
   }
-
-  return 0; // WTF!
 }
 
 // TODO use utf8_len()

@@ -242,6 +242,15 @@ void test_alloc() {
   ASSERT(s2->capacity == 129, "s capacity 129");
   st_delete(&s2);
 
+  s2 = st_new(1, st_enc_utf8);
+  st_copy(&s2, s);
+  CHK_ALL(s2, T_STR_03, st_enc_utf8);
+
+  st_clear(s2);
+  CHK_ALL(s2, "", st_enc_utf8);
+
+  st_delete(&s2);
+
   st_delete(&s);
 }
 
@@ -405,6 +414,70 @@ void test_from() {
   ASSERT(d == 5, "st_base2number is 5");
   st_delete(&s);
 
+  s = st_dec2hex(10);
+  CHK_ALL(s, "a", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_dec2hex(47);
+  CHK_ALL(s, "2f", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_newc("111000111", st_enc_ascii);
+  double dd = st_bin2dec(s);
+  ASSERT(dd == 455, "bin2dec(111000111) == 455");
+  st_delete(&s);
+
+  s = st_newc("0111000111", st_enc_ascii);
+  dd = st_bin2dec(s);
+  ASSERT(dd == 455, "bin2dec(0111000111) == 0");
+  st_delete(&s);
+
+  s = st_newc("01234567", st_enc_ascii);
+  dd = st_oct2dec(s);
+  ASSERT(dd == 342391, "oct2dec(01234567) == 342391");
+  st_delete(&s);
+
+  s = st_newc("0567", st_enc_ascii);
+  dd = st_oct2dec(s);
+  ASSERT(dd == 375, "oct2dec(0567) == 375");
+  st_delete(&s);
+
+  s = st_newc("123abc", st_enc_ascii);
+  dd = st_hex2dec(s);
+  ASSERT(dd == 1194684, "hex2dec(123abc) == 1194684");
+  st_delete(&s);
+
+  s = st_newc("789DEF", st_enc_ascii);
+  dd = st_hex2dec(s);
+  ASSERT(dd == 7904751, "hex2dec(789DEF) == 7904751");
+  st_delete(&s);
+
+
+  s = st_dec2bin(10);
+  CHK_ALL(s, "1010", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_dec2bin((size_t) 3.9505e3);
+  CHK_ALL(s, "111101101110", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_dec2oct(10);
+  CHK_ALL(s, "12", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_dec2oct((size_t) 3950.5);
+  CHK_ALL(s, "7556", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_dec2hex(10);
+  CHK_ALL(s, "a", st_enc_ascii);
+  st_delete(&s);
+
+  s = st_dec2hex((size_t) 3950.5);
+  CHK_ALL(s, "f6e", st_enc_ascii);
+  st_delete(&s);
+
+
   // st_number2base
 
   string* binstr = st_number2base(5, 2);
@@ -520,22 +593,27 @@ void test_utf8_lenc() {
 }
 
 void test_utf8_invalid() {
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_1,
-                         strlen(T_STR_UTF8_1)) == 0);
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_2,
-                         strlen(T_STR_UTF8_2)) == 0);
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_3,
-                         strlen(T_STR_UTF8_3)) == 0);
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_4,
-                         strlen(T_STR_UTF8_4)) == 0);
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_1,
+                         strlen(T_STR_UTF8_1)) == 0, "T_STR_UTF8_1 is valid");
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_2,
+                         strlen(T_STR_UTF8_2)) == 0, "T_STR_UTF8_2 is valid");
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_3,
+                         strlen(T_STR_UTF8_3)) == 0, "T_STR_UTF8_3 is valid");
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_4,
+                         strlen(T_STR_UTF8_4)) == 0, "T_STR_UTF8_4 is valid");
 
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_5,
-                         strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1);
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_6,
-                         strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5);
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_5,
+                         strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1, "T_STR_UTF8_5 is invalid");
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_6,
+                         strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5, "T_STR_UTF8_6 is invalid");
 
-  assert(st_utf8_invalid((const unsigned char*)T_STR_UTF8_7,
-                         strlen(T_STR_UTF8_7)) == 0);
+  ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_7,
+                         strlen(T_STR_UTF8_7)) == 0, "T_STR_UTF8_7 is valid");
+
+  ASSERT(st_validate_encoding(T_STR_UTF8_5, st_enc_utf8) == false, "validate T_STR_UTF8_5");
+  ASSERT(st_validate_encoding(T_STR_UTF8_7, st_enc_utf8) == true, "validate T_STR_UTF8_7");
+  ASSERT(st_validate_encoding(T_STR_UTF8_2, st_enc_utf8) == true, "validate T_STR_UTF8_2");
+
 }
 
 char buffer[256];
@@ -545,9 +623,8 @@ void char_itr_cb(const string* chr, st_len_t pos, string* src) {
 
 void wchar_itr_cb(const string* chr, st_len_t pos, string* src) {
   st_hexdump(chr->value, 8);
-  wcscat((wchar_t*)buffer, (wchar_t*) chr->value);
+  wcscat((wchar_t*)buffer, (wchar_t*)chr->value);
 }
-
 
 void byte_itr_cb(st_uc_t chr, st_len_t pos, const string* src) {
   st_len_t i = strlen(buffer);
@@ -587,7 +664,7 @@ void test_itr_chars() {
   str = st_newc((const char*)L"abcñ", st_enc_utf32be);
   st_char_iterator(str, (st_char_itr_cb)wchar_itr_cb);
 
-  ASSERT(wcscmp((const wchar_t *) buffer, L"abcñ") == 0, "concat wide iteration");
+  ASSERT(wcscmp((const wchar_t*)buffer, L"abcñ") == 0, "concat wide iteration");
   st_delete(&str);
 
   //
@@ -666,8 +743,41 @@ void test_chr() {
   s = st_chr(65, st_enc_ascii);
   CHK_ALL(s, "A", st_enc_ascii);
   assert(st_ord(s, 0) == 65);
-
   st_delete(&s);
+
+  s = st_chr(65, st_enc_utf8);
+  CHK_ALL(s, "A", st_enc_utf8);
+  assert(st_ord(s, 0) == 65);
+  st_delete(&s);
+
+  s = st_chr(40845, st_enc_utf8);
+  CHK_ALL(s, "龍", st_enc_utf8);
+  assert(st_ord(s, 0) == 40845);
+  st_delete(&s);
+
+  s = st_chr(26159, st_enc_utf8);
+  CHK_ALL(s, "是", st_enc_utf8);
+  assert(st_ord(s, 0) == 26159);
+  st_delete(&s);
+
+  // found: http://en.wikibooks.org/wiki/Unicode/Character_reference/2F000-2FFFF
+  s = st_chr(195038, st_enc_utf8);
+  CHK_ALL(s, "軔", st_enc_utf8);
+  assert(st_ord(s, 0) == 195038);
+  st_delete(&s);
+
+
+  /*
+  s = st_chr(110011, st_enc_utf8);
+  st_debug(s);
+  st_delete(&s);
+  s = st_newc("", st_enc_utf8);
+  printf("%ld\n", st_ord(s, 0));
+  exit(1);
+  */
+
+
+
 
   s = st_newc(T_STR_03, st_enc_utf8);
 
@@ -996,11 +1106,22 @@ void test_search() {
 }
 
 void test_ascii() {
-
   assert(st_ascii_char_size_safe("\xFF") == -1);
   assert(st_ascii_char_size_safe("x") == 1);
   assert(st_ascii_char_size_safe("z") == 1);
+
+  ASSERT(st_is_ascii(T_STR_ASCII) == true, "ascii is ascii -> true!");
+  ASSERT(st_is_ascii(T_STR_03) == false, "utf8 is ascii -> false!");
+
+  ASSERT(st_ascii_valid_codepoint(5) == true, "in range codepoint")
+  ASSERT(st_ascii_valid_codepoint(300) == false, "out of range codepoint");
+
+  st_size_t bytes;
+  ASSERT(st_ascii_length("abc", &bytes) == 3, "length 3");
+  ASSERT(bytes == 3, "size 3");
+  ASSERT(st_ascii_char_size("a") == 1, "ascii char size is always 1");
 }
+
 void test_utf8() {
   ASSERT(st_utf8_char_eq("☃", "☃") == true, "☃ == ☃?");
   ASSERT(st_utf8_char_eq("ñ", "ñ") == true, "ñ == ñ?");
@@ -1052,9 +1173,13 @@ void test_encoding() {
   test_encoding_go_back(L"123456789也不是可运行的程序１２３４５６７８９",
                         "123456789也不是可运行的程序１２３４５６７８９");
 
-  test_encoding_go_back(L"☃是龍𩸽𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿 𠸎 𠸏 𠹷 𠺝 𠺢 𠻗 𠻹 𠻺 𠼭 𠼮 𠽌 𠾴 𠾼 𠿪 𡁜 𡁯 𡁵 𡁶 𡁻 𡃁 𡃉 𡇙 𢃇 𢞵 𢫕 𢭃 𢯊 𢱑 𢱕 𢳂 𢴈 𢵌 𢵧 𢺳 𣲷 𤓓 𤶸 𤷪 𥄫 𦉘 𦟌 𦧲 𦧺 𧨾 𨅝 𨈇 𨋢 𨳊 𨳍 𨳒 𩶘",
-                        "☃是龍𩸽𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿 𠸎 𠸏 𠹷 𠺝 𠺢 𠻗 𠻹 𠻺 𠼭 𠼮 𠽌 𠾴 𠾼 𠿪 𡁜 𡁯 𡁵 𡁶 𡁻 𡃁 𡃉 𡇙 𢃇 𢞵 𢫕 𢭃 𢯊 𢱑 𢱕 𢳂 𢴈 𢵌 𢵧 𢺳 𣲷 𤓓 𤶸 𤷪 𥄫 𦉘 𦟌 𦧲 𦧺 𧨾 𨅝 𨈇 𨋢 𨳊 𨳍 𨳒 𩶘");
-
+  test_encoding_go_back(
+      L"☃是龍𩸽𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿 𠸎 𠸏 𠹷 𠺝 𠺢 𠻗 𠻹 𠻺 𠼭 𠼮 "
+      L"𠽌 𠾴 𠾼 𠿪 𡁜 𡁯 𡁵 𡁶 𡁻 𡃁 𡃉 𡇙 𢃇 𢞵 𢫕 𢭃 𢯊 𢱑 𢱕 𢳂 𢴈 𢵌 𢵧 "
+      L"𢺳 𣲷 𤓓 𤶸 𤷪 𥄫 𦉘 𦟌 𦧲 𦧺 𧨾 𨅝 𨈇 𨋢 𨳊 𨳍 𨳒 𩶘",
+      "☃是龍𩸽𠜎 𠜱 𠝹 𠱓 𠱸 𠲖 𠳏 𠳕 𠴕 𠵼 𠵿 𠸎 𠸏 𠹷 𠺝 𠺢 𠻗 𠻹 𠻺 𠼭 𠼮 "
+      "𠽌 𠾴 𠾼 𠿪 𡁜 𡁯 𡁵 𡁶 𡁻 𡃁 𡃉 𡇙 𢃇 𢞵 𢫕 𢭃 𢯊 𢱑 𢱕 𢳂 𢴈 𢵌 𢵧 𢺳 "
+      "𣲷 𤓓 𤶸 𤷪 𥄫 𦉘 𦟌 𦧲 𦧺 𧨾 𨅝 𨈇 𨋢 𨳊 𨳍 𨳒 𩶘");
 }
 
 void test_internal() {
@@ -1221,3 +1346,4 @@ extern void test_justify() {
   st_delete(&padstr);
   st_delete(&x);
 }
+

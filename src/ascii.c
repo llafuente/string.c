@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-st_len_t st_ascii_length(const char* src, size_t* used_bytes) {
+st_len_t st_ascii_length(const char* src, st_size_t* used_bytes) {
   st_len_t out = strlen(src);
 
   if (used_bytes) {
@@ -54,30 +54,14 @@ st_uc4_t st_ascii_codepoint(const char* input) { return (st_uc4_t)*input; }
 bool st_ascii_valid_codepoint(st_uc4_t codepoint) { return codepoint <= 127; }
 
 bool st_is_ascii(const char* input) {
-  char c;
-  while ((c = *input)) {
+  st_uc_t c;
+  while ((c = (st_uc_t) *input)) {
     if (c > 127) {
       return false;
     }
     ++input;
   }
   return true;
-}
-
-void st_ascii_upper(char* str, st_len_t pos) {
-  char c = str[pos];
-
-  if ((c > 96) && (c < 123)) {
-    str[pos] -= 32;
-  }
-}
-
-void st_ascii_lower(char* str, st_len_t pos) {
-  char c = str[pos];
-
-  if ((c > 64) && (c < 97)) {
-    str[pos] += 32;
-  }
 }
 
 st_len_t st_ascii_from_codepoint(char* out, st_uc_t codepoint) {

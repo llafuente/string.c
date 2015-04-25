@@ -137,7 +137,7 @@ void st_debug(string* str) {
   }
   // write a null at the end, to no overflow
   // this modify the string... but it's for debug only!
-  str->value[str->capacity] = '\0';
+  str->value[str->capacity - 1] = '\0';
 
   printf("\nprintf %s\n", str->value);
 }
@@ -207,12 +207,24 @@ bool st_validate_encoding(char* input, st_enc_t enc) {
   while (*p) {
     // check if the character is valid
     st_len_t len = st_char_size_safe(input, enc);
+    printf("size [%d] @[%ld]\n", len, input - p);
 
-    if (len <= 0) {
+    if (len < 0) {
       return false;
     }
     // move to the next character
-    input += len;
+    if (enc == st_enc_utf8) {
+      // check surrogates
+
+      while (++p && --len) {
+        if(!ST_UTF8_IS_TRAIL(*p)) {
+          return false;
+        }
+      }
+    } else {
+      input += len;
+    }
+    printf("next char [%c]\n", *input);
   }
   // if we didn't fail yet, return success
   return true;

@@ -14,6 +14,6 @@ make check "CFLAGS=-fprofile-arcs -ftest-coverage"
 
 rm -rf code-coverage
 mkdir code-coverage
-gcovr -r .. --html --html-details -o code-coverage/index.html -v
+gcovr -r .. --html --html-details -o code-coverage/index.html -v --exclude 'src/picobase\.c'
 
 cd ..

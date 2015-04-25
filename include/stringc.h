@@ -462,13 +462,13 @@ ST_EXTERN string* string_encode(string* src, st_enc_t to_enc);
 ST_EXTERN double st_base2number(string* src, int base);
 
 // binary to decimal
-#define st_bin2dec(value) st_number2base(value, 2)
+#define st_bin2dec(value) st_base2number(value, 2)
 
 // octal to decimal
-#define st_oct2dec(value) st_number2base(value, 8)
+#define st_oct2dec(value) st_base2number(value, 8)
 
 // hexadecimal to decimal
-#define st_hex2dec(value) st_number2base(value, 16)
+#define st_hex2dec(value) st_base2number(value, 16)
 
 /* Returns a new string containing the representation of the given (unsigned)
  * number argument in given base.
@@ -1292,7 +1292,7 @@ ST_EXTERN st_len_t st_utf8_from_codepoint(char* utf8, st_uc4_t codepoint);
 //-
 /* cldoc:begin-category(ascii.c) */
 
-ST_EXTERN st_len_t st_ascii_length(const char* src, size_t* used_bytes);
+ST_EXTERN st_len_t st_ascii_length(const char* src, st_size_t* used_bytes);
 
 ST_EXTERN st_len_t st_ascii_char_size_safe(const char* input);
 
