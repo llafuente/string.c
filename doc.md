@@ -53,6 +53,7 @@
 * [st\_contains](#st_contains)
 * [st\_copy](#st_copy)
 * [st\_copyc](#st_copyc)
+* [st\_cspn](#st_cspn)
 * [st\_debug](#st_debug)
 * [st\_delete](#st_delete)
 * [st\_dump](#st_dump)
@@ -89,6 +90,7 @@
 * [st\_rtrim](#st_rtrim)
 * [st\_scmp](#st_scmp)
 * [st\_shuffle](#st_shuffle)
+* [st\_spn](#st_spn)
 * [st\_start\_with](#st_start_with)
 * [st\_sub](#st_sub)
 * [st\_subcompare](#st_subcompare)
@@ -579,7 +581,7 @@ Append input to out
 ---
 
 <a name="st_ascii_length"></a>
-### st\_len\_t st\_ascii\_length(const char\* src, size\_t \* used_bytes)
+### st\_len\_t st\_ascii\_length(const char\* src, st\_size\_t \* used_bytes)
 
 
 
@@ -587,7 +589,7 @@ Append input to out
 
 * `const char*` *src*
 
-* `size_t *` *used\_bytes*
+* `st_size_t *` *used\_bytes*
 
 
 ---
@@ -1035,10 +1037,37 @@ Copy src into out
 
 ---
 
+<a name="st_cspn"></a>
+### st\_len\_t st\_cspn(const string\* subject, const string\* mask, st\_len\_t offset, st\_len\_t length)
+
+Return the position of the maximum initial segment of S
+of `subject` which contains no characters in `mask`.
+
+
+
+##### Return: st\_len\_t
+
+position
+
+##### Arguments (4)
+
+* `const string*` *subject*
+
+* `const string*` *mask*
+
+* `st_len_t` *offset*
+
+* `st_len_t` *length*
+
+
+---
+
 <a name="st_debug"></a>
 ### void st\_debug(string \* str)
 
 Print to stdout useful information to debug
+It add zeronull at the end of the string to not overflow when printf
+
 
 
 ##### Arguments (1)
@@ -1753,6 +1782,31 @@ new string
 * `string *` *src*
 
 * `size_t` *len*
+
+
+---
+
+<a name="st_spn"></a>
+### st\_len\_t st\_spn(const string\* subject, const string\* mask, st\_len\_t offset, st\_len\_t length)
+
+Return the position of the maximum initial segment
+of `subject` which contains only characters in `mask`.
+
+
+
+##### Return: st\_len\_t
+
+position
+
+##### Arguments (4)
+
+* `const string*` *subject*
+
+* `const string*` *mask*
+
+* `st_len_t` *offset*
+
+* `st_len_t` *length*
 
 
 ---

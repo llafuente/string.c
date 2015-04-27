@@ -1019,6 +1019,26 @@ ST_EXTERN string* st_remove(const string* haystack, const string* needle,
 ST_EXTERN string* st_replace(const string* haystack, const string* needle,
                              const string* replacement, st_len_t* count);
 
+/* Return the position of the maximum initial segment
+ * of `subject` which contains only characters in `mask`.
+ *
+ * @return position
+ * @subject
+ * @mask
+ */
+ST_EXTERN st_len_t st_spn(const string* subject, const string* mask,
+                          st_len_t offset, st_len_t length);
+
+/* Return the position of the maximum initial segment of S
+ * of `subject` which contains no characters in `mask`.
+ *
+ * @return position
+ * @subject
+ * @mask
+ */
+ST_EXTERN st_len_t st_cspn(const string* subject, const string* mask,
+                           st_len_t offset, st_len_t length);
+
 /* cldoc:end-category() */
 //-
 //- encode.c

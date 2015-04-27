@@ -452,12 +452,11 @@ void test_from() {
   ASSERT(dd == 7904751, "hex2dec(789DEF) == 7904751");
   st_delete(&s);
 
-
   s = st_dec2bin(10);
   CHK_ALL(s, "1010", st_enc_ascii);
   st_delete(&s);
 
-  s = st_dec2bin((size_t) 3.9505e3);
+  s = st_dec2bin((size_t)3.9505e3);
   CHK_ALL(s, "111101101110", st_enc_ascii);
   st_delete(&s);
 
@@ -465,7 +464,7 @@ void test_from() {
   CHK_ALL(s, "12", st_enc_ascii);
   st_delete(&s);
 
-  s = st_dec2oct((size_t) 3950.5);
+  s = st_dec2oct((size_t)3950.5);
   CHK_ALL(s, "7556", st_enc_ascii);
   st_delete(&s);
 
@@ -473,10 +472,9 @@ void test_from() {
   CHK_ALL(s, "a", st_enc_ascii);
   st_delete(&s);
 
-  s = st_dec2hex((size_t) 3950.5);
+  s = st_dec2hex((size_t)3950.5);
   CHK_ALL(s, "f6e", st_enc_ascii);
   st_delete(&s);
-
 
   // st_number2base
 
@@ -594,26 +592,35 @@ void test_utf8_lenc() {
 
 void test_utf8_invalid() {
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_1,
-                         strlen(T_STR_UTF8_1)) == 0, "T_STR_UTF8_1 is valid");
+                         strlen(T_STR_UTF8_1)) == 0,
+         "T_STR_UTF8_1 is valid");
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_2,
-                         strlen(T_STR_UTF8_2)) == 0, "T_STR_UTF8_2 is valid");
+                         strlen(T_STR_UTF8_2)) == 0,
+         "T_STR_UTF8_2 is valid");
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_3,
-                         strlen(T_STR_UTF8_3)) == 0, "T_STR_UTF8_3 is valid");
+                         strlen(T_STR_UTF8_3)) == 0,
+         "T_STR_UTF8_3 is valid");
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_4,
-                         strlen(T_STR_UTF8_4)) == 0, "T_STR_UTF8_4 is valid");
+                         strlen(T_STR_UTF8_4)) == 0,
+         "T_STR_UTF8_4 is valid");
 
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_5,
-                         strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1, "T_STR_UTF8_5 is invalid");
+                         strlen(T_STR_UTF8_5)) == T_STR_UTF8_5 + 1,
+         "T_STR_UTF8_5 is invalid");
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_6,
-                         strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5, "T_STR_UTF8_6 is invalid");
+                         strlen(T_STR_UTF8_6)) == T_STR_UTF8_6 + 5,
+         "T_STR_UTF8_6 is invalid");
 
   ASSERT(st_utf8_invalid((const unsigned char*)T_STR_UTF8_7,
-                         strlen(T_STR_UTF8_7)) == 0, "T_STR_UTF8_7 is valid");
+                         strlen(T_STR_UTF8_7)) == 0,
+         "T_STR_UTF8_7 is valid");
 
-  ASSERT(st_validate_encoding(T_STR_UTF8_5, st_enc_utf8) == false, "validate T_STR_UTF8_5");
-  ASSERT(st_validate_encoding(T_STR_UTF8_7, st_enc_utf8) == true, "validate T_STR_UTF8_7");
-  ASSERT(st_validate_encoding(T_STR_UTF8_2, st_enc_utf8) == true, "validate T_STR_UTF8_2");
-
+  ASSERT(st_validate_encoding(T_STR_UTF8_5, st_enc_utf8) == false,
+         "validate T_STR_UTF8_5");
+  ASSERT(st_validate_encoding(T_STR_UTF8_7, st_enc_utf8) == true,
+         "validate T_STR_UTF8_7");
+  ASSERT(st_validate_encoding(T_STR_UTF8_2, st_enc_utf8) == true,
+         "validate T_STR_UTF8_2");
 }
 
 char buffer[256];
@@ -766,7 +773,6 @@ void test_chr() {
   assert(st_ord(s, 0) == 195038);
   st_delete(&s);
 
-
   /*
   s = st_chr(110011, st_enc_utf8);
   st_debug(s);
@@ -775,9 +781,6 @@ void test_chr() {
   printf("%ld\n", st_ord(s, 0));
   exit(1);
   */
-
-
-
 
   s = st_newc(T_STR_03, st_enc_utf8);
 
@@ -1103,6 +1106,60 @@ void test_search() {
   st_delete(&needle);
   st_delete(&replacement);
   st_delete(&result);
+
+  //
+  // st_spn
+  //
+  string* subject = st_newc("22222222aaaa bbb1111 cccc", st_enc_ascii);
+  string* mask = st_newc("1234", st_enc_ascii);
+
+  ASSERT(st_spn(subject, mask, 0, 0) == 8, "st_spn 1");
+  ASSERT(st_spn(subject, mask, 2, 0) == 8, "st_spn 2");
+  ASSERT(st_spn(subject, mask, 2, 3) == 6, "st_spn 3");
+
+  st_delete(&subject);
+  st_delete(&mask);
+
+  subject = st_newc("this is the test string", st_enc_ascii);
+  mask = st_newc("htes ", st_enc_ascii);
+  // TODO! ASSERT(st_spn(subject, mask, 8, 30) == 1, "st_spn 1");
+  // printf("%ld\n", st_spn(subject, mask, 8, 0));
+  // exit(1);
+  ASSERT(st_spn(subject, mask, 8, 0) == 19, "st_spn 4");
+  ASSERT(st_spn(subject, mask, 0, 0) == 2, "st_spn 5");
+  st_delete(&subject);
+  st_delete(&mask);
+
+  subject = st_newc("☃龍☃龍!☃龍☃龍!", st_enc_utf8);
+  mask = st_newc("☃龍", st_enc_utf8);
+  ASSERT(st_spn(subject, mask, 0, 0) == 4, "st_spn 6");
+  ASSERT(st_spn(subject, mask, 5, 0) == 9, "st_spn 7");
+  st_delete(&subject);
+  st_delete(&mask);
+
+  subject = st_newc("abcd", st_enc_utf8);
+  mask = st_newc("apple", st_enc_utf8);
+  ASSERT(st_cspn(subject, mask, 0, 0) == 0, "st_cspn 1");
+  st_delete(&subject);
+  st_delete(&mask);
+
+  subject = st_newc("abcd", st_enc_utf8);
+  mask = st_newc("banana", st_enc_utf8);
+  ASSERT(st_cspn(subject, mask, 0, 0) == 0, "st_cspn 1");
+  st_delete(&subject);
+  st_delete(&mask);
+
+  subject = st_newc("hello", st_enc_utf8);
+  mask = st_newc("l", st_enc_utf8);
+  ASSERT(st_cspn(subject, mask, 0, 0) == 2, "st_cspn 1");
+  st_delete(&subject);
+  st_delete(&mask);
+
+  subject = st_newc("hello", st_enc_utf8);
+  mask = st_newc("world", st_enc_utf8);
+  ASSERT(st_cspn(subject, mask, 0, 0) == 2, "st_cspn 1");
+  st_delete(&subject);
+  st_delete(&mask);
 }
 
 void test_ascii() {
@@ -1346,4 +1403,3 @@ extern void test_justify() {
   st_delete(&padstr);
   st_delete(&x);
 }
-

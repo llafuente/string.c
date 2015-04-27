@@ -217,7 +217,7 @@ bool st_validate_encoding(char* input, st_enc_t enc) {
       // check surrogates
 
       while (++p && --len) {
-        if(!ST_UTF8_IS_TRAIL(*p)) {
+        if (!ST_UTF8_IS_TRAIL(*p)) {
           return false;
         }
       }

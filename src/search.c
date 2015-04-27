@@ -448,3 +448,93 @@ string* st_replace(const string* haystack, const string* needle,
 
   return out;
 }
+
+// TODO benchmark
+st_len_t st_span(const string* subject, const string* mask, st_len_t offset,
+                 st_len_t length, bool contains) {
+  st_len_t mlen = mask->length;
+
+  if (mlen == 0) {
+    return 0;
+  }
+
+  // caches
+  st_len_t slen = subject->length;
+  st_enc_t enc = subject->encoding;
+
+  // working range
+  st__calc_range(slen, &offset, &length);
+
+  char* start;
+  char* end;
+  st__get_char_range(subject, offset, length, &start, &end);
+  st_len_t jump;
+  st_len_t mjump;
+  char* mval = mask->value;
+  char* mend = mval + mask->used;
+  st_uc_t* mp;
+  st_len_t pos = offset;
+
+  // chararacters caches
+  st_uc_t sc0;
+  st_uc_t sc1;
+  st_uc_t sc2;
+  st_uc_t sc3;
+  bool f;
+
+  while (start <= end) {
+    jump = st_char_size(start, enc);
+    f = contains;
+
+    switch (jump) {
+    case 1:
+      sc0 = (st_uc_t)start[0];
+      break;
+    case 2:
+      sc0 = (st_uc_t)start[0];
+      sc1 = (st_uc_t)start[1];
+      break;
+    case 3:
+      sc0 = (st_uc_t)start[0];
+      sc1 = (st_uc_t)start[1];
+      sc2 = (st_uc_t)start[2];
+      break;
+    case 4:
+      sc0 = (st_uc_t)start[0];
+      sc1 = (st_uc_t)start[1];
+      sc2 = (st_uc_t)start[2];
+      sc3 = (st_uc_t)start[3];
+      break;
+    }
+
+    mp = (st_uc_t*)mval;
+    while (mp < mend) {
+      mjump = st_char_size((char*)mp, enc);
+      if ((jump != mjump) || (sc0 != mp[0]) || (jump > 1 && sc1 != mp[1]) ||
+          (jump > 2 && sc2 != mp[2]) || (jump > 3 && sc3 != mp[3])) {
+        mp += mjump;
+        continue;
+      }
+      f = !f;
+      break;
+    }
+
+    if (!f) {
+      return pos;
+    }
+
+    ++pos;
+    start += jump;
+  }
+
+  return pos;
+}
+
+st_len_t st_spn(const string* subject, const string* mask, st_len_t offset,
+                st_len_t length) {
+  return st_span(subject, mask, offset, length, false);
+}
+st_len_t st_cspn(const string* subject, const string* mask, st_len_t offset,
+                 st_len_t length) {
+  return st_span(subject, mask, offset, length, true);
+}
