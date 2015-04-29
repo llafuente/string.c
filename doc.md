@@ -10,6 +10,7 @@
 * [st\_uc\_t](#st_uc_t)
 * [st\_enc\_t](#st_enc_t)
 * [string](#string)
+* [st\_\_calc\_offset](#st__calc_offset)
 * [st\_\_calc\_range](#st__calc_range)
 * [st\_\_char\_lower](#st__char_lower)
 * [st\_\_char\_upper](#st__char_upper)
@@ -64,6 +65,7 @@
 * [st\_hex2bin](#st_hex2bin)
 * [st\_hexdump](#st_hexdump)
 * [st\_index\_of](#st_index_of)
+* [st\_insert](#st_insert)
 * [st\_ipos](#st_ipos)
 * [st\_irpos](#st_irpos)
 * [st\_is\_ascii](#st_is_ascii)
@@ -264,6 +266,21 @@ string type, use value[] at the end, so only one malloc is enough
 
 
 ## Functions
+
+<a name="st__calc_offset"></a>
+### st\_len\_t st\_\_calc\_offset(st\_len\_t str_length, st\_len\_t offset)
+
+Normalize offset using the same logic
+
+
+##### Arguments (2)
+
+* `st_len_t` *str\_length*
+
+* `st_len_t` *offset*
+
+
+---
 
 <a name="st__calc_range"></a>
 ### void st\_\_calc\_range(st\_len\_t str_length, st\_len\_t \* offset, st\_len\_t \* offset_length)
@@ -1243,6 +1260,27 @@ alias of [st_pos](#st_pos)
 * `st_len_t` *offset*
 
 * `st_len_t` *length*
+
+
+---
+
+<a name="st_insert"></a>
+### void st\_insert(string \*\* out, const string\* ins, st\_len\_t offset)
+
+Add `ins` into `offset` position
+
+
+##### Return: void
+
+position
+
+##### Arguments (3)
+
+* `string **` *out*
+
+* `const string*` *ins*
+
+* `st_len_t` *offset*
 
 
 ---

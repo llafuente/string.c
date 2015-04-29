@@ -470,7 +470,7 @@ st_len_t st_span(const string* subject, const string* mask, st_len_t offset,
   st__get_char_range(subject, offset, length, &start, &end);
   st_len_t jump;
   st_len_t mjump;
-  char* mval = mask->value;
+  char* mval = (char*)mask->value;
   char* mend = mval + mask->used;
   st_uc_t* mp;
   st_len_t pos = offset;
@@ -508,7 +508,7 @@ st_len_t st_span(const string* subject, const string* mask, st_len_t offset,
     }
 
     mp = (st_uc_t*)mval;
-    while (mp < mend) {
+    while (mp < (st_uc_t*)mend) {
       mjump = st_char_size((char*)mp, enc);
       if ((jump != mjump) || (sc0 != mp[0]) || (jump > 1 && sc1 != mp[1]) ||
           (jump > 2 && sc2 != mp[2]) || (jump > 3 && sc3 != mp[3])) {
@@ -537,4 +537,37 @@ st_len_t st_spn(const string* subject, const string* mask, st_len_t offset,
 st_len_t st_cspn(const string* subject, const string* mask, st_len_t offset,
                  st_len_t length) {
   return st_span(subject, mask, offset, length, true);
+}
+
+void st_insert(string** out, const string* ins, st_len_t offset) {
+  // caches
+  // check capacity -> resize
+  string* o = (*out);
+  st_len_t iused = ins->used;
+  st_len_t oused = o->used;
+  st_len_t rused = oused + iused;
+  st_enc_t enc = o->encoding;
+  st_grow(out, rused, enc);
+  // re-cache, maybe it was reallocated
+  o = (*out);
+
+  // working range
+  offset = st__calc_offset(o->length, offset);
+
+  char* oval = o->value;
+  char* p = oval;
+
+  if (offset) {
+    ST_ADVANCE(p, offset, enc);
+  }
+
+  // move from offset to the end of ins
+  st_len_t left = oused - (p - oval);
+  memmove(p + iused, p, left);
+  // move ins to offset
+  memmove(p, ins->value, iused);
+  // zero null the end
+  st__zeronull(oval + rused, 0, enc);
+  o->used = rused;
+  o->length += ins->length;
 }

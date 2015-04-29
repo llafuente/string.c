@@ -1038,6 +1038,13 @@ ST_EXTERN st_len_t st_spn(const string* subject, const string* mask,
  */
 ST_EXTERN st_len_t st_cspn(const string* subject, const string* mask,
                            st_len_t offset, st_len_t length);
+/* Add `ins` into `offset` position
+ *
+ * @return position
+ * @subject
+ * @mask
+ */
+ST_EXTERN void st_insert(string** out, const string* ins, st_len_t offset);
 
 /* cldoc:end-category() */
 //-
@@ -1146,6 +1153,15 @@ ST_EXTERN void st__get_char_range(const string* str, st_len_t start_pos,
  * @utf8
  */
 ST_EXTERN st_len_t st__utf32cp_to_utf8c(st_uc4_t utf32, st_uc_t* utf8);
+
+/* Normalize offset using the same logic
+ *@[st__get_char_range](#st__get_char_range)
+ *
+ * @return normalized offset
+ * @str_length
+ * @offset
+ */
+ST_EXTERN st_len_t st__calc_offset(st_len_t str_length, st_len_t offset);
 
 /* Normalize given range to be useable in
  *[st__get_char_range](#st__get_char_range)

@@ -79,6 +79,15 @@ char* st__get_char_offset(const string* str, st_len_t offset) {
   return p;
 }
 
+st_len_t st__calc_offset(st_len_t str_length, st_len_t offset) {
+  if (offset < 0) {
+    assert(-offset < str_length);
+
+    offset = str_length + offset;
+  }
+
+  return offset;
+}
 void st__calc_range(st_len_t str_length, st_len_t* offset, st_len_t* length) {
   st_len_t off = *offset;
   st_len_t off_len = *length;

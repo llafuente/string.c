@@ -1160,6 +1160,27 @@ void test_search() {
   ASSERT(st_cspn(subject, mask, 0, 0) == 2, "st_cspn 1");
   st_delete(&subject);
   st_delete(&mask);
+
+  //
+  // st_insert
+  //
+
+  subject = st_newc("hello", st_enc_utf8);
+  string* ins = st_newc("world", st_enc_utf8);
+  st_insert(&subject, ins, 0);
+  CHK_ALL(subject, "worldhello", st_enc_utf8);
+
+  st_insert(&subject, ins, 1);
+  CHK_ALL(subject, "wworldorldhello", st_enc_utf8);
+
+  st_insert(&subject, ins, -1);
+  CHK_ALL(subject, "wworldorldhellworldo", st_enc_utf8);
+
+  st_insert(&subject, ins, subject->length);
+  CHK_ALL(subject, "wworldorldhellworldoworld", st_enc_utf8);
+
+  st_delete(&subject);
+  st_delete(&ins);
 }
 
 void test_ascii() {
