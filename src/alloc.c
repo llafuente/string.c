@@ -54,16 +54,12 @@ string* st_new_max(st_len_t len, st_enc_t enc) {
   }
 }
 
-// TODO use utf8_len()
 string* st_newc(const char* src, st_enc_t enc) {
   st_len_t len;
   st_size_t used;
 
   st_get_meta(src, enc, &len, &used);
   st_size_t size = used + st__zeronull_size(enc);
-
-  // printf("%s\n",  src);
-  // printf("len[%zu] used[%zu] enc[%d]", len, used, enc);
 
   string* s =
       (string*)__STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));

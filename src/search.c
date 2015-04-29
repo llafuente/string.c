@@ -26,8 +26,7 @@
 /// @file
 
 #include "stringc.h"
-// TODO add st_len_t len (to search always inside a substring)
-// Finds position of first occurrence of a string within another */
+
 st_len_t st_pos(const string* haystack, const string* needle, st_len_t offset,
                 st_len_t length) {
   // caches
@@ -397,7 +396,7 @@ string* st_replace(const string* haystack, const string* needle,
     if (!memcmp(nval, start, nused)) {
       oval_pos = (oval - ofval);
 
-      // this formula is very conservative, maybe we can increased
+      // this formula is very conservative, maybe we can increase it
       // TODO performance check
       st_grow(&out, oval_pos + need_cpy + rused + rused + (end - start), enc);
       // redo caches

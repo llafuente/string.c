@@ -180,4 +180,30 @@ string* st_ucfirst(const string* str) {
 
 string* string_swapcase(string* src) { return 0; }
 
-string* string_lcfirst(string* src) { return 0; }
+string* st_lcfirst(string* str) {
+  const char* itr = str->value;
+  st_enc_t enc = str->encoding;
+
+  // fist UP
+  st_len_t jump = st_char_size(itr, enc);
+  st_uc4_t cp = st_codepoint(itr, enc);
+  st_uc4_t cp2 = st_utf32_lowercase(cp);
+  st_len_t cp_size;
+
+  if (cp != cp2) {
+    string* out = st_new_max(str->used, enc);
+    char* oval = out->value;
+
+    cp_size = st_from_codepoint(oval, cp2, enc);
+
+    memcpy(oval + cp_size, itr + jump,
+           str->used - jump + st__zeronull_size(enc));
+
+    out->length = str->length;
+    out->used = str->used - jump + cp_size;
+
+    return out;
+  }
+
+  return st_clone(str);
+}

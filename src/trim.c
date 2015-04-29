@@ -29,7 +29,6 @@
 
 string* string_def_trim_mask = 0;
 
-// TODO review, cache charmask for !what_str
 string* st_trim(const string* str, string* what_str, int mode) {
   const char* c = str->value;
   size_t len = str->length;

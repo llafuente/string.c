@@ -852,9 +852,9 @@ ST_EXTERN string* st_ltrim(const string* str, string* character_mask);
 /* cldoc:begin-category(case.c) */
 
 /* Returns a copy of `input` with the first character converted to uppercase and
- *the
- * remainder to lowercase.
+ * the remainder to lowercase.
  * see [st_ucfirst](#st_ucfirst)
+ * see [st_lcfirst](#st_lcfirst)
  *
  * @return new string
  * @input The input string
@@ -863,11 +863,21 @@ ST_EXTERN string* st_capitalize(const string* input);
 
 /* Returns a copy of `input` with the first character uppercased.
  * see [st_capitalize](#st_capitalize)
+ * see [st_lcfirst](#st_lcfirst)
  *
  * @return new string
  * @input The input string
  */
 ST_EXTERN string* st_ucfirst(const string* input);
+
+/* Returns a copy of `input` with the first character lowercased.
+ * see [st_capitalize](#st_capitalize)
+ * see [st_ucfirst](#st_ucfirst)
+ *
+ * @return new string
+ * @input The input string
+ */
+ST_EXTERN string* st_lcfirst(string* str);
 
 /* Uppercase `str` and return it into `buffer` (null-terminated)
  *

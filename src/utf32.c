@@ -44,24 +44,15 @@ bool st_utf32_valid_codepoint(st_uc4_t code_point) {
   return code_point <= 0x10FFFF ? 4 : -1;
 }
 
-// TODO casting to st_uc4_t* is the same?!
 st_uc4_t st_utf32be_codepoint(const char* input) {
-  const st_uc4_t* uc_input = (const st_uc4_t*)input;
-  return *uc_input;
-  /*
-  const st_uc_t* uc_input = (const st_uc_t*)input;
-
-  return ((uc_input[0]) << 24) + ((uc_input[1]) << 16) + ((uc_input[2]) << 8) +
-         (uc_input[3]);
-  */
+  return *(const st_uc4_t*)input;
 }
 
-// TODO casting to st_uc2_t* and shift is the same?!
 st_uc4_t st_utf32le_codepoint(const char* input) {
-  const st_uc_t* uc_input = (const st_uc_t*)input;
+  st_uc4_t a = *(const st_uc4_t*)input;
 
-  return ((uc_input[3]) << 24) + ((uc_input[2]) << 16) + ((uc_input[1]) << 8) +
-         (uc_input[0]);
+  return (a << 24) | ((a & 0x0000ff00UL) << 8) | ((a & 0x00ff0000UL) >> 8) |
+         (a >> 24);
 }
 
 st_len_t st_utf32_char_size(const char* input) { return 4; }

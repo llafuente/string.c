@@ -179,6 +179,7 @@ void st_byte_iterator(const string* str, st_byte_itr_cb itr_cb) {
   }
 }
 
+// TODO does not work with utf32
 void st_line_iterator(const string* str, st_char_itr_cb itr_cb) {
   string* buffer = 0;
 

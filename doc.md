@@ -70,6 +70,7 @@
 * [st\_irpos](#st_irpos)
 * [st\_is\_ascii](#st_is_ascii)
 * [st\_justify](#st_justify)
+* [st\_lcfirst](#st_lcfirst)
 * [st\_left](#st_left)
 * [st\_length](#st_length)
 * [st\_line\_iterator](#st_line_iterator)
@@ -706,9 +707,9 @@ string length (do not include null terminated space)
 ### string \* st\_capitalize(const string\* input)
 
 Returns a copy of `input` with the first character converted to uppercase and
-the
-remainder to lowercase.
+the remainder to lowercase.
 see [st_ucfirst](#st_ucfirst)
+see [st_lcfirst](#st_lcfirst)
 
 
 
@@ -1370,6 +1371,26 @@ new string
 
 ---
 
+<a name="st_lcfirst"></a>
+### string \* st\_lcfirst(string \* str)
+
+Returns a copy of `input` with the first character lowercased.
+see [st_capitalize](#st_capitalize)
+see [st_ucfirst](#st_ucfirst)
+
+
+
+##### Return: string \*
+
+new string
+
+##### Arguments (1)
+
+* `string *` *str*
+
+
+---
+
 <a name="st_left"></a>
 ### string \* st\_left(const string\* src, size\_t width, const string\* padstr)
 
@@ -1975,6 +1996,7 @@ new string
 
 Returns a copy of `input` with the first character uppercased.
 see [st_capitalize](#st_capitalize)
+see [st_lcfirst](#st_lcfirst)
 
 
 
