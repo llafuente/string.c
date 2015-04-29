@@ -851,13 +851,23 @@ ST_EXTERN string* st_ltrim(const string* str, string* character_mask);
 //-
 /* cldoc:begin-category(case.c) */
 
-/* Returns a copy of str with the first character converted to uppercase and the
+/* Returns a copy of `input` with the first character converted to uppercase and
+ *the
  * remainder to lowercase.
+ * see [st_ucfirst](#st_ucfirst)
  *
  * @return new string
- * @str The input string
+ * @input The input string
  */
 ST_EXTERN string* st_capitalize(const string* input);
+
+/* Returns a copy of `input` with the first character uppercased.
+ * see [st_capitalize](#st_capitalize)
+ *
+ * @return new string
+ * @input The input string
+ */
+ST_EXTERN string* st_ucfirst(const string* input);
 
 /* Uppercase `str` and return it into `buffer` (null-terminated)
  *

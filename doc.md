@@ -99,6 +99,7 @@
 * [st\_to\_utf32](#st_to_utf32)
 * [st\_to\_utf8](#st_to_utf8)
 * [st\_trim](#st_trim)
+* [st\_ucfirst](#st_ucfirst)
 * [st\_upper](#st_upper)
 * [st\_utf32\_char\_size](#st_utf32_char_size)
 * [st\_utf32\_lead\_size](#st_utf32_lead_size)
@@ -704,8 +705,10 @@ string length (do not include null terminated space)
 <a name="st_capitalize"></a>
 ### string \* st\_capitalize(const string\* input)
 
-Returns a copy of str with the first character converted to uppercase and the
+Returns a copy of `input` with the first character converted to uppercase and
+the
 remainder to lowercase.
+see [st_ucfirst](#st_ucfirst)
 
 
 
@@ -1963,6 +1966,25 @@ new string
 * `string *` *character\_mask*
 
 * `int` *mode*
+
+
+---
+
+<a name="st_ucfirst"></a>
+### string \* st\_ucfirst(const string\* input)
+
+Returns a copy of `input` with the first character uppercased.
+see [st_capitalize](#st_capitalize)
+
+
+
+##### Return: string \*
+
+new string
+
+##### Arguments (1)
+
+* `const string*` *input*
 
 
 ---

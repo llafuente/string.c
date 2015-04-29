@@ -263,22 +263,32 @@ void test_case() {
   st_delete(&up);
 
   s = st_newc("áéíóú", st_enc_utf8);
+
+  up = st_ucfirst(s);
+  CHK_ALL(up, "Áéíóú", st_enc_utf8);
+  st_delete(&up);
+
   up = st_upper(s);
   CHK_ALL(up, "ÁÉÍÓÚ", st_enc_utf8);
   st_delete(&up);
 
   up = st_capitalize(s);
   CHK_ALL(up, "Áéíóú", st_enc_utf8);
+  st_delete(&up);
 
   st_delete(&s);
-  st_delete(&up);
 
   s = st_newc("ÁÉÍÓÚ", st_enc_utf8);
+
   up = st_capitalize(s);
   CHK_ALL(up, "Áéíóú", st_enc_utf8);
+  st_delete(&up);
+
+  up = st_ucfirst(s);
+  CHK_ALL(up, "ÁÉÍÓÚ", st_enc_utf8);
+  st_delete(&up);
 
   st_delete(&s);
-  st_delete(&up);
 
   char buffer[12];
   st__char_upper("a", buffer, st_enc_ascii);
