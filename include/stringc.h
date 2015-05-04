@@ -1368,7 +1368,7 @@ ST_EXTERN bool st_is_ascii(const char* input);
 //-
 /* cldoc:begin-category(utf32.c) */
 
-ST_EXTERN st_len_t st_utf32_length(const char* src, size_t* used_bytes);
+ST_EXTERN st_len_t st_utf32_length(const char* src, st_size_t* used_bytes);
 
 ST_EXTERN st_uc4_t st_utf32le_codepoint(const char* input);
 ST_EXTERN st_uc4_t st_utf32be_codepoint(const char* input);

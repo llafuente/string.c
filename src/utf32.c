@@ -27,8 +27,8 @@
 
 #include "stringc.h"
 
-st_len_t st_utf32_length(const char* src, size_t* used_bytes) {
-  st_len_t out = strlen(src);
+st_len_t st_utf32_length(const char* src, st_size_t* used_bytes) {
+  st_len_t out = wcslen((wchar_t*)src) * 4;
 
   if (used_bytes) {
     *used_bytes = out;
@@ -41,7 +41,7 @@ bool st_utf32_valid_codepoint(st_uc4_t code_point) {
   // calculate the code point
   //
   // make sure the code point is within the valid range
-  return code_point <= 0x10FFFF ? 4 : -1;
+  return code_point <= 0x10FFFF;
 }
 
 st_uc4_t st_utf32be_codepoint(const char* input) {

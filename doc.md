@@ -2053,7 +2053,7 @@ new string
 ---
 
 <a name="st_utf32_length"></a>
-### st\_len\_t st\_utf32\_length(const char\* src, size\_t \* used_bytes)
+### st\_len\_t st\_utf32\_length(const char\* src, st\_size\_t \* used_bytes)
 
 
 
@@ -2061,7 +2061,7 @@ new string
 
 * `const char*` *src*
 
-* `size_t *` *used\_bytes*
+* `st_size_t *` *used\_bytes*
 
 
 ---

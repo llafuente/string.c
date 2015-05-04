@@ -212,18 +212,35 @@ void st_cleanup() {
 }
 
 char* st_dump(string* s) {
-  size_t len = sizeof(string) + s->capacity;
-  printf("len %lu\n", len);
-  char* out = malloc(len);
+  size_t slen = sizeof(string);
+  size_t len = s->used;
+  // printf("total capacity = %lu\n", len);
+  char* out = malloc((4 * slen) + len + 1);
   char* p = (char*)s; // dump values on by one
-  printf("p [%p] s[%p]\n", p, s);
+  // printf("p [%p] s[%p]\n", p, s);
   char* pp = out;
-  while (--len) {
-    printf("len [%lu] char[%c | %2.2x]\n", len, *p, (*p) & 0xff);
+  char c[3];
+
+  do {
+    // printf("len [%lu] char[%c | %2.2x]\n", slen, *p, (*p) & 0xff);
+    sprintf(c, "%2.2x", (*p) & 0xff);
+    pp[0] = '\\';
+    pp[1] = 'x';
+    pp[2] = c[0];
+    pp[3] = c[1];
+
+    ++p;
+    pp += 4;
+  } while (--slen);
+
+  do {
+    // printf("len [%lu] char[%c | %2.2x]\n", len, *p, (*p) & 0xff);
     *pp = *p;
     ++p;
     ++pp;
-  }
+  } while (--len);
+
+  *pp = '\0';
 
   return out;
 }

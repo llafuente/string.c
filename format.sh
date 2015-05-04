@@ -24,3 +24,10 @@ for file in $(find ./test/ -iname '*.c'); do
   clang-format -style=file ${file} > xx
   mv xx ${file}
 done
+
+for file in $(find ./test/ -iname '*.h'); do
+  echo "formatting file ${file}"
+
+  clang-format -style=file ${file} > xx
+  mv xx ${file}
+done

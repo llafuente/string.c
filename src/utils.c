@@ -207,7 +207,6 @@ bool st_validate_encoding(char* input, st_enc_t enc) {
   while (*p) {
     // check if the character is valid
     st_len_t len = st_char_size_safe(input, enc);
-    printf("size [%d] @[%ld]\n", len, input - p);
 
     if (len < 0) {
       return false;
@@ -224,7 +223,6 @@ bool st_validate_encoding(char* input, st_enc_t enc) {
     } else {
       input += len;
     }
-    printf("next char [%c]\n", *input);
   }
   // if we didn't fail yet, return success
   return true;
