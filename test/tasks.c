@@ -1,8 +1,8 @@
 #include "tasks.h"
 
-size_t assert_count = 0;
-struct timespec* bench_time_start = 0;
-struct timespec* bench_time_end = 0;
+size_t st_assert_count = 0;
+struct timespec* st_bench_time_start = 0;
+struct timespec* st_bench_time_end = 0;
 
 // move functions here
 
@@ -18,23 +18,25 @@ char* bench_get_current_date() {
 }
 
 void bench_start() {
-  bench_time_start = (struct timespec*)malloc(sizeof(bench_time_start));
-  // clock_gettime(CLOCK_PROCESS_CPUTIME_ID, bench_time_start);
-  clock_gettime(CLOCK_MONOTONIC, bench_time_start);
+  st_bench_time_start = (struct timespec*)malloc(sizeof(struct timespec));
+  // clock_gettime(CLOCK_PROCESS_CPUTIME_ID, st_bench_time_start);
+  clock_gettime(CLOCK_MONOTONIC, st_bench_time_start);
 }
 
 double bench_end() {
-  bench_time_end = (struct timespec*)malloc(sizeof(bench_time_end));
-  // clock_gettime(CLOCK_PROCESS_CPUTIME_ID, bench_time_end);
-  clock_gettime(CLOCK_MONOTONIC, bench_time_end);
+  st_bench_time_end = (struct timespec*)malloc(
+      sizeof(struct timespec)); // clock_gettime(CLOCK_PROCESS_CPUTIME_ID,
+                                // st_bench_time_end);
+  clock_gettime(CLOCK_MONOTONIC, st_bench_time_end);
 
-  double result = (bench_time_end->tv_sec - bench_time_start->tv_sec) * 1E9 +
-                  (bench_time_end->tv_nsec - bench_time_start->tv_nsec);
+  double result =
+      (st_bench_time_end->tv_sec - st_bench_time_start->tv_sec) * 1E9 +
+      (st_bench_time_end->tv_nsec - st_bench_time_start->tv_nsec);
 
-  free(bench_time_start);
-  bench_time_start = 0;
-  free(bench_time_end);
-  bench_time_end = 0;
+  free(st_bench_time_start);
+  st_bench_time_start = 0;
+  free(st_bench_time_end);
+  st_bench_time_end = 0;
   return result;
 }
 

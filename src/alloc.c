@@ -94,7 +94,6 @@ void st_grow(string** src, st_size_t cap, st_enc_t enc) {
   }
 
   if (cap + st__zeronull_size(enc) > (*src)->capacity) {
-    printf("resize\n");
     (*src)->encoding = enc;
     st_resize(src, cap);
   }

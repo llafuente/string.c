@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #include <time.h>
 
-extern size_t assert_count;
+extern size_t st_assert_count;
 
 #define STRINGIFY2(x) #x
 #define STRINGIFY(x) STRINGIFY2(x)
@@ -44,17 +44,36 @@ extern size_t assert_count;
 #define PASTE2(a, b) a##b
 #define PASTE(a, b) PASTE2(a, b)
 
+#ifdef BENCHMARKING
 #define ASSERT(comparison, name)                                               \
-  if (comparison) {                                                            \
-    printf("[%6zu]\x1B[32mPASS\x1B[39m: %-32s [%s:%d]\n", ++assert_count,      \
-           name, __FILE__, __LINE__);                                          \
-  } else {                                                                     \
-    printf("[%6zu]\x1B[31mFAIL\x1B[39m: %-32s [%s:%d]\n", ++assert_count,      \
+  if (comparison == false) {                                                           \
+    printf("[%6zu]\x1B[31mFAIL\x1B[39m: %-32s [%s:%d]\n", ++st_assert_count,   \
            name, __FILE__, __LINE__);                                          \
     trace(stderr);                                                             \
     exit(1);                                                                   \
   }
 
+#define ASSERT_STR(src, dst, enc)                                              \
+  if (enc == st_enc_utf32be || enc == st_enc_utf32le) {                        \
+    ASSERT(0 == wcscmp((const wchar_t*)src->value, (const wchar_t*)dst),       \
+           "value");                                                           \
+  } else {                                                                     \
+    ASSERT(0 == strcmp((const char*)src->value, (const char*)dst), "value");   \
+  }                                                                            \
+  ASSERT(src->length == st_length((const char*)dst, enc), "length");           \
+  ASSERT(src->used == st_capacity((const char*)dst, enc), "used");             \
+  ASSERT(src->capacity >= src->used, "capacity");
+#else
+#define ASSERT(comparison, name)                                               \
+  if (comparison) {                                                            \
+    printf("[%6zu]\x1B[32mPASS\x1B[39m: %-32s [%s:%d]\n", ++st_assert_count,   \
+           name, __FILE__, __LINE__);                                          \
+  } else {                                                                     \
+    printf("[%6zu]\x1B[31mFAIL\x1B[39m: %-32s [%s:%d]\n", ++st_assert_count,   \
+           name, __FILE__, __LINE__);                                          \
+    trace(stderr);                                                             \
+    exit(1);                                                                   \
+  }
 #define ASSERT_STR(src, dst, enc)                                              \
   if (enc == st_enc_utf32be || enc == st_enc_utf32le) {                        \
     printf("# CHECK %s = utf32 L[%d]U[%d]C[%u]\n", STRINGIFY2(src),            \
@@ -75,6 +94,8 @@ extern size_t assert_count;
   ASSERT(src->used == st_capacity((const char*)dst, enc), "used");             \
   ASSERT(src->capacity >= src->used, "capacity");
 
+#endif
+
 #define TASK_IMPL(name)                                                        \
   extern int run_task_##name(void);                                            \
   int run_task_##name(void)
@@ -86,38 +107,45 @@ extern size_t assert_count;
   extern int run_task_##name(void);                                            \
   run_task_##name();
 
+  #include <unistd.h>
+
 // create a benchmark
 // allways run times+3
 // the first three times are to get everything hot
-#define TASK_BENCHMARK(prefix, measures, times, name)                          \
+#define TASK_BENCHMARK(prefix, measurements, times, name)                      \
+  extern int run_task_##name(void);                                            \
   {                                                                            \
     run_task_##name();                                                         \
     run_task_##name();                                                         \
     run_task_##name();                                                         \
-    double lmeasures[measures];                                                \
-    for (size_t m = 0; m < measures; ++m) {                                    \
+    double lmeasurements[measurements];                                        \
+    for (size_t m = 0; m < measurements; ++m) {                                \
       bench_start();                                                           \
       for (size_t i = 0; i < times; ++i) {                                     \
-        func();                                                                \
+        run_task_##name();                                                     \
       }                                                                        \
-      lmeasures[m] = bench_end();                                              \
+      lmeasurements[m] = bench_end();                                          \
     }                                                                          \
-    char filename[100];                                                        \
+    char filename[256];                                                        \
     sprintf(filename, "bench_data/%s-%s", prefix, #name);                      \
     FILE* fp = fopen(filename, "w+");                                          \
+    if (!fp) { \
+      printf("cannot open file %s\n", filename);\
+      exit(1);\
+    }\
     char* date = bench_get_current_date();                                     \
     fprintf(fp, "# " #name ": %s\n", date);                                    \
     free(date);                                                                \
-    for (size_t m = 0; m < measures; ++m) {                                    \
-      fprintf(fp, "%f\n", lmeasures[m]);                                       \
+    for (size_t m = 0; m < measurements; ++m) {                                \
+      fprintf(fp, "%f\n", lmeasurements[m]);                                   \
     }                                                                          \
     fclose(fp);                                                                \
   }
 
 extern char* bench_get_current_date();
 
-extern struct timespec* bench_time_start;
-extern struct timespec* bench_time_end;
+extern struct timespec* st_bench_time_start;
+extern struct timespec* st_bench_time_end;
 
 extern void bench_start();
 extern double bench_end();

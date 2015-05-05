@@ -1,0 +1,25 @@
+{
+  "name": "string.c",
+  "version": "0.0.0",
+  "description": "Single allocation string implementation (with struct) c99 at least, more convenient and performance that common null terminated char*, 100% compatible with them :) and accept multiple encodings.",
+  "main": "cldoc2md.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/llafuente/string.c.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/llafuente/string.c/issues"
+  },
+  "homepage": "https://github.com/llafuente/string.c",
+  "dependencies": {
+    "async": "^0.9.0"
+  }
+}

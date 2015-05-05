@@ -33,7 +33,6 @@ void char_itr_cb(const string* chr, st_len_t pos, string* src) {
 }
 
 void wchar_itr_cb(const string* chr, st_len_t pos, string* src) {
-  st_hexdump(chr->value, 8);
   wcscat((wchar_t*)buffer, (wchar_t*)chr->value);
 }
 

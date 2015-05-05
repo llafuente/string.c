@@ -90,6 +90,25 @@ sh doc.sh
 sh code-coverage.sh
 ```
 
+## Benchmarks
+
+TODO
+* Use a variable in makefile.am?
+* new Phony target?
+
+meanwhile... edit makefile.am
+* comment: test_run_tests_SOURCES = test/run-tests.c
+* uncomment: test_run_tests_SOURCES = test/run-benchmarks.c
+
+```bash
+sh benchmarks.sh oldversion
+# do your changes and recompile
+sh benchmarks.sh newversion
+node compare.js oldversion newversion
+# open with your browser bench_data/comparison.html
+```
+
+
 ### install pip & gcovr
 
 install phyton...

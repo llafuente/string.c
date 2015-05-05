@@ -35,13 +35,7 @@ libstringc_la_SOURCES = src/append.c \
                   src/utf32.c \
                   src/utils.c
 
-
-TESTS = test/run-tests
-check_PROGRAMS = test/run-tests
-test_run_tests_CFLAGS = -O1 -lrt
-test_run_tests_LDFLAGS = -O1 -lrt
-test_run_tests_SOURCES = test/run-tests.c \
-                         test/tasks.c \
+SOURCES_TEST =           test/tasks.c \
                          test/test-alloc.c \
                          test/test-append.c \
                          test/test-ascii.c \
@@ -62,5 +56,14 @@ test_run_tests_SOURCES = test/run-tests.c \
                          test/test-utf32.c \
                          test/test-utf8.c \
                          test/test-utils.c
+
+
+TESTS = test/run-tests
+check_PROGRAMS = test/run-tests
+test_run_tests_CFLAGS = -O1
+test_run_tests_LDFLAGS = -O1 -lrt
+test_run_tests_SOURCES = test/run-tests.c
+#test_run_tests_SOURCES = test/run-benchmarks.c
+test_run_tests_SOURCES += ${SOURCES_TEST}
 
 test_run_tests_LDADD = libstringc.la

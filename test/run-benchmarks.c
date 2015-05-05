@@ -23,20 +23,47 @@
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "stringc.h"
-#include "fixtures.h"
+/// @file
+
 #include "tasks.h"
+#include "fixtures.h"
 
-TASK_IMPL(utf32) {
+int main(int argc, const char* argv[]) {
 
-  st_size_t used_bytes;
-  ASSERT(st_utf32_length((const char*)L"ABC", &used_bytes) == 12,
-         "12bytes length");
-  ASSERT(used_bytes == 12, "12bytes capacity");
+  printf("#########################\n");
+  printf("## string.c benchmarks ##\n");
+  printf("#########################\n");
 
-  ASSERT(st_utf32_valid_codepoint(0xFFFFFF) == false, "utf32 cp invalid");
-  ASSERT(st_utf32_valid_codepoint(0x20FFFF) == false, "utf32 cp invalid");
-  ASSERT(st_utf32_valid_codepoint(0x000001) == true, "utf32 cp valid");
+  if (argc == 1) {
+    printf("Usage: benchmarks target-file");
+    exit(1);
+  }
+
+  const char* prefix = argv[1];
+
+  TASK_BENCHMARK(prefix, 25, 500, alloc);
+  TASK_BENCHMARK(prefix, 25, 500, append);
+  TASK_BENCHMARK(prefix, 25, 500, ascii);
+  TASK_BENCHMARK(prefix, 25, 500, case);
+  TASK_BENCHMARK(prefix, 25, 500, compare);
+  TASK_BENCHMARK(prefix, 25, 500, encoding);
+  TASK_BENCHMARK(prefix, 25, 500, from);
+  TASK_BENCHMARK(prefix, 25, 500, hexbinhex);
+  TASK_BENCHMARK(prefix, 25, 500, internal);
+  TASK_BENCHMARK(prefix, 25, 500, iterators);
+  TASK_BENCHMARK(prefix, 25, 500, justify);
+  TASK_BENCHMARK(prefix, 25, 500, repeat);
+  TASK_BENCHMARK(prefix, 25, 500, search);
+  TASK_BENCHMARK(prefix, 25, 500, shuffle);
+  TASK_BENCHMARK(prefix, 25, 500, sub);
+  TASK_BENCHMARK(prefix, 25, 500, to);
+  TASK_BENCHMARK(prefix, 25, 500, trim);
+  TASK_BENCHMARK(prefix, 25, 500, utf32);
+  TASK_BENCHMARK(prefix, 25, 500, utf8);
+  TASK_BENCHMARK(prefix, 25, 500, utils);
+
+  st_cleanup();
+  printf("OK\n");
 
   return 0;
 }
