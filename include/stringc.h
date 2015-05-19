@@ -1270,15 +1270,15 @@ ST_EXTERN st_len_t st_utf8_char_size(const char* input);
  */
 ST_EXTERN st_len_t st_utf8_lead_size(st_uc_t lead);
 
-/* Return utf8 length and capacity
+/* Return utf8 length and bytes
  * based on glib_utf8_offset_to_pointer
  *
  * @return string length utf-8 encoded
  * @src
- * @capacity
+ * @bytes
  *   Optional, 0 means you don't want the value
  */
-ST_EXTERN st_len_t st_utf8_length(const char* src, st_size_t* capacity);
+ST_EXTERN st_len_t st_utf8_length(const char* src, st_size_t* bytes);
 
 /* Check if the given uchar* is a valid utf-8 sequence.
  * Return value :
@@ -1348,7 +1348,7 @@ ST_EXTERN st_len_t st_utf8_from_codepoint(char* utf8, st_uc4_t codepoint);
 //-
 /* cldoc:begin-category(ascii.c) */
 
-ST_EXTERN st_len_t st_ascii_length(const char* src, st_size_t* used_bytes);
+ST_EXTERN st_len_t st_ascii_length(const char* src, st_size_t* bytes);
 
 ST_EXTERN st_len_t st_ascii_char_size_safe(const char* input);
 
@@ -1368,7 +1368,7 @@ ST_EXTERN bool st_is_ascii(const char* input);
 //-
 /* cldoc:begin-category(utf32.c) */
 
-ST_EXTERN st_len_t st_utf32_length(const char* src, st_size_t* used_bytes);
+ST_EXTERN st_len_t st_utf32_length(const char* src, st_size_t* bytes);
 
 ST_EXTERN st_uc4_t st_utf32le_codepoint(const char* input);
 ST_EXTERN st_uc4_t st_utf32be_codepoint(const char* input);

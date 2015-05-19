@@ -27,11 +27,11 @@
 
 #include "stringc.h"
 
-st_len_t st_utf32_length(const char* src, st_size_t* used_bytes) {
+st_len_t st_utf32_length(const char* src, st_size_t* bytes) {
   st_len_t out = wcslen((wchar_t*)src) * 4;
 
-  if (used_bytes) {
-    *used_bytes = out;
+  if (bytes) {
+    *bytes = out;
   }
 
   return out;

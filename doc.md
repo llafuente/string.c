@@ -600,7 +600,7 @@ Append input to out
 ---
 
 <a name="st_ascii_length"></a>
-### st\_len\_t st\_ascii\_length(const char\* src, st\_size\_t \* used_bytes)
+### st\_len\_t st\_ascii\_length(const char\* src, st\_size\_t \* bytes)
 
 
 
@@ -608,7 +608,7 @@ Append input to out
 
 * `const char*` *src*
 
-* `st_size_t *` *used\_bytes*
+* `st_size_t *` *bytes*
 
 
 ---
@@ -2053,7 +2053,7 @@ new string
 ---
 
 <a name="st_utf32_length"></a>
-### st\_len\_t st\_utf32\_length(const char\* src, st\_size\_t \* used_bytes)
+### st\_len\_t st\_utf32\_length(const char\* src, st\_size\_t \* bytes)
 
 
 
@@ -2061,7 +2061,7 @@ new string
 
 * `const char*` *src*
 
-* `st_size_t *` *used\_bytes*
+* `st_size_t *` *bytes*
 
 
 ---
@@ -2362,9 +2362,9 @@ Return how many bytes contains given lead, with no error control.
 ---
 
 <a name="st_utf8_length"></a>
-### st\_len\_t st\_utf8\_length(const char\* src, st\_size\_t \* capacity)
+### st\_len\_t st\_utf8\_length(const char\* src, st\_size\_t \* bytes)
 
-Return utf8 length and capacity
+Return utf8 length and bytes
 based on glib_utf8_offset_to_pointer
 
 
@@ -2377,7 +2377,7 @@ string length utf-8 encoded
 
 * `const char*` *src*
 
-* `st_size_t *` *capacity*
+* `st_size_t *` *bytes*
 
 
 ---

@@ -27,11 +27,11 @@
 
 #include "stringc.h"
 
-st_len_t st_ascii_length(const char* src, st_size_t* used_bytes) {
+st_len_t st_ascii_length(const char* src, st_size_t* bytes) {
   st_len_t out = strlen(src);
 
-  if (used_bytes) {
-    *used_bytes = out;
+  if (bytes) {
+    *bytes = out;
   }
 
   return out;

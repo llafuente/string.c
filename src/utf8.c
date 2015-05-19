@@ -27,7 +27,7 @@
 
 #include "stringc.h"
 
-st_len_t st_utf8_length(const char* src, st_size_t* capacity) {
+st_len_t st_utf8_length(const char* src, st_size_t* bytes) {
   st_len_t len = 0;
   const char* p = src;
   char jump;
@@ -43,8 +43,8 @@ st_len_t st_utf8_length(const char* src, st_size_t* capacity) {
   }
   //++used_bytes; do not include '\0'!
 
-  if (capacity) {
-    *capacity = used_bytes;
+  if (bytes) {
+    *bytes = used_bytes;
   }
 
   return len;

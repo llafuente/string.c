@@ -46,7 +46,7 @@ extern size_t st_assert_count;
 
 #ifdef BENCHMARKING
 #define ASSERT(comparison, name)                                               \
-  if (comparison == false) {                                                           \
+  if (comparison == false) {                                                   \
     printf("[%6zu]\x1B[31mFAIL\x1B[39m: %-32s [%s:%d]\n", ++st_assert_count,   \
            name, __FILE__, __LINE__);                                          \
     trace(stderr);                                                             \
@@ -107,7 +107,7 @@ extern size_t st_assert_count;
   extern int run_task_##name(void);                                            \
   run_task_##name();
 
-  #include <unistd.h>
+#include <unistd.h>
 
 // create a benchmark
 // allways run times+3
@@ -129,10 +129,10 @@ extern size_t st_assert_count;
     char filename[256];                                                        \
     sprintf(filename, "bench_data/%s-%s", prefix, #name);                      \
     FILE* fp = fopen(filename, "w+");                                          \
-    if (!fp) { \
-      printf("cannot open file %s\n", filename);\
-      exit(1);\
-    }\
+    if (!fp) {                                                                 \
+      printf("cannot open file %s\n", filename);                               \
+      exit(1);                                                                 \
+    }                                                                          \
     char* date = bench_get_current_date();                                     \
     fprintf(fp, "# " #name ": %s\n", date);                                    \
     free(date);                                                                \
