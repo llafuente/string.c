@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <wchar.h>
+#include <ctype.h>
 
 #ifndef __STRINGC_TYPE__
 #define __STRINGC_TYPE__
@@ -354,6 +355,7 @@ ST_EXTERN st_len_t
 /* Append input to out
  *
  * [st_concat](#st_concat)
+ * [st_append_char](#st_append_char)
  *
  * @out
  *  out could be resized
@@ -362,9 +364,20 @@ ST_EXTERN st_len_t
  */
 ST_EXTERN void st_append(string** out, string* src);
 
+/* Append ASCII character at the end of the string.
+ *
+ * [st_append](#st_append)
+ * [st_concat](#st_concat)
+ *
+ * @return new string
+ * @first
+ * @second
+ */
+ST_EXTERN void st_append_char(string** out, st_uc_t ch);
 /* Concatenate two string and return a new one.
  *
  * [st_append](#st_append)
+ * [st_append_char](#st_append_char)
  *
  * @return new string
  * @first
@@ -507,6 +520,19 @@ ST_EXTERN string* st_chr(st_uc4_t value, st_enc_t enc);
 st_uc4_t st_ord(const string* str, st_len_t offset);
 
 #define st_char_code_at st_ord
+
+/* Escape string. Transform newline -> '\n'
+ *
+ * @str
+ * @return new string
+ */
+string* st_escape(const string* str);
+/* Unescape string. Transform '\n' -> newline
+ *
+ * @str
+ * @return new string
+ */
+string* st_unescape(const string* str);
 
 /* cldoc:end-category() */
 //-

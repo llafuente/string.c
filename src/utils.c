@@ -91,8 +91,8 @@ void st_hexdump(const char* p, st_size_t size) {
 }
 
 void st_debug(string* str) {
-  printf("st_debug @%p, length[%d] used[%d] size[%u] enc[%d]\n", str,
-         str->length, str->used, str->capacity, str->encoding);
+  printf("st_debug @%p, len[%d] use[%d] cap[%u] enc[%d]\n", str, str->length,
+         str->used, str->capacity, str->encoding);
 
   char* p = str->value;
   size_t size = str->capacity;

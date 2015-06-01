@@ -45,5 +45,13 @@ TASK_IMPL(append) {
   st_delete(&aux);
   st_delete(&s);
 
+  s = st_newc("wtf", st_enc_utf8);
+
+  st_append_char(&s, '0');
+  ASSERT_STR(s, "wtf0", st_enc_utf8);
+
+  st_delete(&aux);
+  st_delete(&s);
+
   return 0;
 }

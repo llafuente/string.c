@@ -23,6 +23,7 @@
 * [st\_\_zeronull](#st__zeronull)
 * [st\_\_zeronull\_size](#st__zeronull_size)
 * [st\_append](#st_append)
+* [st\_append\_char](#st_append_char)
 * [st\_ascii\_char\_size](#st_ascii_char_size)
 * [st\_ascii\_char\_size\_safe](#st_ascii_char_size_safe)
 * [st\_ascii\_codepoint](#st_ascii_codepoint)
@@ -59,6 +60,7 @@
 * [st\_delete](#st_delete)
 * [st\_dump](#st_dump)
 * [st\_end\_with](#st_end_with)
+* [st\_escape](#st_escape)
 * [st\_from\_codepoint](#st_from_codepoint)
 * [st\_get\_meta](#st_get_meta)
 * [st\_grow](#st_grow)
@@ -101,6 +103,7 @@
 * [st\_to\_utf8](#st_to_utf8)
 * [st\_trim](#st_trim)
 * [st\_ucfirst](#st_ucfirst)
+* [st\_unescape](#st_unescape)
 * [st\_upper](#st_upper)
 * [st\_utf32\_char\_size](#st_utf32_char_size)
 * [st\_utf32\_lead\_size](#st_utf32_lead_size)
@@ -525,6 +528,7 @@ Return the size of zeronull "char" in given `enc`
 
 Append input to out
 [st_concat](#st_concat)
+[st_append_char](#st_append_char)
 
 
 
@@ -533,6 +537,28 @@ Append input to out
 * `string **` *out*
 
 * `string *` *src*
+
+
+---
+
+<a name="st_append_char"></a>
+### void st\_append\_char(string \*\* out, st\_uc\_t ch)
+
+Append ASCII character at the end of the string.
+[st_append](#st_append)
+[st_concat](#st_concat)
+
+
+
+##### Return: void
+
+new string
+
+##### Arguments (2)
+
+* `string **` *out*
+
+* `st_uc_t` *ch*
 
 
 ---
@@ -987,6 +1013,7 @@ Compare two strings byte-to-byte.
 
 Concatenate two string and return a new one.
 [st_append](#st_append)
+[st_append_char](#st_append_char)
 
 
 
@@ -1143,6 +1170,19 @@ true if ends, false otherwise
 * `const string*` *haystack*
 
 * `const string*` *needle*
+
+
+---
+
+<a name="st_escape"></a>
+### string \* st\_escape(const string\* str)
+
+Escape string. Transform newline -> '\n'
+
+
+##### Arguments (1)
+
+* `const string*` *str*
 
 
 ---
@@ -2007,6 +2047,19 @@ new string
 ##### Arguments (1)
 
 * `const string*` *input*
+
+
+---
+
+<a name="st_unescape"></a>
+### string \* st\_unescape(const string\* str)
+
+Unescape string. Transform '\n' -> newline
+
+
+##### Arguments (1)
+
+* `const string*` *str*
 
 
 ---

@@ -30,6 +30,7 @@
 TASK_IMPL(to) {
   size_t num;
   string* s;
+  string* s2;
 
   s = st_chr(97, st_enc_ascii);
   ASSERT_STR(s, "a", st_enc_ascii);
@@ -94,6 +95,20 @@ TASK_IMPL(to) {
   s = st_chr(241, st_enc_utf8);
   ASSERT_STR(s, "ñ", st_enc_utf8);
   st_delete(&s);
+
+  s = st_newc("\\n\\\\a", st_enc_utf8);
+  s2 = st_unescape(s);
+
+  ASSERT_STR(s2, "\n\\a", st_enc_utf8);
+  st_delete(&s);
+  st_delete(&s2);
+
+  s = st_newc("\n\a abc \\xx", st_enc_utf8);
+  s2 = st_escape(s);
+
+  ASSERT_STR(s2, "\\n\\a abc \\\\xx", st_enc_utf8);
+  st_delete(&s);
+  st_delete(&s2);
 
   return 0;
 }

@@ -55,6 +55,19 @@ void st_append(string** out, string* src) {
   cache->value[cache->used] = '\0';
 }
 
+void st_append_char(string** out, st_uc_t ch) {
+  st_enc_t enc = (*out)->encoding;
+  assert(enc == st_enc_ascii || enc == st_enc_utf8);
+
+  st_grow(out, (*out)->used + 1, enc);
+  string* cache = *out;
+
+  cache->value[cache->used] = ch;
+  ++cache->length;
+  ++cache->used;
+  cache->value[cache->used] = '\0'; // can be asumed beacause st_uc_t
+}
+
 string* st_concat(string* first, string* second) {
   assert(first->encoding == second->encoding);
 

@@ -241,3 +241,122 @@ st_uc4_t st_ord(const string* str, st_len_t offset) {
 
   return 0;
 }
+
+string* st_unescape(const string* str) {
+  st_uc_t ch;
+  st_uc_t oval;
+  int i;
+
+#define ISOCTAL(c) ((c >= (st_uc_t)'0') && (c <= (st_uc_t)'7'))
+
+  string* out = st_new(str->capacity, str->encoding);
+  const char* data = str->value;
+
+  while ((ch = *(st_uc_t*)(data++)) != 0) {
+    if (ch == '\\') {
+      if ((ch = *((st_uc_t*)data++)) == 0)
+        break;
+      switch (ch) {
+      case '\\': /* \\ -> \ */
+        ch = '\\';
+        break;
+      case 'a': /* \a -> audible bell */
+        ch = '\a';
+        break;
+      case 'b': /* \b -> backspace */
+        ch = '\b';
+        break;
+      case 'f': /* \f -> formfeed */
+        ch = '\f';
+        break;
+      case 'n': /* \n -> newline */
+        ch = '\n';
+        break;
+      case 'r': /* \r -> carriagereturn */
+        ch = '\r';
+        break;
+      case 't': /* \t -> horizontal tab */
+        ch = '\t';
+        break;
+      case 'v': /* \v -> vertical tab */
+        ch = '\v';
+        break;
+      case '0': /* \nnn -> ASCII value */
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+        for (oval = ch - '0', i = 0;
+             i < 2 && (ch = *((st_uc_t*)data)) != 0 && ISOCTAL(ch);
+             i++, data++) {
+          oval = (oval << 3) | (ch - '0');
+        }
+        ch = oval;
+        break;
+      default: /* \any -> any */
+        break;
+      }
+    }
+
+    st_append_char(&out, ch);
+  }
+
+  st__zeronull(out->value, out->used, out->encoding);
+
+  return out;
+}
+
+string* st_escape(const string* str) {
+  st_uc_t ch;
+
+  const char* data = str->value;
+  string* out = st_new(str->capacity, str->encoding);
+  string* buffer = st_new(5, str->encoding);
+
+#define ISDIGIT(c) ((c >= (st_uc_t)'0') && (c <= (st_uc_t)'9'))
+  st_size_t len = str->used;
+  while (len-- > 0) {
+    ch = *(st_uc_t*)(data++);
+    if (ch < 127) {
+      if (isprint(ch)) {
+        if (ch == '\\') {
+          st_append_char(&out, ch);
+        }
+        st_append_char(&out, ch);
+        continue;
+      } else if (ch == '\a') { /* \a -> audible bell */
+        ch = (st_uc_t)'a';
+      } else if (ch == '\b') { /* \b -> backspace */
+        ch = (st_uc_t)'b';
+      } else if (ch == '\f') { /* \f -> formfeed */
+        ch = (st_uc_t)'f';
+      } else if (ch == '\n') { /* \n -> newline */
+        ch = (st_uc_t)'n';
+      } else if (ch == '\r') { /* \r -> carriagereturn */
+        ch = (st_uc_t)'r';
+      } else if (ch == '\t') { /* \t -> horizontal tab */
+        ch = (st_uc_t)'t';
+      } else if (ch == '\v') { /* \v -> vertical tab */
+        ch = (st_uc_t)'v';
+      }
+      st_append_char(&out, '\\');
+      st_append_char(&out, ch);
+      continue;
+    }
+    if (ISDIGIT(ch)) {
+      sprintf(buffer->value, "\\%03d", ch);
+      st_append(&out, buffer);
+    } else {
+      sprintf(buffer->value, "\\%d", ch);
+      st_append(&out, buffer);
+    }
+  }
+
+  st__zeronull(out->value, out->used, out->encoding);
+  st_delete(&buffer);
+
+  return out;
+}
