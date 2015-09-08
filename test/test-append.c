@@ -53,5 +53,14 @@ TASK_IMPL(append) {
   st_delete(&aux);
   st_delete(&s);
 
+  s = st_newc("wtf", st_enc_utf8);
+
+  aux = st_concat_random(s, 10);
+  ASSERT(aux->length == s->length + 10, "random size ok");
+
+  st_delete(&aux);
+  st_delete(&s);
+
+
   return 0;
 }

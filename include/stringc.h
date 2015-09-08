@@ -374,7 +374,7 @@ ST_EXTERN void st_append(string** out, string* src);
  * @second
  */
 ST_EXTERN void st_append_char(string** out, st_uc_t ch);
-/* Concatenate two string and return a new one.
+/* Concatenate two strings and return a new one.
  *
  * [st_append](#st_append)
  * [st_append_char](#st_append_char)
@@ -385,6 +385,17 @@ ST_EXTERN void st_append_char(string** out, st_uc_t ch);
  */
 ST_EXTERN string* st_concat(string* first, string* second);
 
+/* Concatenate two strings (second random) and return a new one.
+ *
+ * [st_append](#st_append)
+ * [st_concat](#st_concat)
+ * [st_append_char](#st_append_char)
+ *
+ * @return new string
+ * @first
+ * @second
+ */
+ST_EXTERN string* st_concat_random(string* first, st_len_t len);
 /* cldoc:end-category() */
 //-
 //- bin2hex.c

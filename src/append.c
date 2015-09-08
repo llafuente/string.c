@@ -85,3 +85,39 @@ string* st_concat(string* first, string* second) {
 
   return out;
 }
+
+void st__random_ascii(char *s, const int len) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    s[len] = 0;
+}
+
+string* st_concat_random(string* first, st_len_t len) {
+  string* second = st_new(len, st_enc_ascii);
+  st__random_ascii(second->value, len);
+  second->used = len;
+  second->length = len;
+
+  size_t f_used = first->used;
+  size_t s_used = second->used;
+  string* out = st_new(f_used + s_used, first->encoding);
+  char* dst = out->value;
+  memcpy(dst, first->value, f_used);
+  memcpy(dst + f_used, second->value, s_used);
+
+  out->used = f_used + s_used;
+  out->length = first->length + second->length;
+
+  dst[out->used] = '\0';
+
+  st_delete(&second);
+
+  return out;
+}
