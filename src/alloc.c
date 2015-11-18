@@ -30,7 +30,7 @@
 string* st_new(st_size_t cap, st_enc_t enc) {
   st_size_t size = cap + st__zeronull_size(enc);
 
-  string* s = (string*)__STRING_ALLOCATOR(sizeof(string) + size * sizeof(char));
+  string* s = (string*)st__malloc(sizeof(string) + size * sizeof(char));
 
   s->length = 0;
   s->used = 0;
@@ -61,8 +61,7 @@ string* st_newc(const char* src, st_enc_t enc) {
   st_get_meta(src, enc, &len, &used);
   st_size_t size = used + st__zeronull_size(enc);
 
-  string* s =
-      (string*)__STRING_ALLOCATOR(sizeof(string) + (size) * sizeof(char));
+  string* s = (string*)st__malloc(sizeof(string) + (size) * sizeof(char));
 
   s->length = len;
   s->used = used;
@@ -79,8 +78,7 @@ void st_resize(string** src, st_size_t cap) {
   st_size_t size =
       cap + st__zeronull_size((*src)->encoding); // null terminated!
 
-  *src = (string*)__STRING__REALLOCATOR(*src,
-                                        sizeof(string) + size * sizeof(char));
+  *src = (string*)st__realloc(*src, sizeof(string) + size * sizeof(char));
 
   (*src)->capacity = size;
 
@@ -102,7 +100,7 @@ void st_grow(string** src, st_size_t cap, st_enc_t enc) {
 string* st_clone(const string* src) {
   size_t size = sizeof(string) + src->capacity * sizeof(char);
 
-  string* out = (string*)__STRING_ALLOCATOR(size);
+  string* out = (string*)st__malloc(size);
 
   memcpy(out, src, size); // copy everything
 
@@ -118,7 +116,7 @@ string* st_rclone(const string* src, st_size_t cap) {
   size_t size = sizeof(string) + cap * sizeof(char);
   size_t src_size = sizeof(string) + src->capacity * sizeof(char);
 
-  string* out = (string*)__STRING_ALLOCATOR(size);
+  string* out = (string*)st__malloc(size);
 
   memcpy(out, src, src_size); // copy everything
   out->capacity = cap;
@@ -194,7 +192,7 @@ void st_copyc(string** out, const char* src, st_enc_t enc) {
 }
 
 void st_delete(string** out) {
-  __STRING_DEALLOCATOR((void*)*out);
+  st__free((void*)*out);
   *out = __STRING_MEM_FREE_ADDR; // when free set to a know address
 }
 
@@ -202,12 +200,6 @@ void st_clear(string* out) {
   st__zeronull(out->value, 0, out->encoding);
   out->length = 0;
   out->used = 0;
-}
-
-void st_cleanup() {
-  if (string_def_trim_mask) {
-    st_delete(&string_def_trim_mask);
-  }
 }
 
 char* st_dump(string* s) {

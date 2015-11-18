@@ -118,17 +118,9 @@ extern string* string_def_trim_mask;
 
 #define __STRING_MEM_FREE_ADDR 0
 
-#ifndef __STRING_ALLOCATOR
-#define __STRING_ALLOCATOR malloc
-#endif
-
-#ifndef __STRING__REALLOCATOR
-#define __STRING__REALLOCATOR realloc
-#endif
-
-#ifndef __STRING_DEALLOCATOR
-#define __STRING_DEALLOCATOR free
-#endif
+typedef void* (*st_malloc_func)(size_t size);
+typedef void (*st_free_func)(void* ptr);
+typedef void* (*st_realloc_func)(void* ptr, size_t size);
 
 //-
 //- MACROS (good ones)
@@ -245,6 +237,38 @@ extern const st_uc_t st_bom[];
   }
 
 /* cldoc:end-category() */
+
+//-
+//- stringc.c
+//-
+/* cldoc:begin-category(stringc.c) */
+
+/* Replace built-in allocators: malloc, realloc & free
+ * null won't modify current allocators, if you want to reset
+ * call `st_replace_allocators(malloc, realloc, free)` instead.
+ */
+ST_EXTERN void st_replace_allocators(st_malloc_func malloc_func,
+                                     st_realloc_func realloc_func,
+                                     st_free_func free_func);
+
+/* Clean up operation, call this before exit.
+ * Some operation require intermediate/costly objects
+ * st_memfree take care of them and free that memory
+ * > can be called more than once to free memory
+ */
+ST_EXTERN void st_memfree();
+/* Internal to malloc call that check for overriden allocators
+ */
+ST_EXTERN void* st__malloc(size_t size);
+/* Internal to free call that check for overriden allocators
+ */
+ST_EXTERN void st__free(void* ptr);
+/* Internal to realloc call that check for overriden allocators
+ */
+ST_EXTERN void* st__realloc(void* ptr, size_t size);
+
+/* cldoc:end-category() */
+
 //-
 //- utils.c
 //-
@@ -760,13 +784,6 @@ ST_EXTERN void st_delete(string** out);
  * @out
  */
 ST_EXTERN void st_clear(string* out);
-
-/* Clean up operation, call this before exit.
- * Some operation require intermediate/costly objects
- * st_cleanup take care of them and free that memory
- * > can be called more than once to free memory
- */
-ST_EXTERN void st_cleanup();
 
 /* wip
  *

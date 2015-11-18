@@ -4,7 +4,10 @@
 * [st\_char\_itr\_cb](#st_char_itr_cb)
 * [st\_char\_map\_cb](#st_char_map_cb)
 * [st\_enc\_t](#st_enc_t)
+* [st\_free\_func](#st_free_func)
 * [st\_len\_t](#st_len_t)
+* [st\_malloc\_func](#st_malloc_func)
+* [st\_realloc\_func](#st_realloc_func)
 * [st\_size\_t](#st_size_t)
 * [st\_uc4\_t](#st_uc4_t)
 * [st\_uc\_t](#st_uc_t)
@@ -14,10 +17,13 @@
 * [st\_\_calc\_range](#st__calc_range)
 * [st\_\_char\_lower](#st__char_lower)
 * [st\_\_char\_upper](#st__char_upper)
+* [st\_\_free](#st__free)
 * [st\_\_get\_char\_offset](#st__get_char_offset)
 * [st\_\_get\_char\_range](#st__get_char_range)
+* [st\_\_malloc](#st__malloc)
 * [st\_\_memchr](#st__memchr)
 * [st\_\_mempbrk](#st__mempbrk)
+* [st\_\_realloc](#st__realloc)
 * [st\_\_repeat](#st__repeat)
 * [st\_\_utf32cp\_to\_utf8c](#st__utf32cp_to_utf8c)
 * [st\_\_zeronull](#st__zeronull)
@@ -45,13 +51,13 @@
 * [st\_charmask](#st_charmask)
 * [st\_chop](#st_chop)
 * [st\_chr](#st_chr)
-* [st\_cleanup](#st_cleanup)
 * [st\_clear](#st_clear)
 * [st\_clone](#st_clone)
 * [st\_cmp](#st_cmp)
 * [st\_codepoint](#st_codepoint)
 * [st\_compare](#st_compare)
 * [st\_concat](#st_concat)
+* [st\_concat\_random](#st_concat_random)
 * [st\_contains](#st_contains)
 * [st\_copy](#st_copy)
 * [st\_copyc](#st_copyc)
@@ -78,6 +84,7 @@
 * [st\_line\_iterator](#st_line_iterator)
 * [st\_lower](#st_lower)
 * [st\_ltrim](#st_ltrim)
+* [st\_memfree](#st_memfree)
 * [st\_new](#st_new)
 * [st\_new\_max](#st_new_max)
 * [st\_new\_subc](#st_new_subc)
@@ -89,6 +96,7 @@
 * [st\_remove](#st_remove)
 * [st\_repeat](#st_repeat)
 * [st\_replace](#st_replace)
+* [st\_replace\_allocators](#st_replace_allocators)
 * [st\_resize](#st_resize)
 * [st\_right](#st_right)
 * [st\_rpos](#st_rpos)
@@ -170,10 +178,31 @@ supported encodings
 
 ---
 
+<a name="st_free_func"></a>
+### typedef st\_free\_func void (void *) *
+
+
+
+---
+
 <a name="st_len_t"></a>
 ### typedef st\_len\_t int32_t
 
 string length type.
+
+
+---
+
+<a name="st_malloc_func"></a>
+### typedef st\_malloc\_func void *(unsigned long) *
+
+
+
+---
+
+<a name="st_realloc_func"></a>
+### typedef st\_realloc\_func void *(void *, unsigned long) *
+
 
 
 ---
@@ -356,6 +385,19 @@ Uppercase `str` and return it into `buffer` (null-terminated)
 
 ---
 
+<a name="st__free"></a>
+### void st\_\_free(void \* ptr)
+
+Internal to free call that check for overriden allocators
+
+
+##### Arguments (1)
+
+* `void *` *ptr*
+
+
+---
+
 <a name="st__get_char_offset"></a>
 ### char \* st\_\_get\_char\_offset(const string\* str, st\_len\_t offset)
 
@@ -408,6 +450,19 @@ Ranges (offset+length) won't be normalized, call
 
 ---
 
+<a name="st__malloc"></a>
+### void \* st\_\_malloc(size\_t size)
+
+Internal to malloc call that check for overriden allocators
+
+
+##### Arguments (1)
+
+* `size_t` *size*
+
+
+---
+
 <a name="st__memchr"></a>
 ### char \* st\_\_memchr(const char\* s, st\_uc\_t c, size\_t n)
 
@@ -453,6 +508,21 @@ Check is done at byte level, do not use utf8 here
 * `const char*` *s1*
 
 * `const char*` *s2*
+
+
+---
+
+<a name="st__realloc"></a>
+### void \* st\_\_realloc(void \* ptr, size\_t size)
+
+Internal to realloc call that check for overriden allocators
+
+
+##### Arguments (2)
+
+* `void *` *ptr*
+
+* `size_t` *size*
 
 
 ---
@@ -916,17 +986,6 @@ new string
 
 ---
 
-<a name="st_cleanup"></a>
-### void st\_cleanup
-
-Clean up operation, call this before exit.
-Some operation require intermediate/costly objects
-st_cleanup take care of them and free that memory
-> can be called more than once to free memory
-
-
----
-
 <a name="st_clear"></a>
 ### void st\_clear(string \* out)
 
@@ -1011,7 +1070,7 @@ Compare two strings byte-to-byte.
 <a name="st_concat"></a>
 ### string \* st\_concat(string \* first, string \* second)
 
-Concatenate two string and return a new one.
+Concatenate two strings and return a new one.
 [st_append](#st_append)
 [st_append_char](#st_append_char)
 
@@ -1026,6 +1085,29 @@ new string
 * `string *` *first*
 
 * `string *` *second*
+
+
+---
+
+<a name="st_concat_random"></a>
+### string \* st\_concat\_random(string \* first, st\_len\_t len)
+
+Concatenate two strings (second random) and return a new one.
+[st_append](#st_append)
+[st_concat](#st_concat)
+[st_append_char](#st_append_char)
+
+
+
+##### Return: string \*
+
+new string
+
+##### Arguments (2)
+
+* `string *` *first*
+
+* `st_len_t` *len*
 
 
 ---
@@ -1524,6 +1606,17 @@ new string
 
 ---
 
+<a name="st_memfree"></a>
+### void st\_memfree
+
+Clean up operation, call this before exit.
+Some operation require intermediate/costly objects
+st_memfree take care of them and free that memory
+> can be called more than once to free memory
+
+
+---
+
 <a name="st_new"></a>
 ### string \* st\_new(st\_size\_t cap, st\_enc\_t enc)
 
@@ -1767,6 +1860,25 @@ new string
 * `const string*` *replacement*
 
 * `st_len_t *` *count*
+
+
+---
+
+<a name="st_replace_allocators"></a>
+### void st\_replace\_allocators(st\_malloc\_func malloc_func, st\_realloc\_func realloc_func, st\_free\_func free_func)
+
+Replace built-in allocators: malloc, realloc & free
+null won't modify current allocators, if you want to reset
+call `st_replace_allocators(malloc, realloc, free)` instead.
+
+
+##### Arguments (3)
+
+* `st_malloc_func` *malloc\_func*
+
+* `st_realloc_func` *realloc\_func*
+
+* `st_free_func` *free\_func*
 
 
 ---

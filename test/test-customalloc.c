@@ -23,47 +23,43 @@
 * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/// @file
-
-#include "tasks.h"
+#include "stringc.h"
 #include "fixtures.h"
+#include "tasks.h"
 
-int main(int argc, const char* argv[]) {
+int call_count = 0;
 
-  printf("#########################\n");
-  printf("## string.c benchmarks ##\n");
-  printf("#########################\n");
+void* my_malloc(size_t bytes) {
+  ++call_count;
+  return malloc(bytes);
+}
 
-  if (argc == 1) {
-    printf("Usage: benchmarks target-file");
-    exit(1);
-  }
+void* my_realloc(void* ptr, size_t bytes) {
+  ++call_count;
+  return realloc(ptr, bytes);
+}
 
-  const char* prefix = argv[1];
+void my_free(void* ptr) {
+  ++call_count;
+  free(ptr);
+}
 
-  TASK_BENCHMARK(prefix, 25, 500, alloc);
-  TASK_BENCHMARK(prefix, 25, 500, append);
-  TASK_BENCHMARK(prefix, 25, 500, ascii);
-  TASK_BENCHMARK(prefix, 25, 500, case);
-  TASK_BENCHMARK(prefix, 25, 500, compare);
-  TASK_BENCHMARK(prefix, 25, 500, encoding);
-  TASK_BENCHMARK(prefix, 25, 500, from);
-  TASK_BENCHMARK(prefix, 25, 500, hexbinhex);
-  TASK_BENCHMARK(prefix, 25, 500, internal);
-  TASK_BENCHMARK(prefix, 25, 500, iterators);
-  TASK_BENCHMARK(prefix, 25, 500, justify);
-  TASK_BENCHMARK(prefix, 25, 500, repeat);
-  TASK_BENCHMARK(prefix, 25, 500, search);
-  TASK_BENCHMARK(prefix, 25, 500, shuffle);
-  TASK_BENCHMARK(prefix, 25, 500, sub);
-  TASK_BENCHMARK(prefix, 25, 500, to);
-  TASK_BENCHMARK(prefix, 25, 500, trim);
-  TASK_BENCHMARK(prefix, 25, 500, utf32);
-  TASK_BENCHMARK(prefix, 25, 500, utf8);
-  TASK_BENCHMARK(prefix, 25, 500, utils);
+TASK_IMPL(customalloc) {
 
-  st_memfree();
-  printf("OK\n");
+  st_replace_allocators(my_malloc, my_realloc, my_free);
+
+  string* s = st_newc(T_STR_CMP1, st_enc_ascii);
+
+  ASSERT(call_count == 1, "one malloc");
+
+  st_copyc(&s, T_STR_CMP3 T_STR_CMP3 T_STR_CMP3, st_enc_ascii);
+
+  ASSERT(call_count == 2, "one realloc");
+
+  st_delete(&s);
+  ASSERT(call_count == 3, "one free");
+
+  st_replace_allocators(malloc, realloc, free);
 
   return 0;
 }

@@ -25,45 +25,50 @@
 
 /// @file
 
-#include "tasks.h"
-#include "fixtures.h"
+#include "stringc.h"
 
-int main(int argc, const char* argv[]) {
+st_malloc_func st__replaced_malloc = 0;
+st_free_func st__replaced_free = 0;
+st_realloc_func st__replaced_realloc = 0;
 
-  printf("#########################\n");
-  printf("## string.c benchmarks ##\n");
-  printf("#########################\n");
+void* st__malloc(size_t size) {
+  if (st__replaced_malloc)
+    return (*st__replaced_malloc)(size);
+  return malloc(size);
+}
 
-  if (argc == 1) {
-    printf("Usage: benchmarks target-file");
-    exit(1);
+void st__free(void* ptr) {
+  if (st__replaced_free)
+    (*st__replaced_free)(ptr);
+  else
+    free(ptr);
+}
+
+void* st__realloc(void* ptr, size_t size) {
+  if (st__replaced_realloc)
+    return (*st__replaced_realloc)(ptr, size);
+
+  return realloc(ptr, size);
+}
+
+void st_replace_allocators(st_malloc_func malloc_func,
+                           st_realloc_func realloc_func,
+                           st_free_func free_func) {
+  if (malloc_func) {
+    st__replaced_malloc = malloc_func;
   }
 
-  const char* prefix = argv[1];
+  if (realloc_func) {
+    st__replaced_realloc = realloc_func;
+  }
 
-  TASK_BENCHMARK(prefix, 25, 500, alloc);
-  TASK_BENCHMARK(prefix, 25, 500, append);
-  TASK_BENCHMARK(prefix, 25, 500, ascii);
-  TASK_BENCHMARK(prefix, 25, 500, case);
-  TASK_BENCHMARK(prefix, 25, 500, compare);
-  TASK_BENCHMARK(prefix, 25, 500, encoding);
-  TASK_BENCHMARK(prefix, 25, 500, from);
-  TASK_BENCHMARK(prefix, 25, 500, hexbinhex);
-  TASK_BENCHMARK(prefix, 25, 500, internal);
-  TASK_BENCHMARK(prefix, 25, 500, iterators);
-  TASK_BENCHMARK(prefix, 25, 500, justify);
-  TASK_BENCHMARK(prefix, 25, 500, repeat);
-  TASK_BENCHMARK(prefix, 25, 500, search);
-  TASK_BENCHMARK(prefix, 25, 500, shuffle);
-  TASK_BENCHMARK(prefix, 25, 500, sub);
-  TASK_BENCHMARK(prefix, 25, 500, to);
-  TASK_BENCHMARK(prefix, 25, 500, trim);
-  TASK_BENCHMARK(prefix, 25, 500, utf32);
-  TASK_BENCHMARK(prefix, 25, 500, utf8);
-  TASK_BENCHMARK(prefix, 25, 500, utils);
+  if (free_func) {
+    st__replaced_free = free_func;
+  }
+}
 
-  st_memfree();
-  printf("OK\n");
-
-  return 0;
+void st_memfree() {
+  if (string_def_trim_mask) {
+    st_delete(&string_def_trim_mask);
+  }
 }

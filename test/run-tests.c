@@ -39,6 +39,7 @@ int main(int argc, const char* argv[]) {
   TASK_RUN(ascii);
   TASK_RUN(case);
   TASK_RUN(compare);
+  TASK_RUN(customalloc);
   TASK_RUN(encoding);
   TASK_RUN(from);
   TASK_RUN(hexbinhex);
@@ -55,7 +56,7 @@ int main(int argc, const char* argv[]) {
   TASK_RUN(utf8);
   TASK_RUN(utils);
 
-  st_cleanup();
+  st_memfree();
   printf("OK\n");
 
   return 0;

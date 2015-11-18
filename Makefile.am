@@ -13,7 +13,8 @@ CLEANFILES =
 lib_LTLIBRARIES = libstringc.la
 libstringc_la_CFLAGS =
 libstringc_la_LDFLAGS = -no-undefined -version-info 1:0:0
-libstringc_la_SOURCES = src/append.c \
+libstringc_la_SOURCES = src/stringc.c \
+                  src/append.c \
                   src/alloc.c \
                   src/ascii.c \
                   src/bin2hex.c \
@@ -41,6 +42,7 @@ SOURCES_TEST =           test/tasks.c \
                          test/test-ascii.c \
                          test/test-case.c \
                          test/test-compare.c \
+                         test/test-customalloc.c \
                          test/test-encoding.c \
                          test/test-from.c \
                          test/test-hexbinhex.c \

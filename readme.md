@@ -28,12 +28,12 @@ include a single header
 include .libs/ and link against libstringc.la
 
 After usage you need to
- [st_cleanup](https://github.com/llafuente/string.c/blob/master/doc.md#st_cleanup)
+ [st_memfree](https://github.com/llafuente/string.c/blob/master/doc.md#st_memfree)
  some cache variable:
 
 ```c
 // cleaning caches
-st_cleanup();
+st_memfree();
 ```
 
 ## API
