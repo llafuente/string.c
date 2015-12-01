@@ -29,6 +29,7 @@
 * [st\_\_zeronull](#st__zeronull)
 * [st\_\_zeronull\_size](#st__zeronull_size)
 * [st\_append](#st_append)
+* [st\_append\_c](#st_append_c)
 * [st\_append\_char](#st_append_char)
 * [st\_ascii\_char\_size](#st_ascii_char_size)
 * [st\_ascii\_char\_size\_safe](#st_ascii_char_size_safe)
@@ -596,9 +597,10 @@ Return the size of zeronull "char" in given `enc`
 <a name="st_append"></a>
 ### void st\_append(string \*\* out, string \* src)
 
-Append input to out
+Append src to out
 [st_concat](#st_concat)
 [st_append_char](#st_append_char)
+[st_append_c](#st_append_c)
 
 
 
@@ -607,6 +609,25 @@ Append input to out
 * `string **` *out*
 
 * `string *` *src*
+
+
+---
+
+<a name="st_append_c"></a>
+### void st\_append\_c(string \*\* out, char \* src)
+
+Append src (c-string) to out
+[st_concat](#st_concat)
+[st_append](#st_append)
+[st_append_char](#st_append_char)
+
+
+
+##### Arguments (2)
+
+* `string **` *out*
+
+* `char *` *src*
 
 
 ---

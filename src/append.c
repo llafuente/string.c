@@ -55,6 +55,27 @@ void st_append(string** out, string* src) {
   cache->value[cache->used] = '\0';
 }
 
+// assume same enc
+void st_append_c(string** out, char* src) {
+  // printf("string_append %p - %p\n", *out, src);
+
+  string* cache = *out;
+
+  st_len_t bytes_to_cpy = strlen(src);
+  size_t cap = cache->capacity;
+
+  if (cap < cache->used + bytes_to_cpy) {
+    // assert(*out == src);
+    st_resize(out, cache->used + bytes_to_cpy);
+  }
+
+  memcpy(cache->value + cache->used, src, bytes_to_cpy);
+  cache->length += st_length(src, cache->encoding);
+  cache->used += bytes_to_cpy;
+
+  cache->value[cache->used] = '\0';
+}
+
 void st_append_char(string** out, st_uc_t ch) {
   st_enc_t enc = (*out)->encoding;
   assert(enc == st_enc_ascii || enc == st_enc_utf8);

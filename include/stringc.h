@@ -376,10 +376,11 @@ ST_EXTERN st_len_t
 //-
 /* cldoc:begin-category(append.c) */
 
-/* Append input to out
+/* Append src to out
  *
  * [st_concat](#st_concat)
  * [st_append_char](#st_append_char)
+ * [st_append_c](#st_append_c)
  *
  * @out
  *  out could be resized
@@ -387,6 +388,19 @@ ST_EXTERN st_len_t
  *  string to append
  */
 ST_EXTERN void st_append(string** out, string* src);
+
+/* Append src (c-string) to out
+ *
+ * [st_concat](#st_concat)
+ * [st_append](#st_append)
+ * [st_append_char](#st_append_char)
+ *
+ * @out
+ *  out could be resized
+ * @src
+ *  string to append
+ */
+ST_EXTERN void st_append_c(string** out, char* src);
 
 /* Append ASCII character at the end of the string.
  *
