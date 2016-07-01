@@ -1,6 +1,6 @@
 AC_INIT([stringc], [1.0], [bug-report@address])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror subdir-objects])
 AC_CANONICAL_HOST
 
 AC_ENABLE_SHARED
