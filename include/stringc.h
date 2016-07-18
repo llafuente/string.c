@@ -73,6 +73,7 @@ typedef enum st_enc_t {
 } st_enc_t;
 
 // string type, use value[] at the end, so only one malloc is enough
+// NOTE: if this is modified check: st_dump_header_size()
 typedef struct string_s {
   // length in characters (not printable character)
   st_len_t length;
@@ -799,10 +800,15 @@ ST_EXTERN void st_delete(string** out);
  */
 ST_EXTERN void st_clear(string* out);
 
-/* wip
+/* Dump the structure so it can be serialized as string
  *
  */
 ST_EXTERN char* st_dump(string* s);
+
+/* Dump just the header of the structure so it can be serialized as string
+ *
+ */
+ST_EXTERN void st_dump_header(string* s, char* buff);
 
 /* cldoc:end-category() */
 //-

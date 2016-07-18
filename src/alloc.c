@@ -202,15 +202,17 @@ void st_clear(string* out) {
   out->used = 0;
 }
 
-char* st_dump(string* s) {
+st_size_t st_dump_header_size() {
+  return (sizeof(st_len_t) + sizeof(st_len_t) + sizeof(st_size_t) +
+          sizeof(st_enc_t));
+}
+
+void st_dump_header(string* s, char* buff) {
   size_t slen = sizeof(string);
-  size_t len = s->used;
-  // printf("total capacity = %lu\n", len);
-  char* out = malloc((4 * slen) + len + 1);
-  char* p = (char*)s; // dump values on by one
-  // printf("p [%p] s[%p]\n", p, s);
-  char* pp = out;
+  char* p = (char*)s;
   char c[3];
+
+  char* pp = buff;
 
   do {
     // printf("len [%lu] char[%c | %2.2x]\n", slen, *p, (*p) & 0xff);
@@ -223,15 +225,24 @@ char* st_dump(string* s) {
     ++p;
     pp += 4;
   } while (--slen);
+}
+
+char* st_dump(string* s) {
+  size_t slen = st_dump_header_size();
+  size_t len = s->used;
+
+  char* out = malloc((4 * slen) + len + 1);
+  char* p = s->value; // dump values on by one
+  char* pp = out + slen * 4;
+
+  st_dump_header(s, out);
 
   do {
-    // printf("len [%lu] char[%c | %2.2x]\n", len, *p, (*p) & 0xff);
     *pp = *p;
     ++p;
     ++pp;
   } while (--len);
 
   *pp = '\0';
-
   return out;
 }
